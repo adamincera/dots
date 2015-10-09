@@ -1,0 +1,23 @@
+pqueue<node> nodeQueue;
+node start = z;
+list<node> orderedList; 
+nodeQueue.enqueue(z,0);
+
+while !isEmpty(nodeQueue) {
+    \* get head of priority queue *\
+    node a = nodeQueue.head();
+    \* keys in out list are node ids *\
+    for eachNode in z.out {
+        node n = eachNode;
+        int distance = z.out[n];
+        \* get weight of a when inserted into pqueue *\
+        int distancethroughA = a.weight() + distance;
+        if distancethroughA < n. {
+            nodeQueue.dequeue(n);
+            \* add to head of list *\
+            orderedList.prepend(a);
+            nodeQueue.enqueue(n, distanceThroughA);
+        }
+    }
+
+}

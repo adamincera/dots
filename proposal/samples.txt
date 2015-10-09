@@ -1,0 +1,17 @@
+/* breadth-first search */
+queue <node> search;
+search.add(start);
+while (!queue.isEmpty) {
+  node next = search.pop;
+  next.mark;
+  node[] children = next.out;
+  for c in children {
+    if (c == end) {
+      print ("there is a path from", start, "to", end);
+    }
+    
+    if (!c.isMarked) {
+        c.mark;
+        queue.add(c.mark)
+    }
+}
