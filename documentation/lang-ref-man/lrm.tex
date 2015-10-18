@@ -244,9 +244,9 @@ A \pltlang\ program consists of a series of function declarations and expression
 
 \subsection{Scope}
 
-In \pltlang\, variables declared in expressions not belonging to functions or \code{for} loops have highest scope.Variables declared in a function are visible or available to be referenced by name within the body of the function. Variables declared in \code{for} loop expressions can be referenced by name within the loop body. 
+In \pltlang\, variables declared in expressions not belonging to functions or \code{for} loops have scope outside of function definitions. Variables declared in a function are visible or available to be referenced by name within the body of the function (functional scoping). Variables declared in \code{for} loop expressions can be referenced by name within the loop body (lexical scoping). There is no true global scoping. Variable declarations within functions and \code{for} loops can mask variables declared outside.
 
-\begin{lstlisting}[language=pltLang, caption=Example of masking]
+\begin{lstlisting}[language=pltLang, caption=Example of masking, label=lst:scope-masking]
 node n("Hello world");
 node x("Goodbye world");
 node y("cool");
@@ -267,7 +267,7 @@ print(n);
 \* prints Hello world *\
 \end{lstlisting}
 
-As you can see above, the declaration of \code{n} in the loop scope masks the declaration of \code{n} from the top level scope.
+In Listing \ref{lst:scope-masking}, the declaration of \code{n} in the loop scope masks the declaration of \code{n} from the top level scope.
 
 \section{Sample Program}
 
