@@ -1,0 +1,249 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc} % ASCII-friendly formatting of text
+\usepackage{parskip} % no indentation of paragraphs
+\usepackage{courier} % for use in lstlistings
+\usepackage[margin=1in]{geometry}
+
+\usepackage{titlesec} % for making sub-subsections
+\setcounter{secnumdepth}{3}
+
+\usepackage{float} % for manipulating floats like tables and figures
+\restylefloat{table} % allows you to use "H" for hard-fixing table position
+\usepackage{graphicx} % for including figures
+
+\usepackage{csquotes} % for block quotes
+
+\usepackage{hyperref}
+\newcommand\fnurl[2]{%
+  \href{#2}{#1}\footnote{\url{#2}}%
+} %for putting hyperlinks in footnotes
+
+\usepackage{listings} % include source code
+\usepackage{color} % color source code
+
+\newcommand{\pltlang}{d.o.t.s.} % allows us to just reference the language name with the ``\pltlang'' cmd, so we can change the name later w/o too much hassle
+
+\newcommand{\code}[1]{\texttt{#1}} %sets it up so you can use \code{...} to format text
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codebrown}{rgb}{0.7,0.35,0.25}
+\definecolor{backcolor}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{pltStyle}{
+  basicstyle=\ttfamily,
+  backgroundcolor=\color{backcolor},
+  commentstyle=\color{codebrown},
+  keywordstyle=\color{blue},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codegreen},
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  keepspaces=false,
+  numbers=left,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2
+}
+
+\lstdefinelanguage{pltLang}
+{
+  morekeywords={
+    bool,
+    true,
+    false,
+    num,
+    string,
+    null,
+    INF,
+    if,
+    else,
+    for,
+    while,
+    break,
+    in,
+    node,
+    graph,
+    list,
+    dict,
+    print,
+    range,
+    def,
+    return
+  },
+  sensitive=true, %keywords are case sensitive
+  morecomment=[l]{\#}, % symbol for single-line comment
+  morecomment=[s]{\\*}{*\\}, % symbol for multi-line comment
+  morestring=[b]" % sets double quote as string indicator
+}
+
+\lstset{style=pltStyle, columns=flexible}
+
+\title{d.o.t.s. \\ A graph language.}
+\author{Hosanna Fuller (hjf2106) --- Manager\\
+Rachel Gordon (rcg2130) --- Language Guru\\
+Yumeng Liao (yl2908) --- Tester\\
+Adam Incera (aji2112) --- System Architect}
+\date{September 2015}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Lexical Elements}
+
+\section{Data Types}
+
+\subsection{Primitive Types}
+
+\subsubsection{num}
+
+The \code{num} data type represents all numbers in \pltlang\ There is no distinction between the traditional data types of \code{int} and \code{float}, which means for example that there is no difference between the values \code{5} and \code{5.0}. The comparative ordering of nums is the same as that of numbers in mathematics. 
+
+\begin{lstlisting}[language=pltLang, caption=Declaration of ``num'' types., label=lst:num]
+num x = 5;
+num y = 5.0;
+num z = x;
+
+num q = 3.14159;
+
+num a, b, c;
+\end{lstlisting}
+
+In Listing \ref{lst:num} variables \code{a, b, c, x, y, z}, and \code{q} are all of the type \code{num}. Variables \code{x}, \code{y}, and \code{z} store equivalent values. Variables \code{a}, \code{b}, and \code{c} are all equal to \code{null}.
+
+\subsubsection{string}
+
+A \code{string} is a sequence of 0 or more characters. Comparative ordering of strings is determined sequentially by comparing the ASCII value of each character in the two strings from left to right.
+
+\begin{lstlisting}[language=pltLang, caption=Declaration of ``string'' types., label=lst:string]
+string a = "alpha";
+string empty = "";
+string char = "a";
+\end{lstlisting}
+
+\subsubsection{bool}
+
+The \code{bool} type is a logical value which can be either the primitive values \code{true} or \code{false}.
+
+\begin{lstlisting}[language=pltLang, caption=Declaration of ``bool'' types., label=lst:bool]
+bool t = true;
+bool f = false;
+\end{lstlisting}
+
+\section{Expressions and Operators}
+
+\section{Statements}
+
+\section{Functions}
+
+\subsection{Function Declaration and Definition}
+
+Before a function can be used, it must be declared and defined. Functions are declared using the \code{def} keyword, followed by the data type the function will return, followed by the function name, followed by a list of parameters enclosed in parentheses. The function must then be immediately defined within a set of curly braces immediately follwing the parentheses of the parameter list. 
+
+\begin{lstlisting}[language=pltLang, caption=Function declaration and definition., label=lst:funct-def]
+\* 
+ * Outline of function declaration and definition.
+ * ``return_type'' would be a data type.
+ *\
+def return_type function_name () {
+  \* function implementation code *\
+}
+\end{lstlisting}
+
+\subsection{Return Statements}
+
+Each function must return a value that matches the declared return type using the \code{return} keyword. For functions with the \code{null} return type, indicating that nothing is returned by the function, the return statement can consist either of the keyword \code{return} as an expression by itself (line 2 of Listing \ref{lst:funct-return}), or it can explcitly \code{return null} (line 6 of Listing \ref{lst:funct-return}).
+
+\begin{lstlisting}[language=pltLang, caption=Return statements of functions., label=lst:funct-return]
+def null fnull1 () {
+  return;
+}
+
+def null fnull2 () {
+  return null;
+}
+
+def int fint () {
+  return 4;
+}
+\end{lstlisting}
+
+\subsection{Parameter List}
+
+The declaration of a function must include a list of required parameters enclosed within parentheses. To define a function which requires no parameters, the contents of the parentheses can be left blank. Otherwise, each parameter requires the data type, followed by a variable name by which the parameter can be referenced within the function definition. 
+
+\begin{lstlisting}[language=pltLang, caption=Parameters in function declarations., label=lst:funct-params]
+def null no_params () {
+  return;
+}
+
+def num one_param (num x) {
+  num b = x;
+  return b;
+}
+
+def string multi_params (string s1, num y, string s2) {
+  string statement = s1 + " " + " " + y + "s2";
+  return statement;
+}
+
+\end{lstlisting}
+
+\subsection{Calling Functions}
+
+The syntax for calling a function is: the name of the function, followed by a comma-separated list of values or variables to be used in paremter list enclosed within parentheses. Each value or variable passed in to a function call is mapped to the corresponding variable in the declared parameter list of the function.
+
+A function-call expression is considered of the same type as its return type. Because of this, function-call expressions may be used as any other expression. For example a function-call expression can be used in the assignment of variables, as in line 11 of Listing \ref{lst:funct-call}.
+
+\begin{lstlisting}[language=pltLang, caption=Function declaration and definition., label=lst:funct-call]
+def num increment (num n, num incr) {
+  return n + incr;
+}
+
+num x = 4;
+
+\* The following call maps ``x'' to the variable ``n'',
+ * and ``2'' to the variable ``incr'' from the declaration
+ * of the ``increment'' function 
+ *\
+num y = increment(x, 2);
+
+print("y: ", y); # prints --> ``y: 6''
+\end{lstlisting}
+
+\subsection{Variable Length Parameter Lists}
+
+The \emph{only} function in \pltlang\ that can have a variable number of parameters is the built-in \code{print} function. All other functions must be declared with a defined absolute number of 0 or more parameters. 
+
+The \code{print} function may be called using a comma-separated list of expressions which can be evaluated as or converted to the \code{string} type. Each of the built-in types may be used directly as an argument to the print function.
+
+\begin{lstlisting}[language=pltLang, caption=The built-in ``print'' function., label=lst:funct-print]
+string alpha = "World";
+print("Hello", alpha, "\n");
+
+node x("foo");
+num n = 20;
+print("The node <", x, "> has an associated num equal to:", n, "\n");
+\end{lstlisting}
+
+In Listing \ref{lst:funct-print}, the \code{print} function was called on line 2 with 3 arguments and with 5 arguments on line 6. The number of arguments passed to \code{print} does not matter. 
+
+\section{Program Structure and Scope}
+
+\subsection{Program Structure}
+
+A \pltlang\ program consists of a series of function declarations and expressions. Because \pltlang\ is a scripting language, there is no \code{main} function. Instead, expressions are executed in order from top to bottom. Functions must be declared and defined before use. 
+
+\subsection{Scope}
+
+\section{Sample Program}
+
+\end{document}
