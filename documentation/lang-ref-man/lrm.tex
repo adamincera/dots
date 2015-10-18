@@ -244,6 +244,31 @@ A \pltlang\ program consists of a series of function declarations and expression
 
 \subsection{Scope}
 
+In \pltlang\, variables declared in expressions not belonging to functions or \code{for} loops have highest scope.Variables declared in a function are visible or available to be referenced by name within the body of the function. Variables declared in \code{for} loop expressions can be referenced by name within the loop body. 
+
+\begin{lstlisting}[language=pltLang, caption=Example of masking]
+node n("Hello world");
+node x("Goodbye world");
+node y("cool");
+
+Graph nodes = {
+	x,
+	y
+};
+
+for node n in nodes {
+	print(n, " ya ya ya\n");
+}
+\* prints
+  Goodbye world ya ya ya
+  cool ya ya ya*\
+
+print(n);
+\* prints Hello world *\
+\end{lstlisting}
+
+As you can see above, the declaration of \code{n} in the loop scope masks the declaration of \code{n} from the top level scope.
+
 \section{Sample Program}
 
 \end{document}
