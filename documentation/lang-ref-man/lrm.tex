@@ -99,6 +99,10 @@ Adam Incera (aji2112) --- System Architect}
 
 \section{Lexical Elements}
 
+\subsection {Whitespace}
+In \pltlang\, white space is defined as any of the special characters \code{\textbackslash r\textbackslash n}, \code{\textbackslash n},  and \code{\textbackslash t} as well as the character obtained by pressing the spacebar. The space character sometimes delimits a separation between the parts of an expression (see the rest of the manual for syntax specifics), but otherwise whitespace is generally ignored outside of string and char expressions, as expressions are separated by the semicolon and scope is defined by braces. 
+
+
 \section{Data Types}
 
 \subsection{Primitive Types}
@@ -138,60 +142,122 @@ bool t = true;
 bool f = false;
 \end{lstlisting}
 
-\subsection{Collections}
-
-\subsubsection{Lists}
-
-A list is a data structure that represents zero or more elements of a particular data type. 
-
-\underline{List Declaration:}
-
-Lists are declared by using the \code{list} keyword and specifying the data type of the elements inside ``\code{< >}'', followed by the variable name. A list can hold elements of any data type, but all elements within a single given list must have a data type matching that of the declared type. 
-
-\underline{Accessing List Elements:}
-
-Lists are indexed by integers and are random-access. In addition to random access, lists also have built-in member functions for queueing and dequeueing elements. The \code{enqueue} member function appends the given element to the end of the list. The \code{dequeue} member function removes the first element of the list, and shifts the remaining elements to the left. 
-
-\begin{lstlisting}[language=pltLang, caption=The ``list'' type., label=lst:list]
-list <string> str_list;
-
-list <num> num_list = [1, 2, 5.3, 6.23];
-num_list[3]; # returns 5.3
-num_list.enqueue(3.2); # num_list now equals [1, 2, 5.3, 6.23, 3.2]
-
-\* after the following:
- * x = 1; num_list = [2, 5.3, 6.23, 3.2]
- *\
-num x = num_list.dequeue();
-\end{lstlisting}
-
-\subsubsection{Dicts}
-
-A dict is a data structure that represents a mapping of keys to values. 
-
-\underline{Dict Declaration:}
-
-Dicts are declared by using the \code{dict} keyword and including a comma-separated specification of the data types of the keys and values inside ``\code{< >}'', followed by the variable name. The first data type listed inside ``< >'' corresponds to the type of the keys, while the second data type corresponds to the type of the values. The data type of dict keys can be any type \emph{except} \code{list} or \code{dict}. There is no restriction on the data type of the values of dict objects. Once a dict has been declared, all keys must be of the same type as that declared for the key, and all values must be of the same type as that declared for the value. 
-
-\underline{Accessing Dict Elements:}
-
-The value of an pairing in a dict can be accessed by specifying the dict name followed by the corresponding key value enclosed in brackets, as seen in line 2 of Listing \ref{lst:dict}.
-
-New mappings can be assigning by subsetting a dict object with a key and setting it equal to a value using the assignment operator. If the key already exists in the dict, the old value will be overwritten with the new value. If the key did not already exist, the new key will be added to the dict along with its new value.
-
-
-\begin{lstlisting}[language=pltLang, caption=The ``dict'' type., label=lst:dict]
-dict <string, val> city_map = {"toronto" : 6, "queens" : 7.8, "nyc" : 0.2};
-city_map["toronto"]; # returns 6
-
-city_map["L.A."] = 18;
-\* city_map = {"toronto" : 6, "queens" : 7.8, "nyc" : 0.2, "L.A." : 18} *\
-
-\end{lstlisting}
-
 \section{Expressions and Operators}
 
+\subsection{Node Operators}
+
+The node operators outlined in Table \ref{tbl:node-ops} below are all binary operators which take a node object on the left-hand and right-hand sides of the operator.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| p{1.5in} | p{2.75in} |}
+\hline
+Operator & Explanation \\
+\hline
+\texttt{-{}-} & Add undirected edge with no weights between the 2 \\
+\hline
+\texttt{-{}-}> & Add directed edge from left node to right node with no weight \\
+\hline
+\texttt{-{}-}[\emph{num}] & Add an undirected edge between 2 nodes with weight \emph{num} in both directions \\
+\hline
+\texttt{-{}-}>[\emph{num}] & Add a directed edge from the left node to the right node with weight \emph{num} \\
+\hline
+[\emph{num}]\texttt{-{}-}[\emph{num}] & Add edge from left to right with the weight in the right set of brackets, and an edge from right to left with the weight in the left set of brackets \\
+\hline
+== & Returns whether the internal ids of 2 nodes match \\
+\hline
+!= & Returns whether the internal ids of 2 nodes do not match \\
+\hline
+\end{tabular}
+\caption{Node Operators}
+\label{tbl:node-ops}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics{graphs/node_operators_example.png}
+\caption{Example Graph showing nodes with different weights and edges.}
+\label{fig:node-ops}
+\end{figure}
+
+
+\begin{lstlisting}[language=pltLang, caption=Shows the use of node operators that creates the graph in Figure \ref{fig:node_ops}., label=lst:node-ops]
+node X, Y, Z, Q, R;
+
+X --> Y;
+Y -->[.3] Z;
+Z -- Q;
+Q --[45] R;
+R [.87]--[.39] X;
+
+R == Q;    # returns false
+R != Q;   # returns true
+
+\* accessing edge lists: *\
+X.out[Y]; # == null
+Y.out[Z]; # == .3
+R.in[X]; # == .87
+
+node alt = Z;
+Y.out[alt] == Y.out[Z]; # returns true
+
+\* Alternate Graph Creation:
+ * adds the nodes to the graph G, while
+ * at the same time it adds edges and weights
+ * between the nodes
+ *\
+node x, y, z, q, r;
+graph G = {
+    x --> y,
+    y -->[.3] z,
+    z -- q,
+    q --[45] r,
+    r [.87]--[.39] x
+};
+    
+
+\end{lstlisting}
+
+\subsection{Graph Operators}
+Hosanna's got this one.
+
+
 \section{Statements}
+
+\subsection{Expression Statements}
+
+
+\subsection{Control Flow Statements}
+
+\subsection{Loop Statements}
+
+\subsubsection{While Loops}
+
+In \pltlang\, \code{while} statements execute repeatedly the code in the scoped block (delimited by braces following the Boolean expression), while the Boolean expression evaluates to true. 
+
+\begin{lstlisting}[language=pltLang, label=lst:while-loop]
+\* 
+ * Outline of function declaration and definition.
+ * ``return_type'' would be a data type.
+ *\
+def return_type function_name () {
+  \* function implementation code *\
+}
+\end{lstlisting}
+
+\subsubsection{For Loops}
+
+\subsection{Other Statements}
+
+\subsubsection{Break}
+
+\subsubsection{Continue}
+
+\subsubsection{Return}
+
+% subsection subsection_name (end)
+
+
 
 \section{Functions}
 
@@ -295,7 +361,7 @@ A \pltlang\ program consists of a series of function declarations and expression
 
 \subsection{Scope}
 
-In \pltlang\, variables declared in expressions not belonging to functions or \code{for} loops have scope outside of function definitions. Variables declared in a function are visible or available to be referenced by name within the body of the function (functional scoping). Variables declared in \code{for} loop expressions can be referenced by name within the loop body (lexical scoping). There is no true global scoping. Variable declarations within functions and \code{for} loops can mask variables declared outside.
+In \pltlang\, variables declared in expressions not belonging to functions or \code{for} loops have scope outside of function definitions. Variables declared in a function are visible or available to be referenced by name within the body of the function (functional scoping). Variables declared in \code{for} loop expressions can be referenced by name within the loop body (lexical scoping). There is no true global scoping as programs are executed from top to bottom. Variable declarations within functions and \code{for} loops can mask variables declared outside.
 
 \begin{lstlisting}[language=pltLang, caption=Example of masking, label=lst:scope-masking]
 node n("Hello world");
@@ -303,12 +369,12 @@ node x("Goodbye world");
 node y("cool");
 
 Graph nodes = {
-	x,
-	y
+  x,
+  y
 };
 
 for node n in nodes {
-	print(n, " ya ya ya\n");
+  print(n, " ya ya ya\n");
 }
 \* prints
   Goodbye world ya ya ya
