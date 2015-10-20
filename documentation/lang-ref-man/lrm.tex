@@ -225,38 +225,138 @@ Hosanna's got this one.
 \section{Statements}
 
 \subsection{Expression Statements}
+In \pltlang\ expression statements are terminated by a semicolon, and are executed in the order they are read in from top to bottom. All effects from an expression statement are completed before the next one is executed.
 
+\begin{lstlisting}[language=pltLang, label=lst:expression-statements]
+\* Examples *\
+node y("Hello world"); \* declaration of a node with data "Hello World" *\
+num a = 5; \* declaration of number a which equals 5 *\
+a = (3 + 3) / 2; \* basic arithmetic, sets a to 3 *\
+print(a); \* function call, prints 3 because previous expression executed. *\
+
+\end{lstlisting}
 
 \subsection{Control Flow Statements}
+\code{if / else if* / else} and \code{if} conditional statements are supported, where \code{*} represents the Kleene star operator.
+
+\begin{lstlisting}[language=pltLang, label=lst:if-else]
+if condition {
+  \* execute when condition is true *\
+}
+else {
+  \* if condition is false go here *\
+}
+
+if condition {
+  \* execute when condition is true *\
+}
+else if another_condition {
+  \* if anothe_condition is true go here *\
+}
+else if yet_another_condition {
+  \* only reached if another_condition is false
+  go here if yet_another_condition is true *\
+}
+else {
+  \* execute when all conditions are false *\
+}
+
+if condition {
+  \* execute if condition is true *\
+}
+\* continue executing subsequent expression statements *\
+
+\end{lstlisting}
 
 \subsection{Loop Statements}
+\pltlang\ supports \code{while} and \code{for} loops.
 
 \subsubsection{While Loops}
 
-In \pltlang\, \code{while} statements execute repeatedly the code in the scoped block (delimited by braces following the Boolean expression), while the Boolean expression evaluates to true. 
+\code{while} statements execute repeatedly the code in the scoped block (delimited by braces following the Boolean expression), while the Boolean expression \code{condition} evaluates to true. 
 
 \begin{lstlisting}[language=pltLang, label=lst:while-loop]
-\* 
- * Outline of function declaration and definition.
- * ``return_type'' would be a data type.
- *\
-def return_type function_name () {
-  \* function implementation code *\
+while condition {
+  \* code *\
 }
+
 \end{lstlisting}
 
 \subsubsection{For Loops}
+\code{for} statements iterate through all elements in \code{iterable\_var}, assigning the current element to \code{var\_name}. 
+
+\begin{lstlisting}[language=pltLang, label=lst:for-loop]
+for var_name in iterable_var {
+  \* code *\
+}
+
+\* common usage examples *\
+for node_var in graph_var {
+  \* do something with each node *\
+}
+
+for edge_var in n.out {
+  \* do something with each outbound edge from node n *\
+}
+
+\end{lstlisting}
 
 \subsection{Other Statements}
 
 \subsubsection{Break}
+Used in a loop to exit out of the loop immediately. Continue executing expressions after the loop block as expected.
+
+\begin{lstlisting}[language=pltlang, label=lst:break-statement]
+num i = 0;
+while i < 5 {
+  i = i + 1;
+  if i == 3 {
+    break;
+  }
+  print(i, ' ');
+}
+\* Prints 1 2 *\
+
+print(i, ' ');
+\* Prints 2 *\
+
+\end{lstlisting}
 
 \subsubsection{Continue}
+Used in a loop to skip the rest of the loop block and execute the next iteration of the loop.
+
+\begin{lstlisting}[language=pltLang, label=lst:continue-statement]
+num i = 0;
+while i < 5 {
+  i = i + 1;
+  if i == 2 {
+    continue;
+  }
+  print(i, ' ');
+}
+\* Prints 1 3 4 5 *\
+
+\end{lstlisting}
 
 \subsubsection{Return}
+Used to exit from a function and dictate the output argument. The output argument must be the same type as specified in the function header. If not, the compiler will throw an error.
 
-% subsection subsection_name (end)
+\begin{lstlisting}[language=pltLang, label=lst:return-statement]
+def num foo(num n) {
+  if n > 2 {
+    return 2;
+  }
+  return 1;
+} 
 
+num out1 = foo(10)
+print(out1);
+\* Prints 2 *\
+
+num out2 = foo(1)
+print(out2);
+\* Prints 1 *\
+\end{lstlisting}
 
 
 \section{Functions}
