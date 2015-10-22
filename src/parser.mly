@@ -3,7 +3,9 @@
 %token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
-%token RETURN IF ELSE FOR WHILE DEF IN NUM STRING NODE GRAPH
+%token UEDGE REDGE
+%token RETURN IF ELSE FOR WHILE DEF IN 
+%token BOOL NUM STRING NODE GRAPH
 %token <string> LITERAL
 %token <string> ID
 %token EOF
@@ -47,16 +49,22 @@ vdecl_list:
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
-|  num_decl_list { $1 }
+|  prim_decl_list { $1 }
 |  node_decl_list { $1 }
+|  graph_decl_list { $1 }
 
+/* primitive typenames */
+prim_type:
+| BOOL { "bool" }
+| NUM { "num" }
+| STRING { "string" }
 
 /* chained primitives can assign using "=" */
-num_decl_list:
-| NUM ID SEMI { [$2] }
-| NUM ID ASSIGN expr SEMI { [$2] } /* assignment and declaration */
-| num_decl_list COMMA ID ASSIGN expr SEMI { $3 :: $1 }
-| num_decl_list COMMA ID SEMI { $3 :: $1 }
+prim_decl_list:
+| prim_type ID SEMI { [$2] }
+| prim_type ID ASSIGN expr SEMI { [$2] } /* assignment and declaration */
+| prim_decl_list COMMA ID ASSIGN expr SEMI { $3 :: $1 }
+| prim_decl_list COMMA ID SEMI { $3 :: $1 }
 
 /* chained nodes can be assigned using "(value)" */
 node_decl_list:
@@ -65,6 +73,18 @@ node_decl_list:
 | node_decl_list COMMA ID LPAREN expr RPAREN SEMI { $3 :: $1 }
 | node_decl_list COMMA ID SEMI { $3 :: $1 }
 
+graph_decl_list:
+| GRAPH ID SEMI { [$2] }
+| graph_decl_list COMMA ID SEMI { $3 :: $1 }
+
+
+edge_ops:
+|  ID UEDGE ID { Undir($1, $3) }
+|  ID REDGE ID { Dir($1, $3) }
+|  ID REDGE LBRACKET expr RBRACKET ID { DirVal($1, $6, $4) }
+|  ID UEDGE LBRACKET expr RBRACKET ID { UndirVal($1, $6, $4) }
+|  ID LBRACKET expr RBRACKET UEDGE LBRACKET expr RBRACKET ID 
+   { BidirVal($3, $1, $9, $7) }
 
 stmt_list:
     /* nothing */  { [] }

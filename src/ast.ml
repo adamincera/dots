@@ -8,6 +8,15 @@ type expr =
   | Call of string * expr list
   | Noexpr
 
+type edgeop = Undir | UndirVal | DirVal | BidirVal
+
+(* b/c nums can be either float or int just treat them as strings *)
+type edge_expr =
+| Undir of string * string (* id, id *)
+| UndirVal of string * string * string (* id, id, weight *)
+| DirVal of string * string * string (* id, id, weight *)
+| BidirVal of string * string * string * string (* weight, id, id, weight *)
+
 type stmt =
     Block of stmt list
   | Expr of expr

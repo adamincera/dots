@@ -17,6 +17,8 @@ rule token = parse
 | '*'      { TIMES }
 | '/'      { DIVIDE }
 | '='      { ASSIGN }
+| "--"     { UEDGE }
+| "-->"    { REDGE }
 | "=="     { EQ }
 | "!="     { NEQ }
 | "<"      { LT }
@@ -30,6 +32,7 @@ rule token = parse
 | "for"    { FOR }
 | "while"  { WHILE }
 | "return" { RETURN }
+| "bool"   { BOOL }
 | "num"    { NUM }
 | "string" { STRING }
 | "node"   { NODE }
