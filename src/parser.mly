@@ -59,25 +59,35 @@ prim_type:
 | NUM { "num" }
 | STRING { "string" }
 
-/* chained primitives can assign using "=" */
-prim_decl_list:
+/* allows chained declaration of primitives,
+ * chained primitives can assign using "=" */
+prim_decl_prefix:
 | prim_type ID SEMI { [$2] }
 | prim_type ID ASSIGN expr SEMI { [$2] } /* assignment and declaration */
 | prim_decl_list COMMA ID ASSIGN expr SEMI { $3 :: $1 }
 | prim_decl_list COMMA ID SEMI { $3 :: $1 }
 
-/* chained nodes can be assigned using "(value)" */
+prim_decl_list:
+|  prim_decl_prefix SEMI { $1 }
+
+/* allows chained declaration of nodes,
+ * chained nodes can be assigned using "(value)" */
+node_decl_prefix:
+| NODE ID { [$2] }
+| NODE ID LPAREN expr RPAREN { [$2] }
+| node_decl_list COMMA ID LPAREN expr RPAREN { $3 :: $1 }
+| node_decl_list COMMA ID { $3 :: $1 }
+
 node_decl_list:
-| NODE ID SEMI { [$2] }
-| NODE ID LPAREN expr RPAREN SEMI { [$2] }
-| node_decl_list COMMA ID LPAREN expr RPAREN SEMI { $3 :: $1 }
-| node_decl_list COMMA ID SEMI { $3 :: $1 }
+|  node_decl_prefix SEMI { $1 }
 
 graph_decl_list:
 | GRAPH ID SEMI { [$2] }
 | GRAPH ID ASSIGN LBRACE edge_op_list RBRACE SEMI { [$2] }
 | graph_decl_list COMMA ID SEMI { $3 :: $1 }
 
+/* comma separated list of operations on nodes
+ * for use with graph declarations: */
 edge_op_list:
 | ID { [$1] }
 | edge_op { [$1] }
@@ -105,8 +115,6 @@ stmt:
      { For($3, $5, $7) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | edge_op { edge_op }
-
-graph_expr:
 
 
 expr:
