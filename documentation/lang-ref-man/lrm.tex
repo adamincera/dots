@@ -453,6 +453,21 @@ print("The node <", x, "> has an associated num equal to:", n, "\n");
 
 In Listing \ref{lst:funct-print}, the \code{print} function was called on line 2 with 3 arguments and with 5 arguments on line 6. The number of arguments passed to \code{print} does not matter. 
 
+\subsection{Built-in Functions}
+
+\pltlang comes with two pre-defined functions. 
+
+The first, \code{print(...)}, prints the string representation of a list of expressions to standard output.
+
+The second, \code{range(num min, num max)}, returns a \code{list <num>} consisting of the integers from min to max-1. The arguments to \code{range} must be integers.
+
+\begin{lstlisting}[language=pltLang, caption=The built-in ``print'' function., label=lst:builtin-functs]
+string alpha = "World";
+print("Hello", alpha, "\n");  # prints "Hello World\n" to standard output
+
+range(0, 4); # returns the list [0, 1, 2, 3]
+\end{lstlisting}
+
 \section{Program Structure and Scope}
 
 \subsection{Program Structure}
