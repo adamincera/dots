@@ -100,7 +100,7 @@ Adam Incera (aji2112) --- System Architect}
 \section{Lexical Elements}
 
 \subsection {Whitespace}
-In \pltlang\, white space is defined as any of the special characters \code{\textbackslash r\textbackslash n}, \code{\textbackslash n},  and \code{\textbackslash t} as well as the character obtained by pressing the spacebar. The space character sometimes delimits a separation between the parts of an expression (see the rest of the manual for syntax specifics), but otherwise whitespace is generally ignored outside of string and char expressions, as expressions are separated by the semicolon and scope is defined by braces. 
+In \pltlang\, white space is defined as any of the special characters \code{\textbackslash r}, \code{\textbackslash n},  and \code{\textbackslash t} as well as the character obtained by pressing the spacebar. Whitespace is generally ignored and used as a token delimiter, except for within string literals.
 
 
 \section{Data Types}
@@ -144,7 +144,35 @@ bool f = false;
 
 \section{Expressions and Operators}
 
-\subsection{Node Operators}
+an \textbf{expression} has at least one operand and at least one operator. Operators have types including constants, variables, and functions that return values. For example:
+
+\begin{lstlisting}[language=pltLang, caption=demonstration of expressions and subexpressions, label=lst:expr]
+3 * 4; 
+3 * 4 + 2;
+((3 * 4) + 4) / (6*8));
+
+\end{lstlisting} 
+
+\subsection{Number and String Operators}
+
+\textbf{Definition:} operators are operations that are performed on operands which can be functions, variables, or data types. 
+\textbf{numerical operators} are operators that include arithmetic and comparative operators.
+\emph{Arithmetic Operators}
+Arithmetic Operators function exactly like C primitive data types, variables and functions.\\ 
+
+\emph{Comparative Operators}
+ Sample operators include 
+\begin{lstlisting}[language=pltLang, caption=Declaration of ``string'' types., label=lst:ops]
+#operators: >,<,==,!=, <=, >=,||,&&
+
+3 == 4; 
+(x && 3) || z;
+(foo && x++)
+\end{lstlisting}
+
+all operators function as they do in C as long as the operands are primitive data types, variables or functions. 
+
+\section{Node Operators}
 
 The node operators outlined in Table \ref{tbl:node-ops} below are all binary operators which take a node object on the left-hand and right-hand sides of the operator.
 
@@ -219,7 +247,47 @@ graph G = {
 \end{lstlisting}
 
 \subsection{Graph Operators}
-Hosanna's got this one.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| p{1.5in} | p{2.75in} |}
+\hline
+Operator & Explanation \\
+\hline
+- & Returns a new graph object with the left-hand side graph without any connections dictated on the right-hand side \\
+\hline
++ & Returns a graph that contains all of the graphs in the left-hand and right-hand graph \\
+\hline
++= & Adds the graph on the right-hand side of the operator to the graph on the left-hand side. \\
+\hline
+-= & Removes the graph on the right-hand side of the operator from the graph on the left-hand side. \\
+\hline
+== & Returns whether the two graphs contain the same nodes. \\
+\hline
+\end{tabular}
+\caption{Graph Operators}
+\label{tbl:graph-ops}
+\end{table}
+
+\subsection{Comparison and Logical Operators}
+
+\textbf{Definition: } logical operators evaluate the logical truth of two operands. These set of functions operate similarly to the logical operators
+
+\code{==} and \code{!=} are the only logical operators which function on graph operands. These operators evaluate the truth of these statements by using the Node \code{==} and \code{!=} logical comparison operators. The \code{graph} operand will then iterate through its \code{nodes}.
+== signifies that two graphs have the same node and neighbors 
+!= means that two graph operands do not have the same nodes and neighbors
+\subsection{Subscript Notation}
+
+\subsubsection{dict Subscript}
+a way of indexing specific elements within a dict the notation is “D[i]” where brackets denote the key in the dictionary you want to index
+\subsubsection{list Subscript}
+a way of indexing specific elements within a list the notation is “L[ i ]” where brackets denote the position in list L 
+
+\subsection{Operator Precendence}
+follows classic programming ordering: parenthesis, exponent, multiply, divide, addition, subtraction
+\subsection{Member Access}
+
+ ``.'' allows you to access members of a structure or a variable
 
 
 \section{Statements}
