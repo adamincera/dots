@@ -102,28 +102,26 @@ Adam Incera (aji2112) --- System Architect}
 
 \subsection{Identifiers}
 
-Identifiers are stngs used to name variables, functions, and new data types. 
-The first character of an identifier must be a letter. Identifiers are case-
-sensitive. Identifiers can contain lowercase letters, uppercase letters, 
-digits, and the underscore character \textquotesingle\_\textquotesingle.
+Identifiers are strings used to name variables and functions. 
+The first character of an identifier must be a letter. Identifiers can contain lowercase letters, uppercase letters, digits, and the underscore character \textquotesingle\_\textquotesingle. Identifiers are case-sensitive. 
 
 \subsection{Keywords}
 
 The following keywords are part of dots itself, and as such cannot be used as 
 identifiers:
 
-\code{bool break continue def dict else false for graph if in INF list 
-node null num return string true while}
+\code{bool break continue def dict else true false for graph if in INF list 
+node null num return string while}
 
 \subsection{Literals}
 
 Literals are raw numeric or string values. The compiler will automatically 
-determine the type of a constant, unless it is explicitly cast.
+determine the type of a literal, unless it is explicitly cast.
 
 \subsubsection{String literals}
 
 String literals are sequences of characters wrapped in double quotes. They may 
-include any charactersx but some characters must be represented by escape 
+include any characters but some characters must be represented by escape 
 sequences:
 
 \begin{table}[H]
@@ -141,19 +139,18 @@ sequences:
 
 \subsubsection{Number literals}
 
-Number constants consist of an optional negative sign, a sequence of digits, 
+Number constants consist of an optional negative sign, an optional sequence of digits, 
 an optional decimal point, and another optional sequence of digits. The second 
-sequence of digits requires the presence of the decimal point.
+sequence of digits requires the presence of the decimal point. Either the first or second sequence of digits must appear (both is also valid).
 
 \subsubsection{Separators}
 
-Separators separate tokens. Whitespace characters (\textquotesingle \ \textquotesingle, \textquotesingle{\textbackslash}n\textquotesingle, \textquotesingle{\textbackslash}t\textquotesingle, etc.) are separators, but not 
-tokens. The other separators are single-character tokens. They are:
+Separators separate tokens. Whitespace characters (\textquotesingle \ \textquotesingle, \textquotesingle{\textbackslash}n\textquotesingle, \textquotesingle{\textbackslash}t\textquotesingle, etc.) are separators, but not tokens. The other separators are single-character tokens. They are:
 
-\code{( ) [ ] \{ \} ; , . :}
+\code{( ) [ ] \{ \} ; , . < >}
 
 \subsection {Whitespace}
-In \pltlang\, white space is defined as any of the special characters \code{\textbackslash r}, \code{\textbackslash n},  and \code{\textbackslash t} as well as the character obtained by pressing the spacebar. Whitespace is generally ignored and used as a token delimiter, except for within string literals.
+In \pltlang\, whitespace is defined as any of the special characters \code{\textbackslash r}, \code{\textbackslash n},  and \code{\textbackslash t} as well as the character obtained by pressing the spacebar. Whitespace is generally ignored and used as a token delimiter, except for within string literals.
 
 
 \section{Data Types}
@@ -162,7 +159,7 @@ In \pltlang\, white space is defined as any of the special characters \code{\tex
 
 \subsubsection{num}
 
-The \code{num} data type represents all numbers in \pltlang\ There is no distinction between the traditional data types of \code{int} and \code{float}, which means for example that there is no difference between the values \code{5} and \code{5.0}. The comparative ordering of nums is the same as that of numbers in mathematics. 
+The \code{num} data type represents all numbers in \pltlang\ There is no distinction between the traditional data types of \code{int} and \code{float} from C, which means for example that there is no difference between the values \code{5} and \code{5.0}. The comparative ordering of nums is the same as that of numbers in mathematics. 
 
 \begin{lstlisting}[language=pltLang, caption=Declaration of ``num'' types., label=lst:num]
 num x = 5;
@@ -188,7 +185,7 @@ string char = "a";
 
 \subsubsection{bool}
 
-The \code{bool} type is a logical value which can be either the primitive values \code{true} or \code{false}.
+The \code{bool} type is a logical value which can be either the primitive values \code{true} or \code{false} or an expression which evaluates to those literals.
 
 \begin{lstlisting}[language=pltLang, caption=Declaration of ``bool'' types., label=lst:bool]
 bool t = true;
@@ -204,11 +201,12 @@ Recursive definition of graph objects:
 \item An empty graph is a graph.
 \item A node is a graph.
 \item A graph added to a graph is a graph.
+\item A graph subtracted from a graph is a graph.
 \end{itemize}
 
 A graph contains only the field \code{vertices}, which is a list of all node objects contained within the graph. 
 
-A node contains the fields \code{value, in, out}. Internally, a node uniquely identified by an id number set by the compiler, but this distinction is invisible to the programmer. The \code{value} field is a string object, and simply represents some value that the node contains. One possible use of the value field is to allow users to assign a more semantic meaning to nodes (ex. setting the value to the name of a city). The \code{in} field is a dict mapping nodes that the current node has edges into to weights. Similarly, the \code{out} field is a dict mapping nodes that have edges into the current node to weights. The keys of the two dicts are nodes. An example of accessing the \code{in} and \code{out} dicts of a node can be seen in Listing \ref{lst:node-ops}.
+A node contains the fields \code{value, in, out}. Internally, a node is uniquely identified by an id number set by the compiler, but this distinction is invisible to the programmer. The \code{value} field is a string object, and simply represents some value that the node contains. One possible use of the value field is to allow users to assign a more semantic meaning to nodes (ex. setting the value to the name of a city). The \code{in} field is a dict mapping nodes that the current node has edges into to weights. Similarly, the \code{out} field is a dict mapping nodes that have edges into the current node to weights. The keys of the two dicts are nodes. An example of accessing the \code{in} and \code{out} dicts of a node can be seen in Listing \ref{lst:node-ops}.
 
 Since node has an \emph{is-a} relationship with graph, it also contains a \code{vertices} field, but this is set upon declaration to contain only the node itself, and cannot be altered by the user.
 
