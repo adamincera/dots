@@ -392,7 +392,7 @@ print(a); \* function call, prints 3 because previous expression executed. *\
 \end{lstlisting}
 
 \subsection{Control Flow Statements}
-\code{if / else if* / else} and \code{if} conditional statements are supported, where \code{*} represents the Kleene star operator.
+In regular expression terms, \code{if / else if* / else?} conditional statements are supported, where \code{*} represents the Kleene star operator, and ``?'' means 0 or 1 instances. Semantically, this means you can have \code{if \{\}} statements, \code{if \{\} else} statements, \code{if \{\} else if \{\} ....}, and \code{if \{\} else if \{\} .... else \{\}} statements. Within each ``\code{\{\}}'' is a statement (which could be the empty statment or a block of expressions, etc.).
 
 \begin{lstlisting}[language=pltLang, label=lst:if-else]
 if condition {
