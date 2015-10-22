@@ -4,6 +4,7 @@
 \usepackage{parskip} % no indentation of paragraphs
 \usepackage{courier} % for use in lstlistings
 \usepackage[margin=1in]{geometry}
+\usepackage{textcomp}
 
 \usepackage{titlesec} % for making sub-subsections
 \setcounter{secnumdepth}{3}
@@ -99,6 +100,58 @@ Adam Incera (aji2112) --- System Architect}
 
 \section{Lexical Elements}
 
+\subsection{Identifiers}
+
+Identifiers are stngs used to name variables, functions, and new data types. 
+The first character of an identifier must be a letter. Identifiers are case-
+sensitive. Identifiers can contain lowercase letters, uppercase letters, 
+digits, and the underscore character \textquotesingle\_\textquotesingle.
+
+\subsection{Keywords}
+
+The following keywords are part of dots itself, and as such cannot be used as 
+identifiers:
+
+\code{bool break continue def dict else false for graph if in INF list 
+node null num return string true while}
+
+\subsection{Literals}
+
+Literals are raw numeric or string values. The compiler will automatically 
+determine the type of a constant, unless it is explicitly cast.
+
+\subsubsection{String literals}
+
+String literals are sequences of characters wrapped in double quotes. They may 
+include any charactersx but some characters must be represented by escape 
+sequences:
+
+\begin{table}[H]
+\begin{tabular}{ p{0.5in}  p{2.75in} }
+{\textbackslash}{\textbackslash} & backslash \\
+{\textbackslash}\textquotesingle & single quote \\
+{\textbackslash}" & double quote \\
+{\textbackslash}n & newline \\
+{\textbackslash}r & carriage return \\
+{\textbackslash}t & horizontal tab \\
+{\textbackslash}v & vertical tab \\
+\end{tabular}
+\label{tbl:escapes}
+\end{table}
+
+\subsubsection{Number literals}
+
+Number constants consist of an optional negative sign, a sequence of digits, 
+an optional decimal point, and another optional sequence of digits. The second 
+sequence of digits requires the presence of the decimal point.
+
+\subsubsection{Separators}
+
+Separators separate tokens. Whitespace characters (\textquotesingle \ \textquotesingle, \textquotesingle{\textbackslash}n\textquotesingle, \textquotesingle{\textbackslash}t\textquotesingle, etc.) are separators, but not 
+tokens. The other separators are single-character tokens. They are:
+
+\code{( ) [ ] \{ \} ; , . :}
+
 \subsection {Whitespace}
 In \pltlang\, white space is defined as any of the special characters \code{\textbackslash r\textbackslash n}, \code{\textbackslash n},  and \code{\textbackslash t} as well as the character obtained by pressing the spacebar. The space character sometimes delimits a separation between the parts of an expression (see the rest of the manual for syntax specifics), but otherwise whitespace is generally ignored outside of string and char expressions, as expressions are separated by the semicolon and scope is defined by braces. 
 
@@ -140,6 +193,40 @@ The \code{bool} type is a logical value which can be either the primitive values
 \begin{lstlisting}[language=pltLang, caption=Declaration of ``bool'' types., label=lst:bool]
 bool t = true;
 bool f = false;
+\end{lstlisting}
+
+\subsection{Node and Graph Objects}
+
+A \code{node} object represents a single vertex in a Graph, and a \code{graph} object represents a collection of graphs (which can be empty). \emph{Note}: A node is a graph, but a graph is not a node.
+
+Recursive definition of graph objects:
+\begin{itemize}
+\item An empty graph is a graph.
+\item A node is a graph.
+\item A graph added to a graph is a graph.
+\end{itemize}
+
+A graph contains only the field \code{vertices}, which is a list of all node objects contained within the graph. 
+
+A node contains the fields \code{value, in, out}. Internally, a node uniquely identified by an id number set by the compiler, but this distinction is invisible to the programmer. The \code{value} field is a string object, and simply represents some value that the node contains. One possible use of the value field is to allow users to assign a more semantic meaning to nodes (ex. setting the value to the name of a city). The \code{in} field is a dict mapping nodes that the current node has edges into to weights. Similarly, the \code{out} field is a dict mapping nodes that have edges into the current node to weights. The keys of the two dicts are nodes. An example of accessing the \code{in} and \code{out} dicts of a node can be seen in Listing \ref{lst:node-ops}.
+
+Since node has an \emph{is-a} relationship with graph, it also contains a \code{vertices} field, but this is set upon declaration to contain only the node itself, and cannot be altered by the user.
+
+Nodes can be declared in two different ways. In the first, the variable can be simply be declared with the \code{node} keyword and a variable name. This creates a basic node with an empty value, in\_list, and out\_list. In the second manner, a node can be declared by giving it an initial value inside parentheses after the variable name (as seen in line 11 of Listing \ref{lst:node-graph-dec}). Alternatively, a declared variable can be initialized with the assignment operator ``='' to any object of the type \code{node}.
+
+As with all other types, graphs can be assigned at the same time as declaration or assigned later. A graph can be assigned any expression that evaluates to something of the type \code{graph}. There is also a special graph-creation syntax that can \emph{only} be used at declaration time of a graph object  (as seen in lines 6-9 of Listing \ref{lst:node-graph-dec}). This special syntax consists of a comma-separated list of nodes and/or node operations (an example of this syntax can be found in lines 26-32 of Listing \ref{lst:node-ops}). Each node referenced in this type of assignment must have been previously declared. \\
+
+\begin{lstlisting}[language=pltLang, caption=Declaration of ``node'' and ``graph'' objects., label=lst:node-graph-dec]
+node x;
+node y("nyc");
+
+graph g1;
+graph g2 = g1;
+graph g3 = { 
+    x,
+    y
+};  # special graph assignment syntax only available at declaration time
+
 \end{lstlisting}
 
 \section{Expressions and Operators}
