@@ -64,8 +64,8 @@ prim_type:
 prim_decl_prefix:
 | prim_type ID SEMI { [$2] }
 | prim_type ID ASSIGN expr SEMI { [$2] } /* assignment and declaration */
-| prim_decl_list COMMA ID ASSIGN expr SEMI { $3 :: $1 }
-| prim_decl_list COMMA ID SEMI { $3 :: $1 }
+| prim_decl_prefix COMMA ID ASSIGN expr SEMI { $3 :: $1 }
+| prim_decl_prefix COMMA ID SEMI { $3 :: $1 }
 
 prim_decl_list:
 |  prim_decl_prefix SEMI { $1 }
@@ -75,16 +75,19 @@ prim_decl_list:
 node_decl_prefix:
 | NODE ID { [$2] }
 | NODE ID LPAREN expr RPAREN { [$2] }
-| node_decl_list COMMA ID LPAREN expr RPAREN { $3 :: $1 }
-| node_decl_list COMMA ID { $3 :: $1 }
+| node_decl_prefix COMMA ID LPAREN expr RPAREN { $3 :: $1 }
+| node_decl_prefix COMMA ID { $3 :: $1 }
 
 node_decl_list:
 |  node_decl_prefix SEMI { $1 }
 
+graph_decl_prefix:
+| GRAPH ID { [$2] }
+| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { [$2] }
+| graph_decl_prefix COMMA ID { $3 :: $1 }
+
 graph_decl_list:
-| GRAPH ID SEMI { [$2] }
-| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE SEMI { [$2] }
-| graph_decl_list COMMA ID SEMI { $3 :: $1 }
+|  graph_decl_prefix SEMI { $1 };
 
 /* comma separated list of operations on nodes
  * for use with graph declarations: */
