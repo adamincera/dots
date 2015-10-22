@@ -6,6 +6,8 @@ type expr =
   | Binop of expr * op * expr
   | Assign of string * expr
   | Call of string * expr list
+  | MemberVar of string * string
+  | MemberCall of string * string * expr list
   | Noexpr
 
 type edgeop = Undir | UndirVal | DirVal | BidirVal
@@ -32,7 +34,9 @@ type func_decl = {
     body : stmt list;
   }
 
-type program = string list * func_decl list
+(* program: ist of vars, function defs, commands not within a function *)
+type program = {Vars : string list; Funcs : func_decl list;
+                Cmds : stmt list}
 
 let rec string_of_expr = function
     Literal(l) -> l
@@ -70,6 +74,7 @@ let string_of_fdecl fdecl =
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
-let string_of_program (vars, funcs) =
+let string_of_program (vars, funcs, cmds) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
+  String.concat "\n" (List.map string_of_fdecl funcs) ^
+  String.concat "\n" (List.map string_of_stmt cmds)

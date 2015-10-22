@@ -17,6 +17,7 @@ rule token = parse
 | '*'      { TIMES }
 | '/'      { DIVIDE }
 | '='      { ASSIGN }
+| '.'      { DOT }
 | "--"     { UEDGE }
 | "-->"    { REDGE }
 | "=="     { EQ }

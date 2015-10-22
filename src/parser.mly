@@ -1,6 +1,6 @@
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
 %token UEDGE REDGE
@@ -10,6 +10,7 @@
 %token <string> ID
 %token EOF
 
+%nonassoc NOCALL
 %nonassoc NOELSE
 %nonassoc ELSE
 %nonassoc IN
@@ -25,9 +26,10 @@
 %%
 
 program:
-   /* nothing */ { [], [] }
- | program vdecl { ($2 :: fst $1), snd $1 }
- | program fdecl { fst $1, ($2 :: snd $1) }
+|  /* nothing */ { {Vars : []; Funcs : []; Cmds : []} }
+|  program vdecl { {Vars : $2 :: $1.Vars; Funcs: $1.Funcs; Cmds : $1.Cmds} }
+|  program fdecl { {Vars : $1.Vars; Funcs: $2 :: $1.Funcs; Cmds : $1.Cmds} }
+|  program stmt  { {Vars : $1.Vars; Funcs: $1.Funcs; Cmds : $2 :: $1.Cmds} }
 
 fdecl:
    DEF LT ID GT ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
@@ -62,10 +64,10 @@ prim_type:
 /* allows chained declaration of primitives,
  * chained primitives can assign using "=" */
 prim_decl_prefix:
-| prim_type ID SEMI { [$2] }
-| prim_type ID ASSIGN expr SEMI { [$2] } /* assignment and declaration */
-| prim_decl_prefix COMMA ID ASSIGN expr SEMI { $3 :: $1 }
-| prim_decl_prefix COMMA ID SEMI { $3 :: $1 }
+| prim_type ID { [$2] }
+| prim_type ID ASSIGN expr { [$2] } /* assignment and declaration */
+| prim_decl_prefix COMMA ID ASSIGN expr { $3 :: $1 }
+| prim_decl_prefix COMMA ID { $3 :: $1 }
 
 prim_decl_list:
 |  prim_decl_prefix SEMI { $1 }
@@ -110,6 +112,7 @@ stmt_list:
 
 stmt:
     expr SEMI { Expr($1) }
+  | edge_op SEMI { $1 }
   | RETURN expr SEMI { Return($2) }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
@@ -117,7 +120,6 @@ stmt:
   | FOR LPAREN ID IN ID RPAREN stmt
      { For($3, $5, $7) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
-  | edge_op { edge_op }
 
 
 expr:
@@ -135,6 +137,8 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | ID DOT ID %prec NOCALL { MemberVar($1, $3, []) }
+  | ID DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:
