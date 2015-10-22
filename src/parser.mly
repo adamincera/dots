@@ -75,10 +75,15 @@ node_decl_list:
 
 graph_decl_list:
 | GRAPH ID SEMI { [$2] }
+| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE SEMI { [$2] }
 | graph_decl_list COMMA ID SEMI { $3 :: $1 }
 
+edge_op_list:
+| ID { [$1] }
+| edge_op { [$1] }
+| edge_op_list COMMA edge_op { $3 :: $1 }
 
-edge_ops:
+edge_op:
 |  ID UEDGE ID { Undir($1, $3) }
 |  ID REDGE ID { Dir($1, $3) }
 |  ID REDGE LBRACKET expr RBRACKET ID { DirVal($1, $6, $4) }
@@ -99,6 +104,10 @@ stmt:
   | FOR LPAREN ID IN ID RPAREN stmt
      { For($3, $5, $7) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
+  | edge_op { edge_op }
+
+graph_expr:
+
 
 expr:
     LITERAL          { Literal($1) }
