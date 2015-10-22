@@ -22,7 +22,7 @@ rule token = parse
 | "-->"    { REDGE }
 | "=="     { EQ }
 | "!="     { NEQ }
-| "<"      { LT }
+| '<'      { LT }
 | "<="     { LEQ }
 | ">"      { GT }
 | ">="     { GEQ }
@@ -38,8 +38,8 @@ rule token = parse
 | "string" { STRING }
 | "node"   { NODE }
 | "graph"  { GRAPH }
-| "\".*\"" as lxm  { LITERAL(lxm) }         (* string literals *)
-| ['0'-'9']+ as lxm { LITERAL(lxm) }
+| ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) } (* num literal *)
+| "\".*\"" as lxm  { LITERAL(lxm) }                (* string literals *)
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }

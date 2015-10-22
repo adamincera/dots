@@ -10,18 +10,18 @@ type expr =
   | MemberCall of string * string * expr list
   | Noexpr
 
-type edgeop = Undir | UndirVal | DirVal | BidirVal
-
 (* b/c nums can be either float or int just treat them as strings *)
 type edge_expr =
 | Undir of string * string (* id, id *)
 | UndirVal of string * string * string (* id, id, weight *)
 | DirVal of string * string * string (* id, id, weight *)
 | BidirVal of string * string * string * string (* weight, id, id, weight *)
+| NoOp of string
 
 type stmt =
     Block of stmt list
   | Expr of expr
+  | Edgeop of expr
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * stmt
@@ -38,8 +38,17 @@ type func_decl = {
 type program = {Vars : string list; Funcs : func_decl list;
                 Cmds : stmt list}
 
+(* type program = string list * func_decl list *)
+
+(* prepends prelist at the head of postlst *)
+let rec base_concat postlst = function
+  | [] -> postlst
+  | hd :: tl -> base_concat (hd :: postlst) tl 
+in
+let concat prelst postlst = base_concat postlst (List.rev prelst)
+
 let rec string_of_expr = function
-    Literal(l) -> l
+    Literal(l) -> string_of_int l
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
@@ -66,7 +75,7 @@ let rec string_of_stmt = function
       ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_vdecl id = "int " ^ id ^ ";\n"
+let string_of_vdecl id = "type " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
   fdecl.fname ^ "(" ^ String.concat ", " fdecl.formals ^ ")\n{\n" ^
@@ -74,7 +83,7 @@ let string_of_fdecl fdecl =
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
-let string_of_program (vars, funcs, cmds) =
+let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs) ^
   String.concat "\n" (List.map string_of_stmt cmds)

@@ -9,6 +9,7 @@ func1 \
 func2 \
 func3 \
 gcd \
+gcd2 \
 global1 \
 hello \
 if1 \
@@ -18,6 +19,10 @@ if4 \
 ops1 \
 var1 \
 while1
+
+# Choose one
+YACC = ocamlyacc -v
+# YACC = menhir --explain
 
 TARFILES = Makefile testall.sh scanner.mll parser.mly \
 	ast.ml bytecode.ml interpret.ml compile.ml execute.ml microc.ml \
@@ -37,7 +42,7 @@ scanner.ml : scanner.mll
 	ocamllex scanner.mll
 
 parser.ml parser.mli : parser.mly
-	ocamlyacc -v parser.mly
+	$(YACC) parser.mly
 
 %.cmo : %.ml
 	ocamlc -c $<

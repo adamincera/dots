@@ -4,16 +4,14 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
 %token UEDGE REDGE
-%token RETURN IF ELSE FOR WHILE DEF IN 
+%token RETURN IF ELSE FOR WHILE DEF IN
 %token BOOL NUM STRING NODE GRAPH
-%token <string> LITERAL
+%token <int> LITERAL
 %token <string> ID
 %token EOF
 
-%nonassoc NOCALL
 %nonassoc NOELSE
 %nonassoc ELSE
-%nonassoc IN
 %right ASSIGN
 %left EQ NEQ
 %left LT GT LEQ GEQ
@@ -26,10 +24,13 @@
 %%
 
 program:
+  decls EOF { $1 }
+
+decls:
 |  /* nothing */ { {Vars : []; Funcs : []; Cmds : []} }
-|  program vdecl { {Vars : $2 :: $1.Vars; Funcs: $1.Funcs; Cmds : $1.Cmds} }
-|  program fdecl { {Vars : $1.Vars; Funcs: $2 :: $1.Funcs; Cmds : $1.Cmds} }
-|  program stmt  { {Vars : $1.Vars; Funcs: $1.Funcs; Cmds : $2 :: $1.Cmds} }
+|  program vdecl { {Vars : concat($2, $1.Vars); Funcs: $1.Funcs; Cmds : $1.Cmds} }
+|  program fdecl { {Vars : $1.Vars; Funcs: concat($2, $1.Funcs); Cmds : $1.Cmds} }
+/* causes conflicts: |  program stmt  { {Vars : $1.Vars; Funcs: $1.Funcs; Cmds : $2 :: $1.Cmds} } */
 
 fdecl:
    DEF LT ID GT ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
@@ -70,7 +71,7 @@ prim_decl_prefix:
 | prim_decl_prefix COMMA ID { $3 :: $1 }
 
 prim_decl_list:
-|  prim_decl_prefix SEMI { $1 }
+|  prim_decl_prefix SEMI { List.rev $1 }
 
 /* allows chained declaration of nodes,
  * chained nodes can be assigned using "(value)" */
@@ -81,7 +82,7 @@ node_decl_prefix:
 | node_decl_prefix COMMA ID { $3 :: $1 }
 
 node_decl_list:
-|  node_decl_prefix SEMI { $1 }
+|  node_decl_prefix SEMI { List.rev $1 }
 
 graph_decl_prefix:
 | GRAPH ID { [$2] }
@@ -89,12 +90,13 @@ graph_decl_prefix:
 | graph_decl_prefix COMMA ID { $3 :: $1 }
 
 graph_decl_list:
-|  graph_decl_prefix SEMI { $1 };
+|  graph_decl_prefix SEMI { List.rev $1 };
 
 /* comma separated list of operations on nodes
- * for use with graph declarations: */
+ * for use with graph declarations 
+ * TODO: find unambiguous way to allow ID by itself
+ */
 edge_op_list:
-| ID { [$1] }
 | edge_op { [$1] }
 | edge_op_list COMMA edge_op { $3 :: $1 }
 
@@ -112,7 +114,7 @@ stmt_list:
 
 stmt:
     expr SEMI { Expr($1) }
-  | edge_op SEMI { $1 }
+  | edge_op SEMI { Edgeop($1) }
   | RETURN expr SEMI { Return($2) }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
@@ -121,7 +123,14 @@ stmt:
      { For($3, $5, $7) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
 
+expr_opt:
+    /* nothing */ { Noexpr }
+  | expr          { $1 }
 
+/* TODO: find unambiguous way to call a member variable
+ *           ex. x.out
+ *       w/o needed it be a function call with parentheses
+ */
 expr:
     LITERAL          { Literal($1) }
   | ID               { Id($1) }
@@ -137,7 +146,6 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | ID DOT ID %prec NOCALL { MemberVar($1, $3, []) }
   | ID DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
 
