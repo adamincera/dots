@@ -5,6 +5,7 @@
 \usepackage{courier} % for use in lstlistings
 \usepackage[margin=1in]{geometry}
 \usepackage{textcomp}
+\usepackage{titling}
 
 \usepackage{titlesec} % for making sub-subsections
 \setcounter{secnumdepth}{3}
@@ -84,7 +85,15 @@
 
 \lstset{style=pltStyle, columns=flexible}
 
-\title{d.o.t.s. \\ A graph language.}
+\pretitle{%
+  \begin{center}
+  \LARGE
+  \includegraphics[width=7cm,height=7cm,keepaspectratio]{dots.png}\\[\bigskipamount]
+}
+\posttitle{\end{center}}
+
+
+\title{A graph language.}
 \author{Hosanna Fuller (hjf2106) --- Manager\\
 Rachel Gordon (rcg2130) --- Language Guru\\
 Yumeng Liao (yl2908) --- Tester\\
@@ -127,7 +136,6 @@ sequences:
 \begin{table}[H]
 \begin{tabular}{ p{0.5in}  p{2.75in} }
 {\textbackslash}{\textbackslash} & backslash \\
-{\textbackslash}\textquotesingle & single quote \\
 {\textbackslash}" & double quote \\
 {\textbackslash}n & newline \\
 {\textbackslash}r & carriage return \\
@@ -136,6 +144,7 @@ sequences:
 \end{tabular}
 \label{tbl:escapes}
 \end{table}
+For an example, see section 2.1.2 on the string type.
 
 \subsubsection{Number literals}
 
@@ -181,6 +190,7 @@ A \code{string} is a sequence of 0 or more characters. Comparative ordering of s
 string a = "alpha";
 string empty = "";
 string char = "a";
+string escape_sequence_example = "And he said, \"Look at this! I have quotes inside my string!\nAnd a newline too!\"";
 \end{lstlisting}
 
 \subsubsection{bool}
@@ -210,7 +220,7 @@ A node contains the fields \code{value, in, out}. Internally, a node is uniquely
 
 Since node has an \emph{is-a} relationship with graph, it also contains a \code{vertices} field, but this is set upon declaration to contain only the node itself, and cannot be altered by the user.
 
-Nodes can be declared in two different ways. In the first, the variable can be simply be declared with the \code{node} keyword and a variable name. This creates a basic node with an empty value, in\_list, and out\_list. In the second manner, a node can be declared by giving it an initial value inside parentheses after the variable name (as seen in line 11 of Listing \ref{lst:node-graph-dec}). Alternatively, a declared variable can be initialized with the assignment operator ``='' to any object of the type \code{node}.
+Nodes can be declared in two different ways. In the first, the variable can simply be declared with the \code{node} keyword and a variable name. This creates a basic node with an empty value, in\_list, and out\_list. In the second manner, a node can be declared by giving it an initial value inside parentheses after the variable name (as seen in line 2 of Listing \ref{lst:node-graph-dec}). Alternatively, a declared variable can be initialized with the assignment operator ``='' to any object of the type \code{node}.
 
 As with all other types, graphs can be assigned at the same time as declaration or assigned later. A graph can be assigned any expression that evaluates to something of the type \code{graph}. There is also a special graph-creation syntax that can \emph{only} be used at declaration time of a graph object  (as seen in lines 6-9 of Listing \ref{lst:node-graph-dec}). This special syntax consists of a comma-separated list of nodes and/or node operations (an example of this syntax can be found in lines 26-32 of Listing \ref{lst:node-ops}). Each node referenced in this type of assignment must have been previously declared. \\
 
@@ -229,7 +239,7 @@ graph g3 = {
 
 \section{Expressions and Operators}
 
-an \textbf{expression} has at least one operand and at least one operator. Operators have types including constants, variables, and functions that return values. For example:
+An \textbf{expression} has at least one operand and at least one operator. Operators have types including constants, variables, and functions that return values. For example:
 
 \begin{lstlisting}[language=pltLang, caption=demonstration of expressions and subexpressions, label=lst:expr]
 3 * 4; 
@@ -240,13 +250,14 @@ an \textbf{expression} has at least one operand and at least one operator. Opera
 
 \subsection{Number and String Operators}
 
-\textbf{Definition:} operators are operations that are performed on operands which can be functions, variables, or data types. 
-\textbf{numerical operators} are operators that include arithmetic and comparative operators.
-\emph{Arithmetic Operators}
-Arithmetic Operators function exactly like C primitive data types, variables and functions.\\ 
+Operators are operations that are performed on operands which can be functions, variables, or data types. 
+\textbf{Numerical operators} are operators that include arithmetic and comparative operators.
 
-\emph{Comparative Operators}
- Sample operators include 
+\emph{Arithmetic Operators} \\
+Arithmetic Operators function exactly like C with primitive data types such as literals,  variables and functions. d.o.t.s support the addition, subtraction, multiplication, division and modular divison operators. Similar to C, integer division truncates the resulting value \code {5 / 3 = 1}. Modular division returns the remainder of a given division ie \code {5 \% 3 = 2} 
+
+\emph{Comparative Operators} \\
+These opeartors relate two operands to each other. Some sample comparisons include: 
 \begin{lstlisting}[language=pltLang, caption=Declaration of ``string'' types., label=lst:ops]
 #operators: >,<,==,!=, <=, >=,||,&&
 
@@ -255,9 +266,9 @@ Arithmetic Operators function exactly like C primitive data types, variables and
 (foo && x++)
 \end{lstlisting}
 
-all operators function as they do in C as long as the operands are primitive data types, variables or functions. 
+all operators function as they do in C as long as the operands are primitive data types, variables or functions. The result of a comparison operation is a boolean. 
 
-\section{Node Operators}
+\subsection{Node Operators}
 
 The node operators outlined in Table \ref{tbl:node-ops} below are all binary operators which take a node object on the left-hand and right-hand sides of the operator.
 
@@ -356,23 +367,352 @@ Operator & Explanation \\
 
 \subsection{Comparison and Logical Operators}
 
-\textbf{Definition: } logical operators evaluate the logical truth of two operands. These set of functions operate similarly to the logical operators
+Logical operators evaluate the logical truth of two operands. This set of functions operates similarly to the logical operators.
 
-\code{==} and \code{!=} are the only logical operators which function on graph operands. These operators evaluate the truth of these statements by using the Node \code{==} and \code{!=} logical comparison operators. The \code{graph} operand will then iterate through its \code{nodes}.
-== signifies that two graphs have the same node and neighbors 
-!= means that two graph operands do not have the same nodes and neighbors
+\code{==} and \code{!=} are the only logical operators which function on graph operands. These operators are evaluated by recursively evaluating the Node \code{==} and \code{!=} logical comparison operators.
+
+== signifies that two graphs have the same vertices and edges.
+
+!= signifies that two graphs do not have the same vertices and edges.
 \subsection{Subscript Notation}
 
-\subsubsection{dict Subscript}
-a way of indexing specific elements within a dict the notation is “D[i]” where brackets denote the key in the dictionary you want to index
-\subsubsection{list Subscript}
-a way of indexing specific elements within a list the notation is “L[ i ]” where brackets denote the position in list L 
+\subsubsection{Subscript}
+\emph{dict subscripts} specify elements within a \code{dict} at a given index. The notation is “D[i]” where brackets denote the key in the dictionary you want to index.
+\emph{list subscripts} specify elements within a \code{list} at a given index. The notation is “L[i]” where brackets denote the position in list L. 
+
 
 \subsection{Operator Precendence}
-follows classic programming ordering: parenthesis, exponent, multiply, divide, addition, subtraction
+follows traditional mathematical order of operations: parenthesis, exponent, multiply, divide, addition, subtraction
 \subsection{Member Access}
-
  ``.'' allows you to access members of a structure or a variable
+
+\begin{lstlisting}[language=pltLang, label=lst:member-access]
+node x, y, z, q, r;
+graph G = {
+    x --> y,
+    y -->[.3] z,
+    z -- q,
+    q --[45] r,
+    r [.87]--[.39] x
+};
+
+print x.in; # prints [r: 0.39]
+
+print x.in[r] # dict subscript notation; prints 0.39
+
+\end{lstlisting}
+
+\subsection{Control Flow Statements}
+In regular expression terms, \code{if / else if* / else?} conditional statements are supported, where \code{*} represents the Kleene star operator, and ``?'' means 0 or 1 instances. Semantically, this means you can have \code{if \{\}} statements, \code{if \{\} else} statements, \code{if \{\} else if \{\} ....}, and \code{if \{\} else if \{\} .... else \{\}} statements. Within each ``\code{\{\}}'' is a statement (which could be the empty statment or a block of expressions, etc.).
+
+\begin{lstlisting}[language=pltLang, label=lst:if-else]
+if condition {
+  \* execute when condition is true *\
+}
+else {
+  \* if condition is false go here *\
+}
+
+if condition {
+  \* execute when condition is true *\
+}
+else if another_condition {
+  \* if anothe_condition is true go here *\
+}
+else if yet_another_condition {
+  \* only reached if another_condition is false
+  go here if yet_another_condition is true *\
+}
+else {
+  \* execute when all conditions are false *\
+}
+
+if condition {
+  \* execute if condition is true *\
+}
+\* continue executing subsequent expression statements *\
+
+\end{lstlisting}
+
+\subsection{Loop Statements}
+\pltlang\ supports \code{while} and \code{for} loops.
+
+\subsubsection{While Loops}
+
+\code{while} statements execute repeatedly the code in the scoped block (delimited by braces following the Boolean expression), while the boolean expression \code{condition} evaluates to true. 
+
+\begin{lstlisting}[language=pltLang, label=lst:while-loop]
+while condition {
+  \* code *\
+}
+
+\end{lstlisting}
+
+\subsubsection{For Loops}
+\code{for} statements iterate through all elements in \code{iterable\_var}, assigning the current element to \code{var\_name}. 
+
+\begin{lstlisting}[language=pltLang, label=lst:for-loop]
+for var_name in iterable_var {
+  \* code *\
+}
+
+\* common usage examples *\
+for node_var in graph_var {
+  \* do something with each node *\
+}
+
+for edge_var in n.out {
+  \* do something with each outbound edge from node n *\
+}
+
+\end{lstlisting}
+
+\subsection{Other Statements}
+
+\subsubsection{Break}
+Used in a loop to exit out of the loop immediately. Continue executing expressions after the loop block as expected.
+
+\begin{lstlisting}[language=pltlang, label=lst:break-statement]
+num i = 0;
+while i < 5 {
+  i = i + 1;
+  if i == 3 {
+    break;
+  }
+  print(i, ' ');
+}
+\* Prints 1 2 *\
+
+print(i, ' ');
+\* Prints 2 *\
+
+\end{lstlisting}
+
+\subsubsection{Continue}
+Used in a loop to skip the rest of the loop block and execute the next iteration of the loop.
+
+\begin{lstlisting}[language=pltLang, label=lst:continue-statement]
+num i = 0;
+while i < 5 {
+  i = i + 1;
+  if i == 2 {
+    continue;
+  }
+  print(i, ' ');
+}
+\* Prints 1 3 4 5 *\
+
+\end{lstlisting}
+
+\subsubsection{Return}
+Used to exit from a function and dictate the output argument. The output argument must be the same type as specified in the function header. If not, the compiler will throw an error.
+
+\begin{lstlisting}[language=pltLang, label=lst:return-statement]
+def num foo(num n) {
+  if n > 2 {
+    return 2;
+  }
+  return 1;
+} 
+
+num out1 = foo(10)
+print(out1);
+\* Prints 2 *\
+
+num out2 = foo(1)
+print(out2);
+\* Prints 1 *\
+\end{lstlisting}
+
+
+\section{Functions}
+
+\subsection{Function Declaration and Definition}
+
+Before a function can be used, it must be declared and defined. Functions are declared using the \code{def} keyword, followed by the data type the function will return, followed by the function name, followed by a list of parameters enclosed in parentheses. The function must then be immediately defined within a set of curly braces immediately follwing the parentheses of the parameter list. 
+
+\begin{lstlisting}[language=pltLang, caption=Function declaration and definition., label=lst:funct-def]
+\* 
+ * Outline of function declaration and definition.
+ * ``return_type'' would be a data type.
+ *\
+def return_type function_name () {
+  \* function implementation code *\
+}
+\end{lstlisting}
+
+\subsection{Return Statements}
+
+Each function must return a value that matches the declared return type using the \code{return} keyword. For functions with the \code{null} return type, indicating that nothing is returned by the function, the return statement can consist either of the keyword \code{return} as an expression by itself (line 2 of Listing \ref{lst:funct-return}), or it can explcitly \code{return null} (line 6 of Listing \ref{lst:funct-return}).
+
+\begin{lstlisting}[language=pltLang, caption=Return statements of functions., label=lst:funct-return]
+def null fnull1 () {
+  return;
+}
+
+def null fnull2 () {
+  return null;
+}
+
+def int fint () {
+  return 4;
+}
+\end{lstlisting}
+
+\subsection{Parameter List}
+
+The declaration of a function must include a list of required parameters enclosed within parentheses. To define a function which requires no parameters, the contents of the parentheses can be left blank. Otherwise, each parameter requires the data type, followed by a variable name by which the parameter can be referenced within the function definition. 
+
+\begin{lstlisting}[language=pltLang, caption=Parameters in function declarations., label=lst:funct-params]
+def null no_params () {
+  return;
+}
+
+def num one_param (num x) {
+  num b = x;
+  return b;
+}
+
+def string multi_params (string s1, num y, string s2) {
+  string statement = s1 + " " + " " + y + "s2";
+  return statement;
+}
+
+\end{lstlisting}
+
+\subsection{Calling Functions}
+
+The syntax for calling a function is: the name of the function, followed by a comma-separated list of values or variables to be used in paremter list enclosed within parentheses. Each value or variable passed in to a function call is mapped to the corresponding variable in the declared parameter list of the function.
+
+A function-call expression is considered of the same type as its return type. Because of this, function-call expressions may be used as any other expression. For example a function-call expression can be used in the assignment of variables, as in line 11 of Listing \ref{lst:funct-call}.
+
+\begin{lstlisting}[language=pltLang, caption=Function declaration and definition., label=lst:funct-call]
+def num increment (num n, num incr) {
+  return n + incr;
+}
+
+num x = 4;
+
+\* The following call maps ``x'' to the variable ``n'',
+ * and ``2'' to the variable ``incr'' from the declaration
+ * of the ``increment'' function 
+ *\
+num y = increment(x, 2);
+
+print("y: ", y); # prints --> ``y: 6''
+\end{lstlisting}
+
+\subsection{Variable Length Parameter Lists}
+
+The \emph{only} function in \pltlang\ that can have a variable number of parameters is the built-in \code{print} function. All other functions must be declared with a defined absolute number of 0 or more parameters. 
+
+The \code{print} function may be called using a comma-separated list of expressions which can be evaluated as or converted to the \code{string} type. Each of the built-in types may be used directly as an argument to the print function.
+
+\begin{lstlisting}[language=pltLang, caption=The built-in ``print'' function., label=lst:funct-print]
+string alpha = "World";
+print("Hello", alpha, "\n");
+
+node x("foo");
+num n = 20;
+print("The node <", x, "> has an associated num equal to:", n, "\n");
+\end{lstlisting}
+
+In Listing \ref{lst:funct-print}, the \code{print} function was called on line 2 with 3 arguments and with 5 arguments on line 6. The number of arguments passed to \code{print} does not matter. 
+
+\subsection{Built-in Functions}
+
+\pltlang\ comes with two pre-defined functions. 
+
+The first, \code{print(...)}, prints the string representation of a list of expressions to standard output.
+
+The second, \code{range(num min, num max)}, returns a \code{list <num>} consisting of the integers from min to max-1. The arguments to \code{range} must be integers.
+
+\begin{lstlisting}[language=pltLang, caption=The built-in ``print'' function., label=lst:builtin-functs]
+string alpha = "World";
+print("Hello", alpha, "\n");  # prints "Hello World\n" to standard output
+
+range(0, 4); # returns the list [0, 1, 2, 3]
+\end{lstlisting}
+
+\section{Program Structure and Scope}
+
+\subsection{Program Structure}
+
+A \pltlang\ program consists of a series of function declarations and expressions. Because \pltlang\ is a scripting language, there is no \code{main} function. Instead, expressions are executed in order from top to bottom. Functions must be declared and defined before use. 
+
+\subsection{Scope}
+
+In \pltlang, variables declared in expressions not belonging to functions or \code{for} loops have scope outside of function definitions. Variables declared in a function are visible or available to be referenced by name within the body of the function (functional scoping). Variables declared in \code{for} loop expressions can be referenced by name within the loop body (lexical scoping). There is no true global scoping as programs are executed from top to bottom. Variable declarations within functions and \code{for} loops can mask variables declared outside.
+
+\begin{lstlisting}[language=pltLang, caption=Example of masking, label=lst:scope-masking]
+node n("Hello world");
+node x("Goodbye world");
+node y("cool");
+
+Graph nodes = {
+  x,
+  y
+};
+
+for node n in nodes {
+  print(n, " ya ya ya\n");
+}
+\* prints
+  Goodbye world ya ya ya
+  cool ya ya ya*\
+
+print(n);
+\* prints Hello world *\
+\end{lstlisting}
+
+In Listing \ref{lst:scope-masking}, the declaration of \code{n} in the loop scope masks the declaration of \code{n} from the top level scope.
+
+\section{Sample Program}
+\label{sec:code}
+
+In this section, we demonstrate how two simple path-searching algorithms can be implemented using \pltlang's syntax. The end-goal of our project is to be able to implement more complex algorithms. But for the purposes of demonstration, we chose to show Dijkstra's Algorithm (Listing \ref{lst:dijkstras}) and the Breadth-First Search algorithm (Listing \ref{lst:bfs}), as their implementation make use of each collection type and control-flow statement. 
+
+
+\lstinputlisting[language=pltlang, label={lst:dijkstras}, caption=Dijkstra's Algorithm]{dijkstras.dots}
+
+\lstinputlisting[language=pltlang, label={lst:bfs}, caption=Breadth-First Search Algorithm]{bfs.dots}
+
+Now that we have defined the \code{bfs} and \code{dijkstra} functions, we can use them to find shortest paths in an actual instance of a graph.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{graphs/example_city_graph.png}
+\caption{Visual representation of graph created in Listing \ref{lst:path-search}.}
+\label{fig:node_ops}
+\end{figure}
+
+
+\begin{lstlisting}[language=pltLang, caption=Using user-defined functions., label=lst:path-search]
+\* Graph set-up *\
+node x("dc"), y("chicago"), z("philly"), q("nyc"), r("boston");
+
+graph g1 = {
+    x --[2] z;
+    z --[2] q;
+    q --[3] r;
+    z --[9] r;
+    x --[8] y;
+    y --[9] r;
+};
+\* end Graph set-up *\
+
+# find the min costs from "philly" to all other cities:
+dict<node, num> min_costs = dijkstra(g1, z);
+
+# find path with minimum number of hops from "philly" to "chicago":
+list<node> min_path = bfs(g1, z, y);
+
+
+\end{lstlisting}
+
+\end{document}
+
+\end{document}
 
 
 \section{Statements}
@@ -655,5 +995,48 @@ print(n);
 In Listing \ref{lst:scope-masking}, the declaration of \code{n} in the loop scope masks the declaration of \code{n} from the top level scope.
 
 \section{Sample Program}
+\label{sec:code}
+
+In this section, we demonstrate how two simple path-searching algorithms can be implemented using \pltlang's syntax. The end-goal of our project is to be able to implement more complex algorithms. But for the purposes of demonstration, we chose to show Dijkstra's Algorithm (Listing \ref{lst:dijkstras}) and the Breadth-First Search algorithm (Listing \ref{lst:bfs}), as their implementation make use of each collection type and control-flow statement. 
+
+
+\lstinputlisting[language=pltlang, label={lst:dijkstras}, caption=Dijkstra's Algorithm]{dijkstras.dots}
+
+\lstinputlisting[language=pltlang, label={lst:bfs}, caption=Breadth-First Search Algorithm]{bfs.dots}
+
+Now that we have defined the \code{bfs} and \code{dijkstra} functions, we can use them to find shortest paths in an actual instance of a graph.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{graphs/example_city_graph.png}
+\caption{Visual representation of graph created in Listing \ref{lst:path-search}.}
+\label{fig:node_ops}
+\end{figure}
+
+
+\begin{lstlisting}[language=pltLang, caption=Using user-defined functions., label=lst:path-search]
+\* Graph set-up *\
+node x("dc"), y("chicago"), z("philly"), q("nyc"), r("boston");
+
+graph g1 = {
+    x --[2] z;
+    z --[2] q;
+    q --[3] r;
+    z --[9] r;
+    x --[8] y;
+    y --[9] r;
+};
+\* end Graph set-up *\
+
+# find the min costs from "philly" to all other cities:
+dict<node, num> min_costs = dijkstra(g1, z);
+
+# find path with minimum number of hops from "philly" to "chicago":
+list<node> min_path = bfs(g1, z, y);
+
+
+\end{lstlisting}
+
+\end{document}
 
 \end{document}
