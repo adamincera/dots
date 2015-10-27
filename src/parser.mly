@@ -6,10 +6,11 @@
 %token UEDGE REDGE
 %token RETURN IF ELSE FOR WHILE DEF IN
 %token BOOL NUM STRING NODE GRAPH
-%token <int> LITERAL
+%token <string> LITERAL
 %token <string> ID
 %token EOF
 
+%nonassoc NOCALL
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
@@ -28,9 +29,9 @@ program:
 
 decls:
 |  /* nothing */ { {Vars : []; Funcs : []; Cmds : []} }
-|  program vdecl { {Vars : concat($2, $1.Vars); Funcs: $1.Funcs; Cmds : $1.Cmds} }
-|  program fdecl { {Vars : $1.Vars; Funcs: concat($2, $1.Funcs); Cmds : $1.Cmds} }
-/* causes conflicts: |  program stmt  { {Vars : $1.Vars; Funcs: $1.Funcs; Cmds : $2 :: $1.Cmds} } */
+|  decls vdecl { {Vars : concat($2, $1.Vars); Funcs: $1.Funcs; Cmds : $1.Cmds} }
+|  decls fdecl { {Vars : $1.Vars; Funcs: concat($2, $1.Funcs); Cmds : $1.Cmds} }
+|  decls stmt  { {Vars : $1.Vars; Funcs: $1.Funcs; Cmds : $2 :: $1.Cmds} } 
 
 fdecl:
    DEF LT ID GT ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
@@ -49,7 +50,7 @@ formal_list:
 
 vdecl_list:
     /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
+  | vdecl_list vdecl { concat($2, $1) }
 
 vdecl:
 |  prim_decl_list { $1 }
@@ -123,9 +124,11 @@ stmt:
      { For($3, $5, $7) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
 
+/*
 expr_opt:
-    /* nothing */ { Noexpr }
+    * nothing * { Noexpr }
   | expr          { $1 }
+*/
 
 /* TODO: find unambiguous way to call a member variable
  *           ex. x.out
@@ -146,6 +149,7 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | ID DOT ID %prec NOCALL { MemberVar($1, $3) }
   | ID DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
 

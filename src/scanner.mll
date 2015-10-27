@@ -22,7 +22,7 @@ rule token = parse
 | "-->"    { REDGE }
 | "=="     { EQ }
 | "!="     { NEQ }
-| '<'      { LT }
+| "<"      { LT }
 | "<="     { LEQ }
 | ">"      { GT }
 | ">="     { GEQ }
