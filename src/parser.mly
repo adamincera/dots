@@ -5,7 +5,8 @@
 %token EQ NEQ LT LEQ GT GEQ
 %token UEDGE REDGE
 %token RETURN IF ELSE FOR WHILE DEF IN
-%token BOOL NUM STRING NODE GRAPH
+%token BOOL NUM STRING NODE GRAPH LIST DICT
+%token TRUE FALSE INF
 %token <string> LITERAL
 %token <string> ID
 %token EOF
@@ -34,11 +35,11 @@ decls:
 |  decls stmt  { {Vars : $1.Vars; Funcs: $1.Funcs; Cmds : $2 :: $1.Cmds} } 
 
 fdecl:
-   DEF LT ID GT ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
-     { { fname = $5;
-	 formals = $7;
-	 locals = List.rev $10;
-	 body = List.rev $11 } }
+   DEF ID ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
+     { { fname = $3;
+	 formals = $5;
+	 locals = List.rev $8;
+	 body = List.rev $9 } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -53,9 +54,11 @@ vdecl_list:
   | vdecl_list vdecl { concat($2, $1) }
 
 vdecl:
-|  prim_decl_list { $1 }
-|  node_decl_list { $1 }
-|  graph_decl_list { $1 }
+|  prim_decl_prefix SEMI { List.rev $1 }
+|  node_decl_prefix SEMI { List.rev $1 }
+|  graph_decl_prefix SEMI { List.rev $1 }
+|  list_decl_prefix SEMI { List.rev $1 }
+|  dict_decl_prefix SEMI { List.rev $1 }
 
 /* primitive typenames */
 prim_type:
@@ -63,35 +66,38 @@ prim_type:
 | NUM { "num" }
 | STRING { "string" }
 
-/* allows chained declaration of primitives,
- * chained primitives can assign using "=" */
+/* chained primitive declarations can be assigned using "=" */
 prim_decl_prefix:
 | prim_type ID { [$2] }
 | prim_type ID ASSIGN expr { [$2] } /* assignment and declaration */
 | prim_decl_prefix COMMA ID ASSIGN expr { $3 :: $1 }
 | prim_decl_prefix COMMA ID { $3 :: $1 }
 
-prim_decl_list:
-|  prim_decl_prefix SEMI { List.rev $1 }
-
-/* allows chained declaration of nodes,
- * chained nodes can be assigned using "(value)" */
+/* chained node declarations can be assigned using "(value)" */
 node_decl_prefix:
 | NODE ID { [$2] }
 | NODE ID LPAREN expr RPAREN { [$2] }
 | node_decl_prefix COMMA ID LPAREN expr RPAREN { $3 :: $1 }
 | node_decl_prefix COMMA ID { $3 :: $1 }
 
-node_decl_list:
-|  node_decl_prefix SEMI { List.rev $1 }
-
+/* chained graph declarations can be assigned using "{ edge op list }" */
 graph_decl_prefix:
 | GRAPH ID { [$2] }
 | GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { [$2] }
 | graph_decl_prefix COMMA ID { $3 :: $1 }
 
-graph_decl_list:
-|  graph_decl_prefix SEMI { List.rev $1 };
+/* TODO: fix what goes in the brackets */
+list_decl_prefix:
+| LIST LT ID GT ID { [$3] }
+| LIST LT ID GT ID ASSIGN LBRACKET formal_list RBRACKET { [$3] }
+| list_decl_prefix COMMA LT ID GT ID { $4 :: $1 }
+| list_decl_prefix COMMA LT ID GT ID ASSIGN LBRACKET formal_list RBRACKET { $4 :: $1 }
+
+/* TODO: fix what goes in the braces */
+dict_decl_prefix:
+| DICT LT ID COMMA ID GT ID { [$7] }
+| DICT LT ID COMMA ID GT ID ASSIGN LBRACE formal_list RBRACE { [$7] }
+| dict_decl_prefix COMMA DICT LT ID COMMA ID GT ID { $9 :: $1 }
 
 /* comma separated list of operations on nodes
  * for use with graph declarations 
@@ -136,6 +142,9 @@ expr_opt:
  */
 expr:
     LITERAL          { Literal($1) }
+  | INF              { Literal("INF")}
+  | TRUE             { Boolean(True) }
+  | FALSE            { Boolean(False) }
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }

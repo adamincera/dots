@@ -1,7 +1,9 @@
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
+type bool = True | False
 
 type expr =
     Literal of int
+  | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
   | Assign of string * expr

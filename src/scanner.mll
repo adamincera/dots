@@ -29,6 +29,9 @@ rule token = parse
 | "def"    { DEF }
 | "if"     { IF }
 | "else"   { ELSE }
+| "true"   { TRUE }
+| "INF"    { INF }
+| "false"  { FALSE }
 | "in"     { IN }
 | "for"    { FOR }
 | "while"  { WHILE }
@@ -38,7 +41,9 @@ rule token = parse
 | "string" { STRING }
 | "node"   { NODE }
 | "graph"  { GRAPH }
-| ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) } (* num literal *)
+| "list"   { LIST }
+| "dict"   { DICT }
+| ['0'-'9']+ as lxm { LITERAL(lxm) } (* num literal *)
 | "\".*\"" as lxm  { LITERAL(lxm) }                (* string literals *)
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | eof { EOF }
