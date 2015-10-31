@@ -62,9 +62,16 @@ vdecl:
 
 /* primitive typenames */
 prim_type:
-| BOOL { "bool" }
-| NUM { "num" }
+| BOOL   { "bool" }
+| NUM    { "num" }
 | STRING { "string" }
+
+data_type:
+| prim_type
+| DICT  { "dict" }
+| LIST  { "list" }
+| NODE  { "node" }
+| GRAPH { "graph" }
 
 /* chained primitive declarations can be assigned using "=" */
 prim_decl_prefix:
@@ -88,16 +95,16 @@ graph_decl_prefix:
 
 /* TODO: fix what goes in the brackets */
 list_decl_prefix:
-| LIST LT ID GT ID { [$3] }
-| LIST LT ID GT ID ASSIGN LBRACKET formal_list RBRACKET { [$3] }
-| list_decl_prefix COMMA LT ID GT ID { $4 :: $1 }
-| list_decl_prefix COMMA LT ID GT ID ASSIGN LBRACKET formal_list RBRACKET { $4 :: $1 }
+| LIST LT data_type GT ID { [$3] }
+| LIST LT data_type GT ID ASSIGN LBRACKET formal_list RBRACKET { [$3] }
+| list_decl_prefix COMMA LT data_type GT ID { $4 :: $1 }
+| list_decl_prefix COMMA LT data_type GT ID ASSIGN LBRACKET formal_list RBRACKET { $4 :: $1 }
 
 /* TODO: fix what goes in the braces */
 dict_decl_prefix:
-| DICT LT ID COMMA ID GT ID { [$7] }
-| DICT LT ID COMMA ID GT ID ASSIGN LBRACE formal_list RBRACE { [$7] }
-| dict_decl_prefix COMMA DICT LT ID COMMA ID GT ID { $9 :: $1 }
+| DICT LT data_type COMMA data_type GT ID { [$7] }
+| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE formal_list RBRACE { [$7] }
+| dict_decl_prefix COMMA DICT LT data_type COMMA data_type GT ID { $9 :: $1 }
 
 /* comma separated list of operations on nodes
  * for use with graph declarations 
@@ -141,10 +148,11 @@ expr_opt:
  *       w/o needed it be a function call with parentheses
  */
 expr:
-    LITERAL          { Literal($1) }
+  | LITERAL          { Literal($1) }
   | INF              { Literal("INF")}
   | TRUE             { Boolean(True) }
   | FALSE            { Boolean(False) }
+  | ID LBRACKET expr RBRACKET { Access($1, $3) }
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
