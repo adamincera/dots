@@ -1,0 +1,2 @@
+*** Comments are denoted by triple stars, lines beginning with \n are ignored
+DICT LT NODE COMMA GRAPH GT ID SEMI ID LBRACKET ID RBRACKET SEMI
