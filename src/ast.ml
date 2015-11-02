@@ -1,11 +1,14 @@
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
+type bool = True | False
 
 type expr =
     Literal of int
+  | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
   | Assign of string * expr
   | Call of string * expr list
+  | Access of string * expr (* for dict and list element access *)
   | MemberVar of string * string
   | MemberCall of string * string * expr list
   | Noexpr
@@ -21,7 +24,7 @@ type edge_expr =
 type stmt =
     Block of stmt list
   | Expr of expr
-  | Edgeop of expr
+  | Edgeop of edge_expr
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * stmt
