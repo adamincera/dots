@@ -54,6 +54,7 @@ formal_list:
 
 dict_formal_list:
     ID COLON expr { $1 }
+|   LITERAL COLON expr { $1 }
 |   dict_formal_list COMMA ID COLON expr { $3 :: $1 }
 
 vdecl_list:
