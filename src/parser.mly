@@ -1,8 +1,9 @@
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA DOT
+%token SEMI COLON LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
+%token LOGAND LOGOR
 %token UEDGE REDGE
 %token RETURN IF ELSE FOR WHILE DEF IN
 %token BOOL NUM STRING NODE GRAPH LIST DICT
@@ -15,6 +16,8 @@
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
+%left LOGOR
+%left LOGAND
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
@@ -49,6 +52,10 @@ formal_list:
     ID                   { [$1] }
   | formal_list COMMA ID { $3 :: $1 }
 
+dict_formal_list:
+    ID COLON expr { $1 }
+|   dict_formal_list COMMA ID COLON expr { $3 :: $1 }
+
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { concat($2, $1) }
@@ -67,7 +74,7 @@ prim_type:
 | STRING { "string" }
 
 data_type:
-| prim_type
+| prim_type { $1 }
 | DICT  { "dict" }
 | LIST  { "list" }
 | NODE  { "node" }
@@ -93,24 +100,22 @@ graph_decl_prefix:
 | GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { [$2] }
 | graph_decl_prefix COMMA ID { $3 :: $1 }
 
-/* TODO: fix what goes in the brackets */
 list_decl_prefix:
 | LIST LT data_type GT ID { [$3] }
 | LIST LT data_type GT ID ASSIGN LBRACKET formal_list RBRACKET { [$3] }
 | list_decl_prefix COMMA LT data_type GT ID { $4 :: $1 }
 | list_decl_prefix COMMA LT data_type GT ID ASSIGN LBRACKET formal_list RBRACKET { $4 :: $1 }
 
-/* TODO: fix what goes in the braces */
 dict_decl_prefix:
 | DICT LT data_type COMMA data_type GT ID { [$7] }
-| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE formal_list RBRACE { [$7] }
+| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { [$7] }
 | dict_decl_prefix COMMA DICT LT data_type COMMA data_type GT ID { $9 :: $1 }
 
 /* comma separated list of operations on nodes
  * for use with graph declarations 
- * TODO: find unambiguous way to allow ID by itself
  */
 edge_op_list:
+| ID { [$1] }
 | edge_op { [$1] }
 | edge_op_list COMMA edge_op { $3 :: $1 }
 
@@ -133,9 +138,9 @@ stmt:
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
-  | FOR LPAREN ID IN ID RPAREN stmt
-     { For($3, $5, $7) }
-  | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
+  | FOR LPAREN ID IN ID RPAREN LBRACE vdecl_list stmt_list RBRACE
+     { For($3, $5, $8, $9) }
+  | WHILE LPAREN expr RPAREN LBRACE vdecl_list stmt_list RBRACE { While($3, $6, $7) }
 
 /*
 expr_opt:
@@ -143,10 +148,6 @@ expr_opt:
   | expr          { $1 }
 */
 
-/* TODO: find unambiguous way to call a member variable
- *           ex. x.out
- *       w/o needed it be a function call with parentheses
- */
 expr:
   | LITERAL          { Literal($1) }
   | INF              { Literal("INF")}
@@ -164,6 +165,8 @@ expr:
   | expr LEQ    expr { Binop($1, Leq,   $3) }
   | expr GT     expr { Binop($1, Greater,  $3) }
   | expr GEQ    expr { Binop($1, Geq,   $3) }
+  | expr LOGAND expr { LogAnd($1, $3) }
+  | expr LOGOR expr { LogOr($1, $3) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | ID DOT ID %prec NOCALL { MemberVar($1, $3) }
