@@ -9,8 +9,8 @@ type expr =
   | Assign of string * expr
   | Call of string * expr list
   | Access of string * expr (* for dict and list element access *)
-  | MemberVar of string * string
-  | MemberCall of string * string * expr list
+  | MemberVar of string * string (* parent variable, the accessed member *)
+  | MemberCall of string * string * expr list (* parent variable, accessed funct, parameters *)
   | Noexpr
 
 (* b/c nums can be either float or int just treat them as strings *)
