@@ -1,7 +1,8 @@
-/* def <num> simple (x) {
- *   num y = 3;
- *   y + 3;
- * }
+*** Comments are denoted by triple stars, lines beginning with \n are ignored
+*** def <num> simple (x) {
+***   num y = 3;
+***   y + 3;
+*** }
 
 
 DEF LT ID GT ID LPAREN ID RPAREN LBRACE NUM ID ASSIGN LITERAL SEMI ID PLUS LITERAL SEMI RBRACE
