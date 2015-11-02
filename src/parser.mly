@@ -3,6 +3,7 @@
 %token SEMI COLON LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
+%token LOGAND LOGOR
 %token UEDGE REDGE
 %token RETURN IF ELSE FOR WHILE DEF IN
 %token BOOL NUM STRING NODE GRAPH LIST DICT
@@ -15,6 +16,8 @@
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
+%left LOGOR
+%left LOGAND
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
@@ -136,8 +139,8 @@ stmt:
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
   | FOR LPAREN ID IN ID RPAREN LBRACE vdecl_list stmt_list RBRACE
-     { For($3, $5, $7) }
-  | WHILE LPAREN expr RPAREN LBRACE vdecl_list stmt_list RBRACE { While($3, $5) }
+     { For($3, $5, $8, $9) }
+  | WHILE LPAREN expr RPAREN LBRACE vdecl_list stmt_list RBRACE { While($3, $6, $7) }
 
 /*
 expr_opt:
@@ -162,6 +165,8 @@ expr:
   | expr LEQ    expr { Binop($1, Leq,   $3) }
   | expr GT     expr { Binop($1, Greater,  $3) }
   | expr GEQ    expr { Binop($1, Geq,   $3) }
+  | expr LOGAND expr { LogAnd($1, $3) }
+  | expr LOGOR expr { LogOr($1, $3) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | ID DOT ID %prec NOCALL { MemberVar($1, $3) }

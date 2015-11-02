@@ -19,6 +19,8 @@ rule token = parse
 | '/'      { DIVIDE }
 | '='      { ASSIGN }
 | '.'      { DOT }
+| "&&"     { LOGAND }
+| "||"     { LOGOR }
 | "--"     { UEDGE }
 | "-->"    { REDGE }
 | "=="     { EQ }

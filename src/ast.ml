@@ -3,7 +3,9 @@ type bool = True | False
 
 type expr =
     Literal of int
-  | Boolean of bool
+  | bool
+  | LogAnd of expr * expr (* for use with && symbol *)
+  | LogOr of expr * expr (* for use with || symbol *)
   | Id of string
   | Binop of expr * op * expr
   | Assign of string * expr
@@ -27,8 +29,8 @@ type stmt =
   | Edgeop of edge_expr
   | Return of expr
   | If of expr * stmt * stmt
-  | For of expr * expr * stmt
-  | While of expr * stmt
+  | For of expr * expr * string list * stmt list (* temp var, iterable var, var decls, stmts *)
+  | While of expr * string list * stmt list (* condition, var decls, stmt list *)
 
 type func_decl = {
     fname : string;
