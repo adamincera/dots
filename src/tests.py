@@ -30,9 +30,15 @@ for dir_entry in os.listdir(path):
         print('================================\n')
         with open(filepath, 'r') as test_file:
             for line in test_file:
+                supposed_to_pass = True
                 if line[:3] == '***' or line[0] == '\n':
-                    continue
+                    continue                    
+                
                 to_pipe = line.strip().split()
+                if to_pipe[0] == 'f**':
+                    supposed_to_pass = False
+                    to_pipe = to_pipe[1:]
+
                 to_pipe.insert(0, 'echo')
                 
                 #can pipe with subprocess only by opening another process, not standard syntax
@@ -47,8 +53,12 @@ for dir_entry in os.listdir(path):
                 if run_normal == False:
                     print(output)
                 else:
-                    if 'REJECT' in output:
-                        print('"' + line.strip() + '" failed.\n')
+                    if supposed_to_pass == True:
+                        if 'REJECT' in output:
+                            print('"' + line.strip() + '" failed when it should pass.\n')
+                    else:
+                        if 'ACCEPT' in output:
+                            print('"' + line.strip() + '" passed when it should fail.\n')
 
     else:
         print (dir_entry + ' is messed up.\n')
