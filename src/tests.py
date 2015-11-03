@@ -22,8 +22,6 @@ else:
     print ('no command line args: runs all tests and only prints tests that failed, suppresses stderr of menhir.\n')
     sys.exit()
 
-print(sys.argv)
-
 path = r'menhir-tests'
 for dir_entry in os.listdir(path):
     filepath = os.path.join(path, dir_entry)
