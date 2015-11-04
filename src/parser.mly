@@ -54,6 +54,7 @@ formal_list:
 
 dict_formal_list:
     ID COLON expr { $1 }
+|   LITERAL COLON expr { $1 }
 |   dict_formal_list COMMA ID COLON expr { $3 :: $1 }
 
 vdecl_list:
@@ -102,9 +103,9 @@ graph_decl_prefix:
 
 list_decl_prefix:
 | LIST LT data_type GT ID { [$3] }
-| LIST LT data_type GT ID ASSIGN LBRACKET formal_list RBRACKET { [$3] }
+| LIST LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { [$3] }
 | list_decl_prefix COMMA LT data_type GT ID { $4 :: $1 }
-| list_decl_prefix COMMA LT data_type GT ID ASSIGN LBRACKET formal_list RBRACKET { $4 :: $1 }
+| list_decl_prefix COMMA LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { $4 :: $1 }
 
 dict_decl_prefix:
 | DICT LT data_type COMMA data_type GT ID { [$7] }

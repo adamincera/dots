@@ -1,1 +1,6 @@
+*** def x foo(z) { 
+*** 	num i;
+***		i + 10;
+*** 	}
+
 DEF ID ID LPAREN ID RPAREN LBRACE NUM ID SEMI ID PLUS LITERAL SEMI RBRACE

@@ -1,1 +1,6 @@
+*** while (x < 10 + 1) {
+*** 	node x;
+*** 	x -- y;	
+*** }
+
 WHILE LPAREN ID LT LITERAL PLUS LITERAL RPAREN LBRACE NODE ID SEMI ID UEDGE ID SEMI RBRACE
