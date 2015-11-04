@@ -1,6 +1,6 @@
 (* dots compiler similar to microC *)
 
-type action = ast | compiler | 
+type action = ast | compiler 
 
 let _ =
   let action = if Array.length Sys.argv > 1 then
