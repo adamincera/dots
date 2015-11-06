@@ -3,7 +3,7 @@ type bool = True | False
 
 type expr =
     Literal of int
-  | bool
+  | Boolean of bool
   | LogAnd of expr * expr (* for use with && symbol *)
   | LogOr of expr * expr (* for use with || symbol *)
   | Id of string
@@ -40,8 +40,8 @@ type func_decl = {
   }
 
 (* program: ist of vars, function defs, commands not within a function *)
-type program = {Vars : string list; Funcs : func_decl list;
-                Cmds : stmt list}
+type program = { vars : string list; funcs : func_decl list;
+                cmds : stmt list }
 
 (* type program = string list * func_decl list *)
 
@@ -49,7 +49,7 @@ type program = {Vars : string list; Funcs : func_decl list;
 let rec base_concat postlst = function
   | [] -> postlst
   | hd :: tl -> base_concat (hd :: postlst) tl 
-in
+
 let concat prelst postlst = base_concat postlst (List.rev prelst)
 
 let rec string_of_expr = function
@@ -75,10 +75,10 @@ let rec string_of_stmt = function
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
-  | For(e1, e2, s) ->
+  | For(e1, e2, v, s) ->
       "for (" ^ string_of_expr e1  ^ " in " ^ string_of_expr e2 
       ^ ") " ^ string_of_stmt s
-  | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+  | While(e, s, stmts) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_vdecl id = "type " ^ id ^ ";\n"
 
