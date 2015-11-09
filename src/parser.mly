@@ -32,10 +32,10 @@ program:
   decls EOF { $1 }
 
 decls:
-|  /* nothing */ { {Vars : []; Funcs : []; Cmds : []} }
-|  decls vdecl { {Vars : concat($2, $1.Vars); Funcs: $1.Funcs; Cmds : $1.Cmds} }
-|  decls fdecl { {Vars : $1.Vars; Funcs: concat($2, $1.Funcs); Cmds : $1.Cmds} }
-|  decls stmt  { {Vars : $1.Vars; Funcs: $1.Funcs; Cmds : $2 :: $1.Cmds} } 
+|  /* nothing */ { {vars = []; funcs = []; cmds = []} }
+|  decls vdecl { {vars = concat($2, $1.vars); funcs = $1.funcs; cmds = $1.cmds} }
+|  decls fdecl { {vars = $1.vars; funcs = concat($2, $1.funcs); cmds = $1.cmds} }
+|  decls stmt  { {vars = $1.vars; funcs = $1.funcs; cmds = $2 :: $1.cmds} } 
 
 fdecl:
    DEF ID ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
