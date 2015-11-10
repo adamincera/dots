@@ -31,10 +31,17 @@
 program:
   decls EOF { $1 }
 
+  /* type func_decl = {
+    fname : string;
+    formals : string list;
+    locals : string list;
+    body : stmt list;
+  }) */
+
 decls:
 |  /* nothing */ { {vars = []; funcs = []; cmds = []} }
-|  decls vdecl { {vars = concat($2, $1.vars); funcs = $1.funcs; cmds = $1.cmds} }
-|  decls fdecl { {vars = $1.vars; funcs = concat($2, $1.funcs); cmds = $1.cmds} }
+|  decls vdecl { {vars = $1.vars @ $2; funcs = $1.funcs; cmds = $1.cmds} }
+|  decls fdecl { {vars = $1.vars; funcs = $2 :: $1.funcs; cmds = $1.cmds} }
 |  decls stmt  { {vars = $1.vars; funcs = $1.funcs; cmds = $2 :: $1.cmds} } 
 
 fdecl:
@@ -53,13 +60,14 @@ formal_list:
   | formal_list COMMA ID { $3 :: $1 }
 
 dict_formal_list:
-    ID COLON expr { $1 }
-|   LITERAL COLON expr { $1 }
+    ID COLON expr { [$1] }
+|   LITERAL COLON expr {  [$1] }
 |   dict_formal_list COMMA ID COLON expr { $3 :: $1 }
+|   dict_formal_list COMMA LITERAL COLON expr { $3 :: $1 }
 
 vdecl_list:
     /* nothing */    { [] }
-  | vdecl_list vdecl { concat($2, $1) }
+  | vdecl_list vdecl { $1 @ $2 }
 
 vdecl:
 |  prim_decl_prefix SEMI { List.rev $1 }
@@ -116,11 +124,11 @@ dict_decl_prefix:
  * for use with graph declarations 
  */
 edge_op_list:
-| ID { [$1] }
 | edge_op { [$1] }
 | edge_op_list COMMA edge_op { $3 :: $1 }
 
 edge_op:
+ ID { NoOp($1) }
 |  ID UEDGE ID { Undir($1, $3) }
 |  ID REDGE ID { Dir($1, $3) }
 |  ID REDGE LBRACKET expr RBRACKET ID { DirVal($1, $6, $4) }
@@ -133,9 +141,9 @@ stmt_list:
   | stmt_list stmt { $2 :: $1 }
 
 stmt:
-    expr SEMI { Expr($1) }
+   expr SEMI { Expr($1) } 
   | edge_op SEMI { Edgeop($1) }
-  | RETURN expr SEMI { Return($2) }
+  | RETURN expr SEMI { Return($2) } 
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
@@ -151,7 +159,7 @@ expr_opt:
 
 expr:
   | LITERAL          { Literal($1) }
-  | INF              { Literal("INF")}
+  | INF              { Literal("INF") }
   | TRUE             { Boolean(True) }
   | FALSE            { Boolean(False) }
   | ID LBRACKET expr RBRACKET { Access($1, $3) }

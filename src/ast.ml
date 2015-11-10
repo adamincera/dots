@@ -2,7 +2,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
 type bool = True | False
 
 type expr =
-    Literal of int
+    Literal of string
   | Boolean of bool
   | LogAnd of expr * expr (* for use with && symbol *)
   | LogOr of expr * expr (* for use with || symbol *)
@@ -18,6 +18,7 @@ type expr =
 (* b/c nums can be either float or int just treat them as strings *)
 type edge_expr =
 | Undir of string * string (* id, id *)
+| Dir of string * string (* id, id *)
 | UndirVal of string * string * string (* id, id, weight *)
 | DirVal of string * string * string (* id, id, weight *)
 | BidirVal of string * string * string * string (* weight, id, id, weight *)
@@ -53,7 +54,7 @@ let rec base_concat postlst = function
 let concat prelst postlst = base_concat postlst (List.rev prelst)
 
 let rec string_of_expr = function
-    Literal(l) -> string_of_int l
+    Literal(l) -> l
   | Boolean(b) -> if b = True then "true" else "false"
   | LogOr (e1, e2) -> string_of_expr e1 ^ " || " ^ string_of_expr e2 
   | LogAnd (e1, e2) -> string_of_expr e1 ^ " && " ^ string_of_expr e2 
