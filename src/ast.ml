@@ -19,9 +19,9 @@ type expr =
 type edge_expr =
 | Undir of string * string (* id, id *)
 | Dir of string * string (* id, id *)
-| UndirVal of string * string * string (* id, id, weight *)
-| DirVal of string * string * string (* id, id, weight *)
-| BidirVal of string * string * string * string (* weight, id, id, weight *)
+| UndirVal of string * string * expr (* id, id, weight *)
+| DirVal of string * string * expr (* id, id, weight *)
+| BidirVal of expr * string * string * expr (* weight, id, id, weight *)
 | NoOp of string
 
 type stmt =
@@ -30,7 +30,7 @@ type stmt =
   | Edgeop of edge_expr
   | Return of expr
   | If of expr * stmt * stmt
-  | For of expr * expr * string list * stmt list (* temp var, iterable var, var decls, stmts *)
+  | For of string * string * string list * stmt list (* temp var, iterable var, var decls, stmts *)
   | While of expr * string list * stmt list (* condition, var decls, stmt list *)
 
 type func_decl = {
@@ -88,9 +88,10 @@ let rec string_of_stmt = function
   | Edgeop (edge_expr) -> 
       (match edge_expr with
            Undir (s1, s2) -> s1 ^ " -- " ^ s2  
-          | UndirVal (s1, s2, w) -> s1 ^ " --[" ^ w ^ "] " ^ s2 
-          | DirVal (s1, s2, w) -> s1 ^ " -->[" ^ w ^ "] " ^ s2
-          | BidirVal (s1, w1, s2, w2) -> s1 ^ " [" ^ w1 ^ "]--[" ^ w2 ^ "] " ^ s2 
+          | Dir (s1, s2) -> s1 ^ " --> " ^ s2
+          | UndirVal (s1, s2, w) -> s1 ^ " --[" ^ string_of_expr w ^ "] " ^ s2 
+          | DirVal (s1, s2, w) -> s1 ^ " -->[" ^ string_of_expr w ^ "] " ^ s2
+          | BidirVal (w1, s1, s2, w2) -> s1 ^ " [" ^ string_of_expr w1 ^ "]--[" ^ string_of_expr w2 ^ "] " ^ s2 
           | NoOp (s) -> s
       )
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
@@ -98,7 +99,7 @@ let rec string_of_stmt = function
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
   | For(e1, e2, v, sl) ->
-      "for (" ^ string_of_expr e1  ^ " in " ^ string_of_expr e2 
+      "for (" ^ e1  ^ " in " ^ e2 
       ^ ") { " ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
   | While(e, s, sl) -> "while (" ^ string_of_expr e ^ ") {" ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
 

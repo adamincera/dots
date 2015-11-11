@@ -47,9 +47,9 @@ decls:
 fdecl:
    DEF ID ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
      { { fname = $3;
-	 formals = $5;
-	 locals = List.rev $8;
-	 body = List.rev $9 } }
+   formals = $5;
+   locals = List.rev $8;
+   body = List.rev $9 } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -120,21 +120,26 @@ dict_decl_prefix:
 | DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { [$7] }
 | dict_decl_prefix COMMA DICT LT data_type COMMA data_type GT ID { $9 :: $1 }
 
+
 /* comma separated list of operations on nodes
  * for use with graph declarations 
  */
+ 
 edge_op_list:
 | edge_op { [$1] }
 | edge_op_list COMMA edge_op { $3 :: $1 }
 
 edge_op:
- ID { NoOp($1) }
+/* ID { NoOp($1) }*/
 |  ID UEDGE ID { Undir($1, $3) }
 |  ID REDGE ID { Dir($1, $3) }
 |  ID REDGE LBRACKET expr RBRACKET ID { DirVal($1, $6, $4) }
 |  ID UEDGE LBRACKET expr RBRACKET ID { UndirVal($1, $6, $4) }
 |  ID LBRACKET expr RBRACKET UEDGE LBRACKET expr RBRACKET ID 
    { BidirVal($3, $1, $9, $7) }
+   
+
+
 
 stmt_list:
     /* nothing */  { [] }
@@ -150,12 +155,6 @@ stmt:
   | FOR LPAREN ID IN ID RPAREN LBRACE vdecl_list stmt_list RBRACE
      { For($3, $5, $8, $9) }
   | WHILE LPAREN expr RPAREN LBRACE vdecl_list stmt_list RBRACE { While($3, $6, $7) }
-
-/*
-expr_opt:
-    * nothing * { Noexpr }
-  | expr          { $1 }
-*/
 
 expr:
   | LITERAL          { Literal($1) }
@@ -181,6 +180,12 @@ expr:
   | ID DOT ID %prec NOCALL { MemberVar($1, $3) }
   | ID DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
+
+/*
+expr_opt:
+    * nothing * { Noexpr }
+  | expr          { $1 }
+*/
 
 actuals_opt:
     /* nothing */ { [] }
