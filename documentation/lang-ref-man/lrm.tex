@@ -202,6 +202,57 @@ bool t = true;
 bool f = false;
 \end{lstlisting}
 
+\subsection{Collections}
+
+\subsubsection{Lists}
+
+A list is a data structure that represents zero or more elements of a particular data type. 
+
+\underline{List Declaration:}
+
+Lists are declared by using the \code{list} keyword and specifying the data type of the elements inside ``\code{< >}'', followed by the variable name. A list can hold elements of any data type, but all elements within a single given list must have a data type matching that of the declared type. 
+
+\underline{Accessing List Elements:}
+
+Lists are indexed by integers and are random-access. In addition to random access, lists also have built-in member functions for queueing and dequeueing elements. The \code{enqueue} member function appends the given element to the end of the list. The \code{dequeue} member function removes the first element of the list, and shifts the remaining elements to the left. 
+
+\begin{lstlisting}[language=pltLang, caption=The ``list'' type., label=lst:list]
+list <string> str_list;
+
+list <num> num_list = [1, 2, 5.3, 6.23];
+num_list[3]; # returns 5.3
+num_list.enqueue(3.2); # num_list now equals [1, 2, 5.3, 6.23, 3.2]
+
+\* after the following:
+ * x = 1; num_list = [2, 5.3, 6.23, 3.2]
+ *\
+num x = num_list.dequeue();
+\end{lstlisting}
+
+\subsubsection{Dicts}
+
+A dict is a data structure that represents a mapping of keys to values. 
+
+\underline{Dict Declaration:}
+
+Dicts are declared by using the \code{dict} keyword and including a comma-separated specification of the data types of the keys and values inside ``\code{< >}'', followed by the variable name. The first data type listed inside ``< >'' corresponds to the type of the keys, while the second data type corresponds to the type of the values. The data type of dict keys can be any type \emph{except} \code{list} or \code{dict}. There is no restriction on the data type of the values of dict objects. Once a dict has been declared, all keys must be of the same type as that declared for the key, and all values must be of the same type as that declared for the value. 
+
+\underline{Accessing Dict Elements:}
+
+The value of an pairing in a dict can be accessed by specifying the dict name followed by the corresponding key value enclosed in brackets, as seen in line 2 of Listing \ref{lst:dict}.
+
+New mappings can be assigning by subsetting a dict object with a key and setting it equal to a value using the assignment operator. If the key already exists in the dict, the old value will be overwritten with the new value. If the key did not already exist, the new key will be added to the dict along with its new value.
+
+
+\begin{lstlisting}[language=pltLang, caption=The ``dict'' type., label=lst:dict]
+dict <string, val> city_map = {"toronto" : 6, "queens" : 7.8, "nyc" : 0.2};
+city_map["toronto"]; # returns 6
+
+city_map["L.A."] = 18;
+\* city_map = {"toronto" : 6, "queens" : 7.8, "nyc" : 0.2, "L.A." : 18} *\
+
+\end{lstlisting}
+
 \subsection{Node and Graph Objects}
 
 A \code{node} object represents a single vertex in a Graph, and a \code{graph} object represents a collection of graphs (which can be empty). \emph{Note}: A node is a graph, but a graph is not a node.
