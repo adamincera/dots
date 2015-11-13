@@ -52,7 +52,7 @@ type func_decl = {
   }
 
 (* program: ist of vars, function defs, commands not within a function *)
-type program = { vars : string list; funcs : func_decl list;
+type program = { funcs : func_decl list;
                 cmds : stmt list }
 
 (* type program = string list * func_decl list *)
@@ -122,7 +122,6 @@ let string_of_fdecl fdecl =
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
-let string_of_program (vars, funcs,  cmds) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
+let string_of_program (funcs,  cmds) =
   String.concat "\n" (List.map string_of_fdecl funcs) ^
   String.concat "\n" (List.map string_of_stmt cmds)

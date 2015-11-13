@@ -46,10 +46,10 @@ program:
   decls EOF { $1 }
 
 decls:
-|  /* nothing */ { {vars = []; funcs = []; cmds = []} }
+|  /* nothing */ { {funcs = []; cmds = []} }
 /*|  decls vdecl { {vars = $1.vars @ $2; funcs = $1.funcs; cmds = $1.cmds} }*/
-|  decls fdecl { {vars = $1.vars; funcs = $2 :: $1.funcs; cmds = $1.cmds} }
-|  decls stmt  { {vars = $1.vars; funcs = $1.funcs; cmds = $2 :: $1.cmds} } 
+|  decls fdecl { {funcs = $2 :: $1.funcs; cmds = $1.cmds} }
+|  decls stmt  { {funcs = $1.funcs; cmds = $2 :: $1.cmds} } 
 
 /////////////////////////////////////////////////////////////////////////////
                     /* FUNCTIONS */
