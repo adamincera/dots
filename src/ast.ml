@@ -9,34 +9,45 @@ type expr =
   | Id of string
   | Binop of expr * op * expr
   | Assign of string * expr
+  | AssignList of string * expr list (* when a list of expressions is assigned to a variable *)
+  | DictAssign of  string * expr (* key, value *)
   | Call of string * expr list
   | Access of string * expr (* for dict and list element access *)
   | MemberVar of string * string (* parent variable, the accessed member *)
   | MemberCall of string * string * expr list (* parent variable, accessed funct, parameters *)
+  | Undir of string * string (* id, id *)
+  | Dir of string * string (* id, id *)
+  | UndirVal of string * string * expr (* id, id, weight *)
+  | DirVal of string * string * expr (* id, id, weight *)
+  | BidirVal of expr * string * string * expr (* weight, id, id, weight *)
+  | NoOp of string
   | Noexpr
 
 (* b/c nums can be either float or int just treat them as strings *)
-type edge_expr =
+(*type edge_expr =
 | Undir of string * string (* id, id *)
 | Dir of string * string (* id, id *)
 | UndirVal of string * string * expr (* id, id, weight *)
 | DirVal of string * string * expr (* id, id, weight *)
 | BidirVal of expr * string * string * expr (* weight, id, id, weight *)
 | NoOp of string
+*)
 
 type stmt =
     Block of stmt list
   | Expr of expr
-  | Edgeop of edge_expr
+  | Vdecl of string * string (* (type, id) *)
+  | ListDecl of  string * string (* elem_type, id *)
+  | DictDecl of string * string * string (* key_type, elem_type, id *)
   | Return of expr
   | If of expr * stmt * stmt
-  | For of string * string * string list * stmt list (* temp var, iterable var, var decls, stmts *)
-  | While of expr * string list * stmt list (* condition, var decls, stmt list *)
+  | For of string * string * stmt list (* temp var, iterable var, var decls, stmts *)
+  | While of expr * stmt list (* condition, var decls, stmt list *)
 
 type func_decl = {
     fname : string;
     formals : string list;
-    locals : string list;
+    (*locals : string list;*)
     body : stmt list;
   }
 
@@ -73,6 +84,12 @@ let rec string_of_expr = function
           | Greater -> ">" 
           | Geq -> ">=") ^ " " ^
       string_of_expr e2
+  | Undir (s1, s2) -> s1 ^ " -- " ^ s2  
+  | Dir (s1, s2) -> s1 ^ " --> " ^ s2
+  | UndirVal (s1, s2, w) -> s1 ^ " --[" ^ string_of_expr w ^ "] " ^ s2 
+  | DirVal (s1, s2, w) -> s1 ^ " -->[" ^ string_of_expr w ^ "] " ^ s2
+  | BidirVal (w1, s1, s2, w2) -> s1 ^ " [" ^ string_of_expr w1 ^ "]--[" ^ string_of_expr w2 ^ "] " ^ s2 
+  | NoOp (s) -> s
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
@@ -85,29 +102,23 @@ let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
-  | Edgeop (edge_expr) -> 
-      (match edge_expr with
-           Undir (s1, s2) -> s1 ^ " -- " ^ s2  
-          | Dir (s1, s2) -> s1 ^ " --> " ^ s2
-          | UndirVal (s1, s2, w) -> s1 ^ " --[" ^ string_of_expr w ^ "] " ^ s2 
-          | DirVal (s1, s2, w) -> s1 ^ " -->[" ^ string_of_expr w ^ "] " ^ s2
-          | BidirVal (w1, s1, s2, w2) -> s1 ^ " [" ^ string_of_expr w1 ^ "]--[" ^ string_of_expr w2 ^ "] " ^ s2 
-          | NoOp (s) -> s
-      )
+  | Vdecl(dt, id) -> dt ^ " " ^ id ^ ";\n";
+  | ListDecl(dt, id) -> "list <" ^ dt ^ "> " ^ id ^ ";\n"
+  | DictDecl(kdt, vdt, id) -> "dict <" ^ kdt ^ ", " ^ vdt ^ "> " ^ id ^ ";\n"
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
-  | For(e1, e2, v, sl) ->
+  | For(e1, e2, sl) ->
       "for (" ^ e1  ^ " in " ^ e2 
       ^ ") { " ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
-  | While(e, s, sl) -> "while (" ^ string_of_expr e ^ ") {" ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
+  | While(e, sl) -> "while (" ^ string_of_expr e ^ ") {" ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
 
 let string_of_vdecl id = "type " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
   fdecl.fname ^ "(" ^ String.concat ", " fdecl.formals ^ ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
+  (*String.concat "" (List.map string_of_vdecl fdecl.locals) ^*)
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
