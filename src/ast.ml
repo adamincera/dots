@@ -8,6 +8,7 @@ type expr =
   | LogOr of expr * expr (* for use with || symbol *)
   | Id of string
   | Binop of expr * op * expr
+  | Assign of string * expr
   | Call of string * expr list
   | Access of string * expr (* for dict and list element access *)
   | MemberVar of string * string (* parent variable, the accessed member *)
@@ -26,7 +27,6 @@ type edge_expr =
 type stmt =
     Block of stmt list
   | Expr of expr
-  | Assign of expr * expr
   | Edgeop of edge_expr
   | Return of expr
   | If of expr * stmt * stmt

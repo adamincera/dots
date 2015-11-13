@@ -128,36 +128,36 @@ vdecl:
 
 /* PRIMITIVE INITIALIZERS */
 prim_decl_prefix:
-| prim_type ID { [$2] }                                                   /* num x */
-| prim_type ID ASSIGN expr { [$2] }                                       /* MOVE THESE  */
+| prim_type ID { [$1; $2] }                                                   /* num x */
+| prim_type ID ASSIGN expr { [$1; $2] }                                       /* MOVE THESE  */
 | prim_decl_prefix COMMA ID ASSIGN expr { $3 :: $1 }                      /* MOVE THESE  */
 | prim_decl_prefix COMMA ID { $3 :: $1 }                                  /* num x = 5, y = 2; */
 
 /* NODE INITIALIZERS */
 node_decl_prefix:
-| NODE ID { [$2] }                                                        /* node x;    */
-| NODE ID LPAREN expr RPAREN { [$2] }                                     /* node x("Chicago") */
+| NODE ID { ["node"; $2] }                                                        /* node x;    */
+| NODE ID LPAREN expr RPAREN { ["node"; $2] }                                     /* node x("Chicago") */
 | node_decl_prefix COMMA ID LPAREN expr RPAREN { $3 :: $1 }               /* node x("Chicago"), y("DC"), z("LA"); */
 | node_decl_prefix COMMA ID { $3 :: $1 }
 
 /* GRAPH INITIALIZERS */
 graph_decl_prefix:
-| GRAPH ID { [$2] }                                                       /*  graph g;    */
-| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { [$2] }                     /*  graph g = { x --[5] y; y -->[3] z; }  */
+| GRAPH ID { ["graph"; $2] }                                                       /*  graph g;    */
+| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { ["graph"; $2] }                     /*  graph g = { x --[5] y; y -->[3] z; }  */
 | graph_decl_prefix COMMA ID { $3 :: $1 }                                 /*  graph g = { x --[5] y; y -->[3] z; }  */
 
 
 list_decl_prefix:
-| LIST LT data_type GT ID { [$3] }                                                              /*  list<node> min; */ 
-| LIST LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { [$3] }                        /*  list<node> min_path = { x, y, z; }; */
+| LIST LT data_type GT ID { ["list"; $3] }                                                              /*  list<node> min; */ 
+| LIST LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { ["list"; $3] }                        /*  list<node> min_path = { x, y, z; }; */
 | list_decl_prefix COMMA LT data_type GT ID { $4 :: $1 }                                        /*  list<node> min, list<node> min_path;*/
 | list_decl_prefix COMMA LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { $4 :: $1 }  /*  list<node> min, list<node> min_path = [x; y; z; ];  */
 
 
 dict_decl_prefix:
-| DICT LT data_type COMMA data_type GT ID { [$7] }                                         /* dict<node, num> parents; */ 
-| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { [$7] }   /* dict<node, num> parents = { x; y; z; }; */
-| dict_decl_prefix COMMA DICT LT data_type COMMA data_type GT ID { $9 :: $1 }              /* dict<node, string> cities, dict<node, num> parents = { x; y; z; }; */
+| DICT LT data_type COMMA data_type GT ID { ["dict"; $3; $5; $7] }                                         /* dict<node, num> parents; */ 
+| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { ["dict"; $3; $5; $7] }   /* dict<node, num> parents = { x; y; z; }; */
+| dict_decl_prefix COMMA DICT LT data_type COMMA data_type GT ID { $9 :: $1 }              /* dict<node, string> cities dict<node, num> parents = { x; y; z; }; */
 
 
    
