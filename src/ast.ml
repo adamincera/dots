@@ -2,7 +2,8 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
 type bool = True | False
 
 type expr =
-    Literal of string
+    NumLiteral of string
+  | StrLiteral of string
   | Boolean of bool
   | LogAnd of expr * expr (* for use with && symbol *)
   | LogOr of expr * expr (* for use with || symbol *)
@@ -65,7 +66,8 @@ let rec base_concat postlst = function
 let concat prelst postlst = base_concat postlst (List.rev prelst)
 
 let rec string_of_expr = function
-    Literal(l) -> l
+    NumLiteral(l) -> l
+  | StrLiteral(l) -> "\"" ^ l ^ "\""
   | Boolean(b) -> if b = True then "true" else "false"
   | LogOr (e1, e2) -> string_of_expr e1 ^ " || " ^ string_of_expr e2 
   | LogAnd (e1, e2) -> string_of_expr e1 ^ " && " ^ string_of_expr e2 

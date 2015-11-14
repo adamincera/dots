@@ -19,7 +19,8 @@
 /* Boolean Operations */
 %token TRUE FALSE INF
 
-%token <string> LITERAL
+%token <string> NUM_LIT
+%token <string> STR_LIT
 %token <string> ID
 %token EOF
 
@@ -76,9 +77,9 @@ formal_list:
 /* Dictionary Formal Arguments */
 dict_formal_list:
     ID COLON expr { [DictAssign($1, $3)] }                                      /*   w : 5        */
-|   LITERAL COLON expr {  [DictAssign($1, $3)] }                                /*   "hello" : 5  */
+|   literal COLON expr {  [DictAssign(string_of_expr $1, $3)] }                                /*   "hello" : 5  */
 |   dict_formal_list COMMA ID COLON expr { DictAssign($3, $5) :: $1 }           /*   w : 5        */
-|   dict_formal_list COMMA LITERAL COLON expr { DictAssign($3, $5) :: $1 }
+|   dict_formal_list COMMA literal COLON expr { DictAssign(string_of_expr $3, $5) :: $1 }
 
 /* comma separated list of operations on nodes
  * for use with graph declarations 
@@ -100,6 +101,11 @@ edge_op:
 /////////////////////////////////////////////////////////////////////////////
                           /* VARIABLES */
 /////////////////////////////////////////////////////////////////////////////
+
+/* Literals */
+literal:
+| NUM_LIT { NumLiteral($1) }
+| STR_LIT { StrLiteral($1) }
 
 /* Primitive Typenames */
 prim_type:
@@ -176,8 +182,8 @@ assign_expr:
 */
 
 expr:
-  | LITERAL          { Literal($1) }
-  | INF              { Literal("INF") }
+  | literal          { $1 }
+  | INF              { NumLiteral("INF") }
   | TRUE             { Boolean(True) }
   | FALSE            { Boolean(False) }
   | ID LBRACKET expr RBRACKET { Access($1, $3) }
