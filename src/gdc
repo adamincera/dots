@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./dotc < $1 > compile.c
+gcc -o exec compile.c
