@@ -62,78 +62,10 @@ int remove_node(graph_t *g, node_t *n) {
     if(temp->next)
         temp->next->previous = temp->previous;
     if(!temp->next && !temp->previous) {
-        printf("HERE\n");
         g->nodes = 0;
     }
-    printf("temp = %x\n", (int) temp);
     free(temp);
-    printf("node = %x\n", (int) n);
-    edgelist_t *e = n->in;
-    edgelist_t *f;
-    while(e) {
-        printf("e->node = %x for %s\n", (int) e->node, (char *) n->data);
-
-        f = e->node->out;
-        printf("here\n");
-        while(f && f->node != n)
-            f = f->next;
-        if(!f)
-            printf("f is NULL\n");
-        else {
-            if(f->previous)
-                f->previous->next = f->next;
-            if(f->next)
-                f->next->previous = f->previous;
-            if(!f->next && !f->previous) {
-                printf("no more nodes in %s->in\n", (char *) e->node->data);
-                e->node->in = 0;
-            }
-            printf("f = %x\n", (int) f);
-            free(f);
-        }
-        if(e->next) {
-            e = e->next;
-            free(e->previous);
-            printf("e->previous = %x\n", (int) e->previous);
-        } else {
-            printf("e = %x\n", (int) e);
-            free(e);
-            e = NULL;
-        }
-    }
-
-    e = n->out;
-    printf("here! e = %x\n", (int) e);
-    while(e) {
-        f = e->node->in;
-        while(f && f->node != n)
-            f = f->next;
-        if(!f)
-            printf("f is NULL\n");
-        else {
-            if(f->previous)
-                f->previous->next = f->next;
-            if(f->next)
-                f->next->previous = f->previous;
-            if(!f->next && !f->previous) {
-                printf("no more nodes in %s->in\n", (char *) e->node->data);
-                e->node->out = 0;
-            }
-            printf("f = %x\n", (int) f);
-            free(f);
-        }
-        if(e->next) {
-            e = e->next;
-            printf("e->previous = %x\n", (int) e->previous);
-            free(e->previous);
-        } else {
-            printf("e = %x\n", (int) e);
-            free(e);
-            e = NULL;
-        }
-    }
     g->count--;
-
     return 0;
 }
 

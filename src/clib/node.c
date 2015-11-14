@@ -46,7 +46,6 @@ void connect_dir(node_t *src, node_t *dst) {
 
 /* create weighted directed edge */
 void connect_dir_weighted(node_t *src, node_t *dst, float weight) {
-    printf("connecting %x to %x\n", src, dst);
 
     /* add dst to src->out */
     edgelist_t *e = (edgelist_t *) malloc(sizeof(edgelist_t));
@@ -67,4 +66,67 @@ void connect_dir_weighted(node_t *src, node_t *dst, float weight) {
     if(dst->in != NULL)
         dst->in->previous = f;
     dst->in = f;
+}
+
+/* remove directed edge from src to dst */
+void remove_dir_edge(node_t *src, node_t *dst) {
+    edgelist_t *e = src->out;
+    while(e && e->node != dst)
+        e = e->next;
+    if(!e) {
+        printf("there is no edge from %s to %s\n", (char *) src->data, (char *) dst->data);
+        return;
+    }
+
+    edgelist_t *f;
+    f = e->node->in;
+    while(f && f->node != src)
+        f = f->next;
+    if(!f)
+        printf("f is NULL\n");
+    else {
+        if(f->previous)
+            f->previous->next = f->next;
+        if(f->next)
+            f->next->previous = f->previous;
+        if(!f->next && !f->previous) {
+            e->node->in = 0;
+        }
+        free(f);
+    }
+    if(e->previous)
+        e->previous->next = e->next;
+    if(e->next)
+        e->next->previous = e->previous;
+    if(!(e->next || e->previous))
+        src->out = 0;
+    free(e);
+    e = NULL;
+
+    /*
+    e = src->out;
+    f = e->node->in;
+    while(f && f->node != src)
+        f = f->next;
+    if(!f)
+        printf("f is NULL\n");
+    else {
+        if(f->previous)
+            f->previous->next = f->next;
+        if(f->next)
+            f->next->previous = f->previous;
+        if(!f->next && !f->previous) {
+            e->node->out = 0;
+        }
+        free(f);
+    }
+    free(e);
+    e = NULL;
+    */
+}
+
+/* remove undirected edge between a and b */
+void remove_undir_edge(node_t *a, node_t *b) {
+    remove_dir_edge(a, b);
+    remove_dir_edge(b, a);
 }

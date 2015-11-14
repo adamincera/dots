@@ -34,5 +34,11 @@ void connect_dir(node_t *src, node_t *dst);
 /* create weighted directed edge */
 void connect_dir_weighted(node_t *src, node_t *dst, float weight);
 
+/* remove directed edge from src to dst */
+void remove_dir_edge(node_t *src, node_t *dst);
+
+/* remove undirected edge between a and b */
+void remove_undir_edge(node_t *a, node_t *b);
+
 /* deallocate node */
 void free_node(node_t *n);
