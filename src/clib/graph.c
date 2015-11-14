@@ -57,6 +57,8 @@ int remove_node(graph_t *g, node_t *n) {
         return 1;
     if(temp->previous)
         temp->previous->next = temp->next;
+    else
+        g->nodes = temp->next;
     if(temp->next)
         temp->next->previous = temp->previous;
     if(!temp->next && !temp->previous) {
@@ -130,6 +132,7 @@ int remove_node(graph_t *g, node_t *n) {
             e = NULL;
         }
     }
+    g->count--;
 
     return 0;
 }
@@ -146,7 +149,9 @@ graph_t *subtract_graphs(graph_t *left, graph_t *right) {
     nodelist_t *temp = right->nodes;
     for(temp = right->nodes; temp; temp = temp->next) {
         printf("removing temp = %x\n", (int) temp);
-        remove_node(left, temp->node);
+        int i = remove_node(left, temp->node);
+        if(i)
+            printf("not removed!\n");
     }
     return left;
 }

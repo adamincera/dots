@@ -42,6 +42,7 @@ int main() {
     print_nodes(h);
 
     g = subtract_graphs(g, h);
+//    remove_node(g, o);
     printf("print_nodes(g):\n");
     print_nodes(g);
 
