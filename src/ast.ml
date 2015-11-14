@@ -46,8 +46,9 @@ type stmt =
   | While of expr * stmt list (* condition, var decls, stmt list *)
 
 type func_decl = {
+    rtype : string; 
     fname : string;
-    formals : string list;
+    formals : (string * string) list;
     (*locals : string list;*)
     body : stmt list;
   }
@@ -119,7 +120,9 @@ let rec string_of_stmt = function
 let string_of_vdecl id = "type " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
-  fdecl.fname ^ "(" ^ String.concat ", " fdecl.formals ^ ")\n{\n" ^
+  "def " ^ fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^ 
+    String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) fdecl.formals) ^
+     ")\n{\n" ^
   (*String.concat "" (List.map string_of_vdecl fdecl.locals) ^*)
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"

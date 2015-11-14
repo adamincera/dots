@@ -60,6 +60,7 @@ decls:
 fdecl:
    DEF data_type ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
      { { 
+      rtype = $2;
       fname = $3;
       formals = $5;
       body = List.rev $8 
@@ -71,8 +72,8 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    data_type ID                   { [$1] }
-  | formal_list COMMA data_type ID { $3 :: $1 }
+    data_type ID                   { [($1, $2)] }
+  | formal_list COMMA data_type ID { ($3, $4) :: $1 }
 
 /* Dictionary Formal Arguments */
 dict_formal_list:
