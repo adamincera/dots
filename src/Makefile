@@ -1,4 +1,4 @@
-OBJS = ast.cmo parser.cmo scanner.cmo analyzer.cmo
+OBJS = ast.cmo parser.cmo scanner.cmo translate.cmo analyzer.cmo
 
 TESTS = \
 arith1 \

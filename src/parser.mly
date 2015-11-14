@@ -58,7 +58,7 @@ decls:
 
 /* (1)def (2)func (3)<funcName> ( (5)arg1,...argN ) { (8) <local variables> (9) <body> } */
 fdecl:
-   DEF ID ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+   DEF data_type ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
      { { 
       fname = $3;
       formals = $5;
@@ -71,8 +71,8 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    ID                   { [$1] }
-  | formal_list COMMA ID { $3 :: $1 }
+    data_type ID                   { [$1] }
+  | formal_list COMMA data_type ID { $3 :: $1 }
 
 /* Dictionary Formal Arguments */
 dict_formal_list:

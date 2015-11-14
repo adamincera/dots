@@ -1,0 +1,3 @@
+def num foo (num x) {
+    x;
+}
