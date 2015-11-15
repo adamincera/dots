@@ -21,7 +21,7 @@ for dir_entry in os.listdir(path):
         print('================================')
         dotc_input = Popen(['cat', filepath], stdout=PIPE)
         try:
-            output = check_output(['./dotc'], stdin=dotc_input.stdout, timeout=30)
+            output = check_output(['./gdc'], stdin=dotc_input.stdout, timeout=30)
         except:
             print 'You probably forgot to make the compiler dumbass...'
             continue;

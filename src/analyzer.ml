@@ -30,8 +30,22 @@ let translate (functions, cmds) =
 
     let stmt_list = ["printf(\"hello world\")"] in
 
+    let locals_indexes = StringMap.empty in
+
+
+(*    | MemberCall(p_var, func_name, expr_list) -> (try
+    	string_of_locals (StringMap.find p_var locals_indexes)  
+    	with Not_found -> raise (Failure ("undefined variable " ^ s))
+      )
+          | LogAnd(e1, e2) -> (List.map translate_expr e1) ^ "&&" ^ (List.map translate_expr e2)
+    | LogOr(e1, e2) -> (List.map translate_expr e1) ^ "||" ^ (List.map translate_expr e1)
+        | Id(v) -> string_of_locals (StringMap.find v locals_indexes)
+
+*)
     let rec translate_expr = function 
+    | NumLiteral(l) -> l 
     | StrLiteral(l) -> "\"" ^ l ^ "\""
+    | Boolean(b) -> if b = True then "true" else "false"
     | Call(func_name, el) -> (try
           string_of_fname (StringMap.find func_name function_indexes) ^ 
           "(" ^ String.concat ", " (List.map translate_expr el) ^ ")"
@@ -41,6 +55,9 @@ let translate (functions, cmds) =
 
     let translate_stmt = function 
     | Expr(e) -> translate_expr e ^ ";"
+    | Vdecl(t, id) -> (try 
+    	StringMap.find id locals_indexes; raise (Failure ("variable already declared " ^ id))
+    	with Not_found -> StringMap.add id t locals_indexes; "foo")
     in
 
     let main_func = { crtype = "int";

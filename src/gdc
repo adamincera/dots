@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 ./dotc < $1 > compile.c
 OUT_FILE=$2
 
