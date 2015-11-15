@@ -31,7 +31,6 @@ for dir_entry in os.listdir(path):
 
         out_child = Popen('./' + dir_entry[:-5], shell=True, stdout=PIPE)
         output = out_child.communicate()[0]
-        print(output)
         
         output_filepath = os.path.join(path, dir_entry[:-5] + '.outgdc')
         with open(output_filepath, 'w') as intermediate_output:
@@ -42,13 +41,14 @@ for dir_entry in os.listdir(path):
 
         diff_command = ['diff', '-b', out_filepath, output_filepath]
         diff_child = Popen(diff_command, stdout=PIPE)
+        diff_output = diff_child.communicate()[0]
 
-        if diff_child.returncode == 0:
+        if diff_output.strip() == '':
             print 'passed'
         else: 
             print 'failed, writing diff to .dif file'
-            with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as diff_output:
-                diff_output.write(diff_child.communicate()[0])
+            with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
+                output_diff.write(diff_output.strip())
 
 for f in glob.glob(os.path.join(path,'*.outgdc')):
     os.remove(f)
