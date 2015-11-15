@@ -11,5 +11,5 @@ let string_of_cfunc func =
     "\n}\n"
 
 let string_of_fname = function
-| -1 -> "printf"
+| 1 -> "printf"
 | x -> "f" ^ string_of_int(x)

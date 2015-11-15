@@ -17,10 +17,16 @@ let string_map_pairs map pairs =
 
 
 let translate (functions, cmds) = 
-	let built_in_functions = StringMap.add "print" (-1) StringMap.empty in
+	let bff = [ "print"; "range";] in
+
+	let num_func = 
+		List.fold_left (fun acc x -> acc + 1) 0 bff in
+	(* let built_in_functions = StringMap.add "print" (-1) StringMap.empty in *)
+	let built_in_functions = string_map_pairs StringMap.empty
+      (enum 1 1 (List.map (fun f -> f) bff)) in
 
     let function_indexes = string_map_pairs built_in_functions
-      (enum 1 1 (List.map (fun f -> f.fname) functions)) in
+      (enum 1 (1+num_func) (List.map (fun f -> f.fname) functions)) in
 
     let stmt_list = ["printf(\"hello world\")"] in
 
