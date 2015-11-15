@@ -39,7 +39,7 @@ for dir_entry in os.listdir(path):
         out_filepath = os.path.join(path, dir_entry[:-5] + '.out')
         output_filepath = os.path.join(path, dir_entry[:-5] + '.outgdc')
 
-        diff_command = ['diff', '-b', out_filepath, output_filepath]
+        diff_command = ['diff', '-bB', out_filepath, output_filepath]
         diff_child = Popen(diff_command, stdout=PIPE)
         diff_output = diff_child.communicate()[0]
 
@@ -50,10 +50,12 @@ for dir_entry in os.listdir(path):
             with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
                 output_diff.write(diff_output.strip())
 
-for f in glob.glob(os.path.join(path,'*.outgdc')):
-    os.remove(f)
 
-if '-k' not in sys.argv:
+
+if '-c' in sys.argv:
+    for f in glob.glob(os.path.join(path,'*.outgdc')):
+        os.remove(f)
+
     for f in glob.glob(os.path.join(path,'*.dif')):
         os.remove(f)
 
