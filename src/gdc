@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./dotc < $1 > compile.c
+./dotc < $1 > $1.c
 OUT_FILE=$2
 
 if [ -z "$2" ]; then
@@ -8,4 +8,4 @@ if [ -z "$2" ]; then
 fi
 
 echo "OUT_FILE: ${OUT_FILE}"
-gcc -o ${OUT_FILE} compile.c
+gcc -o ${OUT_FILE} $1.c
