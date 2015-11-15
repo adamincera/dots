@@ -22,11 +22,11 @@ for dir_entry in os.listdir(path):
         try:
             return_code = call(['./gdc', filepath, dir_entry[:-5]], timeout=30)
             if return_code == 0:
-                print 'compiled fine'
+                print 'COMPILATION SUCCESSFULL'
             else:
-                print 'didnt compile fine'
+                print 'COMPILATION FAILED'
         except:
-            print 'You probably forgot to make the compiler dumbass...'
+            print 'compile executable. Stop.'
             continue;
 
         out_child = Popen('./' + dir_entry[:-5], shell=True, stdout=PIPE)
@@ -44,9 +44,9 @@ for dir_entry in os.listdir(path):
         diff_output = diff_child.communicate()[0]
 
         if diff_output.strip() == '':
-            print 'passed'
+            print 'test successfull'
         else: 
-            print 'failed, writing diff to .dif file'
+            print 'test failed....writing diff files'
             with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
                 output_diff.write(diff_output.strip())
 
