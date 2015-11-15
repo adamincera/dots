@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e 
 ./dotc < $1 > $1.c
 OUT_FILE=$2
 
