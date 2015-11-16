@@ -1,1 +1,2 @@
-num numberThing = 8;
+num numberThing;
+print(numberThing);

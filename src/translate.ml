@@ -1,3 +1,7 @@
+open Ast
+
+module StringMap = Map.Make(String)
+
 type c_func = { crtype : string;
                 cfname : string;
                 cformals : (string * string) list;
@@ -22,3 +26,9 @@ let translate_vdecl id = function
 let string_of_fname = function
 | 1 -> "printf"
 | x -> "f" ^ string_of_int(x)
+
+let get_type_fmt = function
+| "num" -> "%f"
+| "string" -> "%s"
+| "boolean" -> "%d"
+| x -> raise (Failure ("unknown type: " ^ x))

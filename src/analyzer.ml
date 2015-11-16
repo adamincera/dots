@@ -59,11 +59,35 @@ let translate (functions, cmds) =
     | NumLiteral(l) -> l 
     | StrLiteral(l) -> "\"" ^ l ^ "\""
     | Boolean(b) -> if b = True then "true" else "false"
-    | Call(func_name, el) -> (try
-          string_of_fname (StringMap.find func_name function_indexes) ^ 
-          "(" ^ String.concat ", " (List.map translate_expr el) ^ ")"
-          with Not_found -> raise (Failure ("undefined function " ^ func_name))
+    | Id(v) -> 
+      (try
+           "l" ^ string_of_int(StringMap.find v !locals_indexes)
+       with
+       | Not_found -> raise (Failure("undeclared variable: " ^ v))
       )
+    | Call(func_name, el) -> match func_name with
+        | "print" ->
+            let rec build_str fmt vals = function
+		    | [] -> (fmt, vals)
+		    | hd :: tl -> match hd with
+		        | NumLiteral(n) as num -> build_str (fmt ^ "%d") (vals ^ "," ^ (translate_expr num)) tl
+		        | StrLiteral(s) as str -> build_str (fmt ^ "%s") (vals ^ "," ^ translate_expr str) tl
+		        | Id(v) as id -> (try
+		                match StringMap.find v !locals_types with
+		                | "num" -> build_str (fmt ^ "%f") (vals ^ "," ^ (translate_expr id)) tl
+		                | "string" -> build_str (fmt ^ "%s") (vals ^ "," ^ (translate_expr id)) tl
+		            with
+		            | Not_found -> raise (Failure ("undefined variable: " ^ v)) )
+            in
+            let result = build_str "" "" el
+            in
+            "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
+
+        | fname -> (try
+               string_of_int(StringMap.find fname function_indexes) ^ 
+               "(" ^ String.concat ", " (List.map translate_expr el) ^ ")"
+            with Not_found -> raise (Failure ("undefined function " ^ fname))
+           ) 
     in
 
     let translate_stmt = function 
@@ -106,7 +130,9 @@ type func_decl = {
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let prg = Parser.program Scanner.token lexbuf in
-  translate (prg.funcs, prg.cmds)
+  translate (prg.funcs, List.rev prg.cmds)
+  (* print_endline (String.concat "\n" (List.map string_of_stmt (List.rev prg.cmds))) *)
+  
 
 (* pretty printing version *)
 (*

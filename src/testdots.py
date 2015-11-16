@@ -59,16 +59,19 @@ for dir_entry in os.listdir(path):
             out_filepath = os.path.join(path, dir_entry[:-5] + '.out')
             output_filepath = os.path.join(path, dir_entry[:-5] + '.outgdc')
 
-            diff_command = ['diff', '-bB', out_filepath, output_filepath]
-            diff_child = Popen(diff_command, stdout=PIPE)
-            diff_output = diff_child.communicate()[0]
+            if (os.path.exists(out_filepath)):
+                diff_command = ['diff', '-bB', out_filepath, output_filepath]
+                diff_child = Popen(diff_command, stdout=PIPE)
+                diff_output = diff_child.communicate()[0]
 
-            if diff_output.strip() == '':
-                print 'PASSED TEST'
-            else: 
-                print 'FAILED TEST....writing diff files'
-                with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
-                    output_diff.write(diff_output.strip())
+                if diff_output.strip() == '':
+                    print 'PASSED TEST'
+                else: 
+                    print 'FAILED TEST....writing diff files'
+                    with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
+                        output_diff.write(diff_output.strip())
+            else:
+                print "FAIL: no .out file exists to check against"
 
 print('\n Tests completed.')
 
