@@ -27,7 +27,7 @@ let find_max_index map =
     in
     max 0 bindings
 
-
+(* the meat of the compiler *)
 let translate (functions, cmds) = 
 	let bff = [ "print"; "range";] in
 
@@ -58,7 +58,9 @@ let translate (functions, cmds) =
 	            with
 	            | Not_found -> raise (Failure ("undefined variable: " ^ v))
 	            | Failure(f) -> raise (Failure f) )
-	| Binop(e1, op, e2) -> expr_fmt e1
+	| Binop(e1, op, e2) -> if not(expr_fmt e1 = expr_fmt e2) 
+	                       then raise (Failure("operands are not of same type")) 
+	                       else expr_fmt e1
 	| Assign(v, e) -> "no-fmt"
 	| AssignList(v, el) -> "no-fmt"
 	| DictAssign(k, v) -> "no-fmt"
@@ -97,7 +99,10 @@ let translate (functions, cmds) =
        | Not_found -> raise (Failure("undeclared variable: " ^ v))
       )
     | Binop(e1, op, e2) -> "TODO"
-    | Assign(v, e) -> "TODO"
+    | Assign(v, e) ->
+        if not(expr_fmt (Id(v)) = expr_fmt e)
+        then raise (Failure ("assignment expression not of type: " ^ expr_fmt (Id(v)) ))
+        else (translate_expr (Id(v))) ^ " = " ^ (translate_expr e)
     | AssignList(v, el) -> "TODO"
 	| DictAssign(k, v) -> "TODO"
     | Call(func_name, el) -> (match func_name with
