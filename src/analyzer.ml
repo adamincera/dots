@@ -15,6 +15,18 @@ let rec enum stride n = function
 let string_map_pairs map pairs =
   List.fold_left (fun m (i, n) -> StringMap.add n i m) map pairs
 
+(* 
+   for use with maps where the value is an int 
+   finds the max int value in the map
+*)
+let find_max_index map = 
+	let bindings = StringMap.bindings map in
+		let rec max cur = function
+		| [] -> cur
+		| hd :: tl -> if snd hd > cur then max (snd hd) tl else max cur tl
+    in
+    max 0 bindings
+
 
 let translate (functions, cmds) = 
 	let bff = [ "print"; "range";] in
@@ -30,6 +42,7 @@ let translate (functions, cmds) =
 
     let stmt_list = ["printf(\"hello world\")"] in
 
+    let locals_types = ref StringMap.empty in
     let locals_indexes = ref StringMap.empty in
 
 
@@ -57,9 +70,10 @@ let translate (functions, cmds) =
     | Expr(e) -> translate_expr e ^ ";"
     | Vdecl(t, id) -> 
       (try 
-    	StringMap.find id !locals_indexes; raise (Failure ("variable already declared: " ^ id))
-    	with | Not_found -> locals_indexes := StringMap.add id t !locals_indexes;
-    						"foo"     						
+    	StringMap.find id !locals_types; raise (Failure ("variable already declared: " ^ id))
+    	with | Not_found -> locals_types := StringMap.add id t !locals_types; (* add type map *)
+    						locals_indexes := StringMap.add id ((find_max_index !locals_indexes)+1) !locals_indexes; (* add index mapping *)
+    						translate_vdecl ("l" ^ string_of_int(StringMap.find id !locals_indexes)) t   						
              | Failure(f) -> raise (Failure (f) ) )
     in
 
@@ -70,13 +84,11 @@ let translate (functions, cmds) =
     in
 
     print_endline ((String.concat "\n" (List.map (fun h -> "#include " ^ h) headers)) ^ "\n" ^
-                   string_of_cfunc main_func ^
-                   "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_indexes))
-                  )
+                   string_of_cfunc main_func )
     
 
-(* How to print all the bindings in locals_indexes: 
-print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_indexes)));
+(* How to print all the bindings in locals_types: 
+print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_types)));
 *)
 
 
