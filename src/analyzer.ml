@@ -40,11 +40,8 @@ let translate (functions, cmds) =
     let function_indexes = string_map_pairs built_in_functions
       (enum 1 (1+num_func) (List.map (fun f -> f.fname) functions)) in
 
-    let stmt_list = ["printf(\"hello world\")"] in
-
     let locals_types = ref StringMap.empty in
     let locals_indexes = ref StringMap.empty in
-
 
     (* returns the format string for each type *)
 	let rec expr_fmt = function
@@ -53,12 +50,14 @@ let translate (functions, cmds) =
 	| Boolean(b) -> "%d"
 	| LogAnd(e1, e2) -> "%d"
 	| LogOr(e1, e2) -> "%d"
-	| Id(v) as id -> (try
-		                match StringMap.find v !locals_types with
-		                | "num" -> "%f"
-		                | "string" -> "%s"
-		            with
-		            | Not_found -> raise (Failure ("undefined variable: " ^ v)) )
+	| Id(v) -> (try
+	                match StringMap.find v !locals_types with
+	                | "num" -> "%f"
+	                | "string" -> "%s"
+	                | x -> raise (Failure ("undefined type: " ^ x))
+	            with
+	            | Not_found -> raise (Failure ("undefined variable: " ^ v))
+	            | Failure(f) -> raise (Failure f) )
 	| Binop(e1, op, e2) -> expr_fmt e1
 	| Assign(v, e) -> "no-fmt"
 	| AssignList(v, el) -> "no-fmt"
@@ -68,6 +67,7 @@ let translate (functions, cmds) =
 	| MemberVar(v, m) -> "TODO - type of member var"
 	| MemberCall(v, f, el) -> "TODO - return type of member function"
 	| Undir(v1, v2) -> "no-fmt"
+	| Dir(v1, v2) -> "no-fmt"
 	| UndirVal(v1, v2, w) -> "no-fmt"
 	| DirVal(v1, v2, w) -> "no-fmt"
 	| BidirVal(w1, v1, v2, w2) -> "no-fmt"
@@ -88,13 +88,19 @@ let translate (functions, cmds) =
     | NumLiteral(l) -> l 
     | StrLiteral(l) -> "\"" ^ l ^ "\""
     | Boolean(b) -> if b = True then "true" else "false"
+    | LogAnd(e1, e2) -> "TODO"
+    | LogOr(e1, e2) -> "TODO"
     | Id(v) -> 
       (try
            "l" ^ string_of_int(StringMap.find v !locals_indexes)
        with
        | Not_found -> raise (Failure("undeclared variable: " ^ v))
       )
-    | Call(func_name, el) -> match func_name with
+    | Binop(e1, op, e2) -> "TODO"
+    | Assign(v, e) -> "TODO"
+    | AssignList(v, el) -> "TODO"
+	| DictAssign(k, v) -> "TODO"
+    | Call(func_name, el) -> (match func_name with
         | "print" ->
             let rec build_str fmt vals = function
 		    | [] -> (fmt, vals)
@@ -108,10 +114,21 @@ let translate (functions, cmds) =
                string_of_int(StringMap.find fname function_indexes) ^ 
                "(" ^ String.concat ", " (List.map translate_expr el) ^ ")"
             with Not_found -> raise (Failure ("undefined function " ^ fname))
-           ) 
+           ) )
+    | Access(v, e) -> "TODO"
+	| MemberVar(v, m) -> "TODO"
+	| MemberCall(v, f, el) -> "TODO"
+	| Undir(v1, v2) -> "TODO"
+	| Dir(v1, v2) -> "TODO"
+	| UndirVal(v1, v2, w) -> "TODO"
+	| DirVal(v1, v2, w) -> "TODO"
+	| BidirVal(w1, v1, v2, w2) -> "TODO"
+	| NoOp(s) -> "TODO"
+	| Noexpr -> "TODO"
     in
 
     let translate_stmt = function 
+    | Block(sl) -> "TODO"
     | Expr(e) -> translate_expr e ^ ";"
     | Vdecl(t, id) -> 
       (try 
@@ -120,6 +137,12 @@ let translate (functions, cmds) =
     						locals_indexes := StringMap.add id ((find_max_index !locals_indexes)+1) !locals_indexes; (* add index mapping *)
     						translate_vdecl ("l" ^ string_of_int(StringMap.find id !locals_indexes)) t   						
              | Failure(f) -> raise (Failure (f) ) )
+    | ListDecl(t, v) -> "TODO"
+    | DictDecl(kt, vt, v) -> "TODO"
+    | Return(e) -> "TODO"
+    | If (cond, s1, s2) -> "TODO"
+    | For (temp, iter, sl) -> "TODO"
+    | While (cond, sl) -> "TODO"
     in
 
     let main_func = { crtype = "int";
