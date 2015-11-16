@@ -30,7 +30,7 @@ let translate (functions, cmds) =
 
     let stmt_list = ["printf(\"hello world\")"] in
 
-    let locals_indexes = StringMap.empty in
+    let locals_indexes = ref StringMap.empty in
 
 
 (*    | MemberCall(p_var, func_name, expr_list) -> (try
@@ -55,9 +55,12 @@ let translate (functions, cmds) =
 
     let translate_stmt = function 
     | Expr(e) -> translate_expr e ^ ";"
-    | Vdecl(t, id) -> (try 
-    	StringMap.find id locals_indexes; raise (Failure ("variable already declared " ^ id))
-    	with Not_found -> StringMap.add id t locals_indexes; "foo")
+    | Vdecl(t, id) -> 
+      (try 
+    	StringMap.find id !locals_indexes; raise (Failure ("variable already declared: " ^ id))
+    	with | Not_found -> locals_indexes := StringMap.add id t !locals_indexes;
+    						"foo"     						
+             | Failure(f) -> raise (Failure (f) ) )
     in
 
     let main_func = { crtype = "int";
@@ -67,9 +70,14 @@ let translate (functions, cmds) =
     in
 
     print_endline ((String.concat "\n" (List.map (fun h -> "#include " ^ h) headers)) ^ "\n" ^
-                   string_of_cfunc main_func)
+                   string_of_cfunc main_func ^
+                   "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_indexes))
+                  )
     
 
+(* How to print all the bindings in locals_indexes: 
+print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_indexes)));
+*)
 
 
 (*
