@@ -19,34 +19,43 @@ for dir_entry in os.listdir(path):
     if os.path.isfile(filepath) and filepath[-5:] == '.dots':
         print('\nRunning tests in ' + dir_entry)
         print('================================')
-        dotc_input = Popen(['cat', filepath], stdout=PIPE)
         try:
-            output = check_output(['./gdc'], stdin=dotc_input.stdout, timeout=30)
+            return_code = call(['./gdc', filepath, dir_entry[:-5]], timeout=30)
+            if return_code == 0:
+                print 'COMPILATION SUCCESSFULL'
+            else:
+                print 'COMPILATION FAILED'
         except:
-            print 'You probably forgot to make the compiler dumbass...'
+            print 'compile executable. Stop.'
             continue;
 
-        output_filepath = os.path.join(path, dir_entry[:-5] + '.outc')
+        out_child = Popen('./' + dir_entry[:-5], shell=True, stdout=PIPE)
+        output = out_child.communicate()[0]
+        
+        output_filepath = os.path.join(path, dir_entry[:-5] + '.outgdc')
         with open(output_filepath, 'w') as intermediate_output:
             intermediate_output.write(output)
 
         out_filepath = os.path.join(path, dir_entry[:-5] + '.out')
-        output_filepath = os.path.join(path, dir_entry[:-5] + '.outc')
+        output_filepath = os.path.join(path, dir_entry[:-5] + '.outgdc')
 
-        diff_command = ['diff', '-b', out_filepath, output_filepath]
+        diff_command = ['diff', '-bB', out_filepath, output_filepath]
         diff_child = Popen(diff_command, stdout=PIPE)
+        diff_output = diff_child.communicate()[0]
 
-        if diff_child.returncode == 0:
-            print 'passed'
+        if diff_output.strip() == '':
+            print 'test successfull'
         else: 
-            print 'failed, writing diff to .dif file'
-            with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as diff_output:
-                diff_output.write(diff_child.communicate()[0])
+            print 'test failed....writing diff files'
+            with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
+                output_diff.write(diff_output.strip())
 
-for f in glob.glob(os.path.join(path,'*.outc')):
-    os.remove(f)
 
-if '-k' not in sys.argv:
+
+if '-c' in sys.argv:
+    for f in glob.glob(os.path.join(path,'*.outgdc')):
+        os.remove(f)
+
     for f in glob.glob(os.path.join(path,'*.dif')):
         os.remove(f)
 
