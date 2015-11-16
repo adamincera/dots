@@ -6,6 +6,10 @@ module StringMap = Map.Make(String)
 (* "\"graph.h\"" *)
 let headers = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
 
+type env = {loc_inds : int StringMap.t; 
+                loc_types : string StringMap.t;
+                func_inds : int StringMap.t}
+
 (* val enum : int -> 'a list -> (int * 'a) list *)
 let rec enum stride n = function
     [] -> []
@@ -162,17 +166,6 @@ let translate (functions, cmds) =
 
 (* How to print all the bindings in locals_types: 
 print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_types)));
-*)
-
-
-(*
-type func_decl = {
-    rtype : string; 
-    fname : string;
-    formals : (string * string) list;
-    (*locals : string list;*)
-    body : stmt list;
-  }
 *)
 
 (* translate version *)
