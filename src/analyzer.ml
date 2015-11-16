@@ -46,6 +46,35 @@ let translate (functions, cmds) =
     let locals_indexes = ref StringMap.empty in
 
 
+    (* returns the format string for each type *)
+	let rec expr_fmt = function
+	| NumLiteral(n) -> "%f"
+	| StrLiteral(s) -> "%s"
+	| Boolean(b) -> "%d"
+	| LogAnd(e1, e2) -> "%d"
+	| LogOr(e1, e2) -> "%d"
+	| Id(v) as id -> (try
+		                match StringMap.find v !locals_types with
+		                | "num" -> "%f"
+		                | "string" -> "%s"
+		            with
+		            | Not_found -> raise (Failure ("undefined variable: " ^ v)) )
+	| Binop(e1, op, e2) -> expr_fmt e1
+	| Assign(v, e) -> "no-fmt"
+	| AssignList(v, el) -> "no-fmt"
+	| DictAssign(k, v) -> "no-fmt"
+	| Call(v, el) -> "TODO - return type of func"
+	| Access(v, e) -> "TODO - type of list / dict vals"
+	| MemberVar(v, m) -> "TODO - type of member var"
+	| MemberCall(v, f, el) -> "TODO - return type of member function"
+	| Undir(v1, v2) -> "no-fmt"
+	| UndirVal(v1, v2, w) -> "no-fmt"
+	| DirVal(v1, v2, w) -> "no-fmt"
+	| BidirVal(w1, v1, v2, w2) -> "no-fmt"
+	| NoOp(s) -> "no-fmt"
+	| Noexpr -> "no-fmt"
+    in
+
 (*    | MemberCall(p_var, func_name, expr_list) -> (try
     	string_of_locals (StringMap.find p_var locals_indexes)  
     	with Not_found -> raise (Failure ("undefined variable " ^ s))
@@ -69,15 +98,7 @@ let translate (functions, cmds) =
         | "print" ->
             let rec build_str fmt vals = function
 		    | [] -> (fmt, vals)
-		    | hd :: tl -> match hd with
-		        | NumLiteral(n) as num -> build_str (fmt ^ "%d") (vals ^ "," ^ (translate_expr num)) tl
-		        | StrLiteral(s) as str -> build_str (fmt ^ "%s") (vals ^ "," ^ translate_expr str) tl
-		        | Id(v) as id -> (try
-		                match StringMap.find v !locals_types with
-		                | "num" -> build_str (fmt ^ "%f") (vals ^ "," ^ (translate_expr id)) tl
-		                | "string" -> build_str (fmt ^ "%s") (vals ^ "," ^ (translate_expr id)) tl
-		            with
-		            | Not_found -> raise (Failure ("undefined variable: " ^ v)) )
+		    | hd :: tl -> build_str (fmt ^ (expr_fmt hd)) (vals ^ "," ^ (translate_expr hd)) tl
             in
             let result = build_str "" "" el
             in
