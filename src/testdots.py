@@ -36,7 +36,8 @@ for dir_entry in os.listdir(path):
 
         comp_success = False
         try:
-            return_code = call(['./gdc', filepath, dir_entry[:-5]], timeout=30)
+            return_code = call(['./gdc', filepath, os.path.join(path, dir_entry[:-5] + '.exec')], 
+                timeout=30)
             if return_code == 0:
                 print 'COMPILATION SUCCESSFUL'
                 comp_success = True
@@ -47,7 +48,8 @@ for dir_entry in os.listdir(path):
             continue;
 
         if (comp_success):
-            out_child = Popen('./' + dir_entry[:-5], shell=True, stdout=PIPE)
+            out_child = Popen('./' + os.path.join(path, dir_entry[:-5]) + '.exec', 
+                shell=True, stdout=PIPE)
             output = out_child.communicate()[0]
             
             output_filepath = os.path.join(path, dir_entry[:-5] + '.outgdc')
@@ -76,7 +78,7 @@ print('\n Tests completed.')
 
 # remove all the intermediate file output if the clean flag is set
 if args.clean:
-    file_exts = ['*.outgdc', '*.dif', '*.c']
+    file_exts = ['*.outgdc', '*.dif', '*.c', '*.exec']
     for ext in file_exts:
         for f in glob.glob(os.path.join(path, ext)):
             os.remove(f)
