@@ -1,0 +1,2 @@
+dict <string,num> str_num_dict;
+dict <num,node> num_node_dict;
