@@ -1,0 +1,5 @@
+list <num> num_list;
+list <string> str_list;
+list <node> node_list;
+list <graph> graph_list;
+print("\n");
