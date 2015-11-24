@@ -1,0 +1,2 @@
+*** Comments are denoted by triple stars, lines beginning with \n are ignored
+ID DOT ID LPAREN RPAREN SEMI

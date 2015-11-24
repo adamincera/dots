@@ -1,0 +1,35 @@
+\* Breadth-First-Search with source and dest*\
+
+def list<node> bfs(graph G, node source, node dest) {
+    list<node> visited = [source];
+    dict<node, node> parents;
+  
+    node curr;
+    bool found = false;
+    while !isEmpty(visited) {
+      curr = visited.dequeue();
+      if curr == dest {
+        found = true;
+        break;
+      }
+
+      for node child in curr.out {
+        if !(child in visited) {
+          visited.enqueue(child);
+          parents[child] = curr;
+        }
+      }
+    }
+  
+    if !found {
+      return [];
+    }
+
+    \* reconstruct path *\
+    list<node> path = [curr];
+    while (curr in parents && parents[curr] != null) {
+      path.enqueue(parents[curr]);
+      curr = parents[curr];
+    }
+    return path;
+}

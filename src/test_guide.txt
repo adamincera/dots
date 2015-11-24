@@ -1,0 +1,21 @@
+Menhir tests:
+
+To run:
+python tests.py
+
+Runs all tests in all .txt files in directory menhir-tests. Each test is a sequence of tokens.
+
+No flags: 
+default configuration. Only prints tests that failed.
+
+-e:
+Show menhir's stderr warnings and messages.
+
+-f:
+Print full syntax tree and menhir output.
+
+Order doesn't matter for flags.
+
+
+Adding tests:
+Testing script will ignore lines that begin with newline or lines that begin with ***, which denotes a comment. Lines that begin with f** are expected to fail, and if they pass, print an appropriate error message. Add sequences of tokens to .txt files, or add additional .txt files. 

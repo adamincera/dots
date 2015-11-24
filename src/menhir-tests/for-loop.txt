@@ -1,0 +1,6 @@
+*** for (x in y) { 
+***     num 10;
+***     x - z;
+***     }
+
+FOR LPAREN ID IN ID RPAREN LBRACE NUM ID SEMI ID MINUS ID SEMI RBRACE
