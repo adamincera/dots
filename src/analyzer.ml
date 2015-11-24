@@ -6,9 +6,11 @@ module StringMap = Map.Make(String)
 (* "\"graph.h\"" *)
 let headers = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
 
-type env = {loc_inds : int StringMap.t; 
-                loc_types : string StringMap.t;
-                func_inds : int StringMap.t}
+type env = {global_inds : int StringMap.t;
+            global_types : string StringMap.t;
+            loc_inds : int StringMap.t; 
+            loc_types : string StringMap.t;
+            func_inds : int StringMap.t}
 
 (* val enum : int -> 'a list -> (int * 'a) list *)
 let rec enum stride n = function
@@ -60,7 +62,7 @@ let translate (functions, cmds) =
 	                | "string" -> "%s"
 	                | x -> raise (Failure ("undefined type: " ^ x))
 	            with
-	            | Not_found -> raise (Failure ("undefined variable: " ^ v))
+	            | Not_found -> raise (Failure ("undefined fmt variable: " ^ v))
 	            | Failure(f) -> raise (Failure f) )
 	| Binop(e1, op, e2) -> if not(expr_fmt e1 = expr_fmt e2) 
 	                       then raise (Failure("operands are not of same type")) 
@@ -136,10 +138,13 @@ let translate (functions, cmds) =
 	| Noexpr -> "TODO"
     in
 
-    let translate_stmt = function 
-    | Block(sl) -> "TODO"
+    let rec translate_stmt = function 
+    | Block(sl) -> (match sl with
+        | [] -> ""
+        | hd :: tl -> translate_stmt hd ^ translate_stmt (Block(tl)) 
+    )
     | Expr(e) -> translate_expr e ^ ";"
-    | Vdecl(t, id) -> 
+    | Vdecl(t, id) ->
       (try 
     	StringMap.find id !locals_types; raise (Failure ("variable already declared: " ^ id))
     	with | Not_found -> locals_types := StringMap.add id t !locals_types; (* add type map *)
@@ -173,8 +178,7 @@ let _ =
   let lexbuf = Lexing.from_channel stdin in
   let prg = Parser.program Scanner.token lexbuf in
   translate (prg.funcs, List.rev prg.cmds)
-  (* print_endline (String.concat "\n" (List.map string_of_stmt (List.rev prg.cmds))) *)
-  
+   (* print_endline (String.concat "\n" (List.map string_of_stmt (List.rev prg.cmds))) *)
 
 (* pretty printing version *)
 (*

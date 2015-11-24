@@ -32,3 +32,4 @@ let get_type_fmt = function
 | "string" -> "%s"
 | "boolean" -> "%d"
 | x -> raise (Failure ("unknown type: " ^ x))
+
