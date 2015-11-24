@@ -1,4 +1,5 @@
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
+type dataType = Num | String | Bool | Graph | Node | Dict | List
 type bool = True | False
 
 type expr =
