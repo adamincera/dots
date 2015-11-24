@@ -95,11 +95,8 @@ let rec string_of_expr = function
   | BidirVal (w1, s1, s2, w2) -> s1 ^ " [" ^ string_of_expr w1 ^ "]--[" ^ string_of_expr w2 ^ "] " ^ s2 
   | NoOp (s) -> s
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
-<<<<<<< HEAD
-=======
   | AssignList(id, el) -> " ~TODO~ "
   | DictAssign(k, v) -> " ~TODO~ "
->>>>>>> 82761b54a30454e7502440490f92a0a034a37e24
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Access (s, e1) -> s ^ "[" ^ string_of_expr e1 ^ "]"
