@@ -3,3 +3,8 @@
 *.toc
 *.log
 *.pdf
+documentation/*/*.out
+documentation/*/*.aux
+documentation/*/*.toc
+documentation/*/*.log
+documentation/*/*.pdf

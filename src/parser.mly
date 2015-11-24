@@ -200,7 +200,8 @@ expr:
   | expr GT     expr { Binop($1, Greater,  $3) }
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr LOGAND expr { LogAnd($1, $3) }
-  | expr LOGOR expr { LogOr($1, $3) }
+  | expr LOGOR expr  { LogOr($1, $3) }
+  | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | ID DOT ID %prec NOCALL { MemberVar($1, $3) }
   | ID DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
