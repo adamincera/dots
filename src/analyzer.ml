@@ -6,11 +6,13 @@ module StringMap = Map.Make(String)
 (* "\"graph.h\"" *)
 let headers = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
 
-type env = {global_inds : int StringMap.t;
+type env = {
+            global_inds : int StringMap.t;
             global_types : string StringMap.t;
             loc_inds : int StringMap.t; 
             loc_types : string StringMap.t;
-            func_inds : int StringMap.t}
+            func_inds : int StringMap.t
+          }
 
 (* val enum : int -> 'a list -> (int * 'a) list *)
 let rec enum stride n = function
@@ -43,45 +45,45 @@ let translate (functions, cmds) =
   let built_in_functions = string_map_pairs StringMap.empty
       (enum 1 1 (List.map (fun f -> f) bff)) in
 
-    let function_indexes = string_map_pairs built_in_functions
+    let func_inds = string_map_pairs built_in_functions
       (enum 1 (1+num_func) (List.map (fun f -> f.fname) functions)) in
 
-    let locals_types = ref StringMap.empty in
-    let locals_indexes = ref StringMap.empty in
+    let loc_types = ref StringMap.empty in
+    let loc_inds = ref StringMap.empty in
 
-      (* returns the format string for each type *)
-  	let rec expr_fmt = function
-  	| NumLiteral(n) -> "%f"
-  	| StrLiteral(s) -> "%s"
-  	| Boolean(b) -> "%d"
-  	| LogAnd(e1, e2) -> "%d"
-  	| LogOr(e1, e2) -> "%d"
-  	| Id(v) -> (try
-  	                match StringMap.find v !locals_types with
-  	                | "num" -> "%f"
-  	                | "string" -> "%s"
-  	                | x -> raise (Failure ("undefined type: " ^ x))
-  	            with
-  	            | Not_found -> raise (Failure ("undefined fmt variable: " ^ v))
-  	            | Failure(f) -> raise (Failure f) )
-  	| Binop(e1, op, e2) -> if not(expr_fmt e1 = expr_fmt e2) 
-  	                       then raise (Failure("operands are not of same type")) 
-  	                       else expr_fmt e1
-  	| Assign(v, e) -> "no-fmt"
-  	| AssignList(v, el) -> "no-fmt"
-  	| DictAssign(k, v) -> "no-fmt"
-  	| Call(v, el) -> "TODO - return type of func"
-  	| Access(v, e) -> "TODO - type of list / dict vals"
-  	| MemberVar(v, m) -> "TODO - type of member var"
-  	| MemberCall(v, f, el) -> "TODO - return type of member function"
-  	| Undir(v1, v2) -> "no-fmt"
-  	| Dir(v1, v2) -> "no-fmt"
-  	| UndirVal(v1, v2, w) -> "no-fmt"
-  	| DirVal(v1, v2, w) -> "no-fmt"
-  	| BidirVal(w1, v1, v2, w2) -> "no-fmt"
-  	| NoOp(s) -> "no-fmt"
-  	| Noexpr -> "no-fmt"
-      in
+  (* returns the format string for each type *)
+  let rec expr_fmt = function
+  | NumLiteral(n) -> "%f"
+  | StrLiteral(s) -> "%s"
+  | Boolean(b) -> "%d"
+  | LogAnd(e1, e2) -> "%d"
+  | LogOr(e1, e2) -> "%d"
+  | Id(v) -> (try
+                  match StringMap.find v !loc_types with
+                  | "num" -> "%f"
+                  | "string" -> "%s"
+                  | x -> raise (Failure ("undefined type: " ^ x))
+              with
+              | Not_found -> raise (Failure ("undefined fmt variable: " ^ v))
+              | Failure(f) -> raise (Failure f) )
+  | Binop(e1, op, e2) -> if not(expr_fmt e1 = expr_fmt e2) 
+                         then raise (Failure("operands are not of same type")) 
+                         else expr_fmt e1
+  | Assign(v, e) -> "no-fmt"
+  | AssignList(v, el) -> "no-fmt"
+  | DictAssign(k, v) -> "no-fmt"
+  | Call(v, el) -> "TODO - return type of func"
+  | Access(v, e) -> "TODO - type of list / dict vals"
+  | MemberVar(v, m) -> "TODO - type of member var"
+  | MemberCall(v, f, el) -> "TODO - return type of member function"
+  | Undir(v1, v2) -> "no-fmt"
+  | Dir(v1, v2) -> "no-fmt"
+  | UndirVal(v1, v2, w) -> "no-fmt"
+  | DirVal(v1, v2, w) -> "no-fmt"
+  | BidirVal(w1, v1, v2, w2) -> "no-fmt"
+  | NoOp(s) -> "no-fmt"
+  | Noexpr -> "no-fmt"
+    in
 
 (*    | MemberCall(p_var, func_name, expr_list) -> (try
       string_of_locals (StringMap.find p_var locals_indexes)  
@@ -100,7 +102,7 @@ let translate (functions, cmds) =
     | LogOr(e1, e2) -> "TODO"
     | Id(v) -> 
       (try
-           "l" ^ string_of_int(StringMap.find v !locals_indexes)
+           "l" ^ string_of_int(StringMap.find v !loc_inds)
        with
        | Not_found -> raise (Failure("undeclared variable: " ^ v))
       )
@@ -110,7 +112,7 @@ let translate (functions, cmds) =
         then raise (Failure ("assignment expression not of type: " ^ expr_fmt (Id(v)) ))
         else (translate_expr (Id(v))) ^ " = " ^ (translate_expr e)
     | AssignList(v, el) -> "TODO"
-  | DictAssign(k, v) -> "TODO"
+    | DictAssign(k, v) -> "TODO"
     | Call(func_name, el) -> (match func_name with
         | "print" ->
             let rec build_str fmt vals = function
@@ -122,11 +124,11 @@ let translate (functions, cmds) =
             "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
 
         | fname -> (try
-               string_of_int(StringMap.find fname function_indexes) ^ 
+               string_of_int(StringMap.find fname func_inds) ^ 
                "(" ^ String.concat ", " (List.map translate_expr el) ^ ")"
             with Not_found -> raise (Failure ("undefined function " ^ fname))
            ) )
-    | Access(v, e) -> "TODO"
+  | Access(v, e) -> "TODO"
   | MemberVar(v, m) -> "TODO"
   | MemberCall(v, f, el) -> "TODO"
   | Undir(v1, v2) -> "TODO"
@@ -146,10 +148,10 @@ let translate (functions, cmds) =
     | Expr(e) -> translate_expr e ^ ";"
     | Vdecl(t, id) ->
       (try 
-      StringMap.find id !locals_types; raise (Failure ("variable already declared: " ^ id))
-      with | Not_found -> locals_types := StringMap.add id t !locals_types; (* add type map *)
-                locals_indexes := StringMap.add id ((find_max_index !locals_indexes)+1) !locals_indexes; (* add index mapping *)
-                translate_vdecl ("l" ^ string_of_int(StringMap.find id !locals_indexes)) t              
+      StringMap.find id !loc_types; raise (Failure ("variable already declared: " ^ id))
+      with | Not_found -> loc_types := StringMap.add id t !loc_types; (* add type map *)
+                loc_inds := StringMap.add id ((find_max_index !loc_inds)+1) !loc_inds; (* add index mapping *)
+                translate_vdecl ("l" ^ string_of_int(StringMap.find id !loc_inds)) t              
              | Failure(f) -> raise (Failure (f) ) )
     | ListDecl(t, v) -> "TODO"
     | DictDecl(kt, vt, v) -> "TODO"
