@@ -169,18 +169,6 @@ let dt_fmt = function
 
 (* the meat of the compiler *)
 let translate (env, functions, cmds) =
-
-    let loc_inds = ref StringMap.empty in
-
-(*    | MemberCall(p_var, func_name, expr_list) -> (try
-      string_of_locals (StringMap.find p_var locals_indexes)  
-      with Not_found -> raise (Failure ("undefined variable " ^ s))
-      )
-          | LogAnd(e1, e2) -> (List.map translate_expr e1) ^ "&&" ^ (List.map translate_expr e2)
-    | LogOr(e1, e2) -> (List.map translate_expr e1) ^ "||" ^ (List.map translate_expr e1)
-        | Id(v) -> string_of_locals (StringMap.find v locals_indexes)
-
-*)
     let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> l
     | Sast.StrLiteral(l, dt) -> "\"" ^ l ^ "\""
@@ -189,7 +177,7 @@ let translate (env, functions, cmds) =
     | Sast.LogOr(e1, e2, dt) -> "TODO"
     | Sast.Id(v, dt) -> 
       (try
-           "l" ^ string_of_int(StringMap.find v !loc_inds)
+           "l" ^ string_of_int(find_var v env.var_inds)
        with
        | Not_found -> raise (Failure("undeclared variable: " ^ v))
       )
@@ -238,8 +226,9 @@ let translate (env, functions, cmds) =
         StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
       with | Not_found -> (List.hd env.var_types) := StringMap.add id t !(List.hd env.var_types); (* add type map *)
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+                print_endline("did decl");
                 translate_vdecl ("l" ^ string_of_int(find_var id env.var_inds)) t        
-             | Failure(f) -> raise (Failure (f) ) )
+           | Failure(f) -> raise (Failure (f) ) )
     | Sast.ListDecl(t, v) -> "TODO"
     | Sast.DictDecl(kt, vt, v) -> "TODO"
     | Sast.Return(e) -> "TODO"
