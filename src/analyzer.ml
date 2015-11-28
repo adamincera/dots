@@ -238,8 +238,7 @@ let translate (env, functions, cmds) =
         StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
       with | Not_found -> (List.hd env.var_types) := StringMap.add id t !(List.hd env.var_types); (* add type map *)
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
-                (* translate_vdecl ("l" ^ string_of_int(StringMap.find id !loc_inds)) t *)
-                "foo"          
+                translate_vdecl ("l" ^ string_of_int(find_var id env.var_inds)) t        
              | Failure(f) -> raise (Failure (f) ) )
     | Sast.ListDecl(t, v) -> "TODO"
     | Sast.DictDecl(kt, vt, v) -> "TODO"
@@ -275,6 +274,7 @@ print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (Lis
 *)
 
 (* translate version *)
+
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let prg = convert_ast (Parser.program Scanner.token lexbuf) basic_env in
@@ -286,6 +286,6 @@ let _ =
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let prg = Parser.program Scanner.token lexbuf in
-  let result = string_of_program (prg.funcs, prg.cmds) in
+  let result = string_of_program (prg.funcs, List.rev prg.cmds) in
   print_endline result;;
 *)

@@ -20,9 +20,9 @@ let string_of_cfunc func =
    params --> id : variable name ; 2nd arg : variable type 
 *)
 let translate_vdecl id = function
-| "string" -> "char *" ^ id ^ ";"
-| "num" -> "float " ^ id ^ ";"
-| x -> raise (Failure ("invalid type declaration: " ^ x))
+| Sast.String -> "char *" ^ id ^ ";"
+| Sast.Num -> "float " ^ id ^ ";"
+| x -> raise (Failure ("invalid type in var declaration"))
 
 let string_of_fname = function
 | 1 -> "printf"
