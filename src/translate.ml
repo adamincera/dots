@@ -1,4 +1,5 @@
 open Ast
+open Sast
 
 module StringMap = Map.Make(String)
 
@@ -33,3 +34,8 @@ let get_type_fmt = function
 | "boolean" -> "%d"
 | x -> raise (Failure ("unknown type: " ^ x))
 
+(*
+let translate_boolop e1 e2 expr_fmt env = function
+| Add
+| x -> 
+*)
