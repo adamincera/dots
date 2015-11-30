@@ -17,4 +17,4 @@ let _ =
   | Compile -> Execute.execute_prog (Compile.translate program)
   | _ -> print_string "Unrecognized option"
 
-  type action = Ast | Interpret | Bytecode | Compile
+  type action = Ast | Compile

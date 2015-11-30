@@ -1,0 +1,6 @@
+string worldStr;
+worldStr = "Hello world!";
+string worldStr2;
+worldStr2 = "Hello again world!";
+
+print(worldStr, "\n", worldStr2, "\n");

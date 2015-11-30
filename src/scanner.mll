@@ -1,5 +1,8 @@
 { open Parser }
 
+let num = ['0'-'9']+
+let num_regex = '-'?(num*'.'num+) | (num+('.'num*)?)
+
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"     { multicomment lexbuf }      (* Multi-Line Comments *)
@@ -46,8 +49,8 @@ rule token = parse
 | "graph"  { GRAPH }
 | "list"   { LIST }
 | "dict"   { DICT }
-| ['0'-'9']+ as lxm { LITERAL(lxm) } (* num literal *)
-| "\".*\"" as lxm  { LITERAL(lxm) }                (* string literals *)
+| num_regex as lxm { NUM_LIT(lxm) } (* num literal *)
+| '"' ([^'"']* as lxm) '"' { STR_LIT(lxm) }               (* string literals *)
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }

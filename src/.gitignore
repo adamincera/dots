@@ -1,1 +1,11 @@
-tests.sh
+exec
+gdc
+parser.output
+parser.automaton
+parser.ml
+parser.mli
+scanner.ml
+testall.log
+*.cmo
+*.cmi
+*.diff

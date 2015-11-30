@@ -1,0 +1,2 @@
+dict <string,num> city_map = {"toronto":6, "nyc":0.5, "philly":8.9};
+print(city_map["philly"],"\n");
