@@ -34,14 +34,18 @@ int main() {
 
     connect_undir(m, n);
 
+    /*
     printf("%s -> %s\n", (char *)m->data, (char *)m->out->node->data);
     printf("%s -> %s\n", (char *)n->data, (char *)n->out->node->data);
+    */
 
     remove_undir_edge(m, n);
+    /*
     printf("%s -> %x\n", (char *)m->data, (int)m->out);
     printf("%s -> %x\n", (char *)n->data, (int)n->out);
+    */
 
-    g = add_graphs(g, h);
+    plus_equals(g, h);
     printf("print_nodes(g):\n");
     print_nodes(g);
     printf("print_nodes(h):\n");
