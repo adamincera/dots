@@ -53,7 +53,7 @@ let find_var var map_list =
       (try StringMap.find var !m
        with
        | Not_found -> finder var tl)
-  | [] -> raise (Failure ("undefined variable: " ^ var))
+  | [] -> raise (Not_found)
   in 
   finder var map_list
 
@@ -137,7 +137,14 @@ in
 let rec stmt env = function
 | Ast.Block(sl) -> Sast.Block(List.map (fun s -> stmt env s) sl)
 | Ast.Expr(e) -> Sast.Expr(expr env e)
-| Ast.Vdecl(dt, v) -> Sast.Vdecl(str_to_type dt, v)
+| Ast.Vdecl(dt, id) -> 
+    (try 
+        StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
+     with | Not_found -> (List.hd env.var_types) := StringMap.add id (str_to_type dt) !(List.hd env.var_types); (* add type map *)
+                (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+          | Failure(f) -> raise (Failure (f) ) 
+    );
+    Sast.Vdecl(str_to_type dt, id)
 | Ast.ListDecl(dt, v) -> Sast.ListDecl(str_to_type dt, v)
 | Ast.DictDecl(dtk, dtv, v) -> Sast.DictDecl(str_to_type dtk, str_to_type dtv, v)
 | Ast.Return(e) -> Sast.Return(expr env e)
@@ -247,16 +254,19 @@ let translate (env, functions, cmds) =
                    string_of_cfunc main_func )
     
 
-  let basic_env = 
+  (* creates a new default environment var *)
+  let create_env =
+      let basic_env = 
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
-      let bf_ind_map = string_map_pairs StringMap.empty bf_inds in
-      let bf_type_map = string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List, "range")] in
+      let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
+      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List, "range")]) in
      {var_types = [ref StringMap.empty];
                        var_inds = [ref StringMap.empty];
-                       func_types = [ref bf_type_map];
-                       func_inds = [ref bf_ind_map];
-                       return_type = Sast.Void}
+                       func_types = [bf_type_map];
+                       func_inds = [bf_ind_map];
+                       return_type = Sast.Void} in
+        basic_env
 
 (* How to print all the bindings in locals_types: 
 print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_types)));
@@ -264,10 +274,39 @@ print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (Lis
 
 (* translate version *)
 
+let print_bindings m =
+  let bindings = StringMap.bindings m in
+  let rec printer = function
+    | [] -> print_endline("")
+    | (k, v)::tl -> print_endline(k ^ string_of_int(v)) ; printer tl
+  in
+  printer bindings
+
 let _ =
   let lexbuf = Lexing.from_channel stdin in
-  let prg = convert_ast (Parser.program Scanner.token lexbuf) basic_env in
-  translate (basic_env, prg.s_funcs, List.rev prg.s_cmds)
+  let ast_prg = (Parser.program Scanner.token lexbuf) in
+  let sast_env = 
+      let bf_names = [ "print"; "range";] in
+      let bf_inds = enum 1 1 bf_names in
+      let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
+      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List, "range")]) in
+     {var_types = [ref StringMap.empty];
+                       var_inds = [ref StringMap.empty];
+                       func_types = [bf_type_map];
+                       func_inds = [bf_ind_map];
+                       return_type = Sast.Void} in
+  let prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in
+  let trans_env = 
+      let bf_names = [ "print"; "range";] in
+      let bf_inds = enum 1 1 bf_names in
+      let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
+      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List, "range")]) in
+     {var_types = [ref StringMap.empty];
+                       var_inds = [ref StringMap.empty];
+                       func_types = [bf_type_map];
+                       func_inds = [bf_ind_map];
+                       return_type = Sast.Void} in
+  translate (trans_env, prg.s_funcs, prg.s_cmds)
    (* print_endline (String.concat "\n" (List.map string_of_stmt (List.rev prg.cmds))) *)
 
 (* pretty printing version *)
