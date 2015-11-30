@@ -84,3 +84,8 @@ connect_dir(x, y, n);
 connect_dir(x, y, n);
 connect_dir(y, x, m);
 
+/* g1 = g2 + g3 */
+g1 = plus(g2, g3);
+
+/* g1 += g2 */
+plus_equals(g1, g2);
