@@ -50,6 +50,9 @@ int main() {
     print_nodes(g);
     printf("print_nodes(h):\n");
     print_nodes(h);
+    graph_t *g_copy = copy(g);
+    printf("print_nodes(copy):\n");
+    print_nodes(g_copy);
 
     g = subtract_graphs(g, h);
     remove_node(g, o);

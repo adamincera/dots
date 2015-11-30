@@ -106,3 +106,11 @@ graph_t *subtract_graphs(graph_t *left, graph_t *right) {
     }
     return left;
 }
+
+graph_t *copy(const graph_t *src) {
+    graph_t *g = init_graph();
+    nodelist_t *temp;
+    for(temp = src->nodes; temp; temp = temp->next)
+        add_node(g, temp->node);
+    return g;
+}
