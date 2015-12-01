@@ -9,3 +9,4 @@ testall.log
 *.cmo
 *.cmi
 *.diff
+*.dots.c
