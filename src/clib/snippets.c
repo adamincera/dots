@@ -26,7 +26,7 @@ node_t *x = init_node(string);
 graph_t *g1 = init_graph();
 
 /* graph g2 = g1; */
-/* TODO */
+graph_t *g2 = copy(g1);
 
 /* graph g3 = {
        x
