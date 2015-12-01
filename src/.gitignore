@@ -10,3 +10,5 @@ testall.log
 *.cmi
 *.diff
 *.dots.c
+*.outgdc
+*.exec
