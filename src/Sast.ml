@@ -2,7 +2,11 @@ open Ast
 
 module StringMap = Map.Make(String)
 
-type dataType = Num | String | Bool | Graph | Node | Dict | List | Void
+type dataType = | Num | String | Bool 
+                | Graph | Node 
+                | List of dataType (* val type *)
+                | Dict of dataType * dataType (* key type, val type *)
+                | Void
 
 type s_expr =
     NumLiteral of string  * dataType                (* 5 *)
@@ -14,7 +18,7 @@ type s_expr =
   | Binop of s_expr * op * s_expr * dataType        (* x + y *)
   | Assign of string * s_expr * dataType         (* x = 5; *)
   | AssignList of string * s_expr list * dataType   (* when a list of expressions is assigned to a variable *)
-  | DictAssign of  string * s_expr * dataType * dataType     (* key, value *)
+  | DictAssign of  s_expr * s_expr * dataType    (* key, value *)
   | Call of string * s_expr list * dataType
   | Access of string * s_expr  * dataType          (* for dict and list element access *)
   | MemberVar of string * string   * dataType      (* parent variable, the accessed member *)
@@ -31,8 +35,6 @@ type s_stmt =
     Block of s_stmt list
   | Expr of s_expr
   | Vdecl of dataType * string
-  | ListDecl of  dataType * string             (* type <id> *)
-  | DictDecl of dataType * dataType * string     (* type <id, id> *)
   | Return of s_expr                          (* return x (dataType) *)
   | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
   | For of string * string * s_stmt list       (* temp var, iterable var, var decls, stmts *)

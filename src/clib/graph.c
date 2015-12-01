@@ -32,16 +32,24 @@ int contains(graph_t *g, void *data, int (* comp)(void *a, void *b)) {
     return 0;
 }
 
-/* add a node to a g by pushing it to the front of the node list */
+/* add a node to g by iterating through the list, returning if the node is found, and if not, adding it to the end */
 void add_node(graph_t *g, node_t *node) {
     nodelist_t *n = (nodelist_t *)malloc(sizeof(nodelist_t));
     n->node = node;
-    n->next = g->nodes;
-    n->previous = NULL;
-    /* check if graph is currently empty */
-    if(g->nodes)
-        g->nodes->previous = n;
-    g->nodes = n;
+    nodelist_t *temp = g->nodes;
+    /* make temp point to last nodelist_t in g->nodes */
+    if(temp) {
+        while(temp->next) {
+            if(temp->node == node)
+                return;
+            temp = temp->next;
+        }
+        temp->next = n;
+    } else {
+        g->nodes = n;
+    }
+    n->previous = temp;
+    n->next = NULL;
     g->count++;
 }
 
@@ -69,7 +77,18 @@ int remove_node(graph_t *g, node_t *n) {
     return 0;
 }
 
-graph_t *add_graphs(graph_t *a, graph_t *b) {
+/* returns a graph containing all nodes in *a and all nodes in *b */
+graph_t *plus(const graph_t *a, const graph_t *b) {
+    graph_t *g = (graph_t *) malloc(sizeof(graph_t));
+    g->nodes = NULL;
+    g->count = 0;
+    plus_equals(g, a);
+    plus_equals(g, b);
+    return g;
+}
+
+/* adds all nodes from *b to *a. returns a */
+graph_t *plus_equals(graph_t *a, const graph_t *b) {
     nodelist_t *temp;
     for(temp = b->nodes; temp; temp = temp->next)
         add_node(a, temp->node);
@@ -78,7 +97,7 @@ graph_t *add_graphs(graph_t *a, graph_t *b) {
 
 /* removes all nodes of *right that exist in *left from *left */
 graph_t *subtract_graphs(graph_t *left, graph_t *right) {
-    nodelist_t *temp = right->nodes;
+    nodelist_t *temp;
     for(temp = right->nodes; temp; temp = temp->next) {
         printf("removing temp = %x\n", (int) temp);
         int i = remove_node(left, temp->node);
@@ -86,4 +105,12 @@ graph_t *subtract_graphs(graph_t *left, graph_t *right) {
             printf("not removed!\n");
     }
     return left;
+}
+
+graph_t *copy(const graph_t *src) {
+    graph_t *g = init_graph();
+    nodelist_t *temp;
+    for(temp = src->nodes; temp; temp = temp->next)
+        add_node(g, temp->node);
+    return g;
 }

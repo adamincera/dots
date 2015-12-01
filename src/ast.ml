@@ -11,7 +11,7 @@ type expr =
   | Binop of expr * op * expr
   | Assign of string * expr
   | AssignList of string * expr list (* when a list of expressions is assigned to a variable *)
-  | DictAssign of  string * expr (* key, value *)
+  | DictAssign of  expr * expr (* key, value *)
   | Call of string * expr list
   | Access of string * expr (* for dict and list element access *)
   | MemberVar of string * string (* parent variable, the accessed member *)

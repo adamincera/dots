@@ -22,6 +22,10 @@ void add_node(graph_t *graph, node_t *node);
 
 int remove_node(graph_t *graph, node_t *node);
 
-graph_t *add_graphs(graph_t *a, graph_t *b);
+graph_t *plus(const graph_t *a, const graph_t *b);
+
+graph_t *plus_equals(graph_t *a, const graph_t *b);
 
 graph_t *subtract_graphs(graph_t *left, graph_t *right);
+
+graph_t *copy(const graph_t *src);
