@@ -76,11 +76,13 @@ formal_list:
   | formal_list COMMA data_type ID { ($3, $4) :: $1 }
 
 /* Dictionary Formal Arguments */
+/* assigning  to a dict */
+/* ex. d = {"foo" : "blah", "bar" : "dd"} */
 dict_formal_list:
-    ID COLON expr { [DictAssign($1, $3)] }                                      /*   w : 5        */
-|   literal COLON expr {  [DictAssign(string_of_expr $1, $3)] }                                /*   "hello" : 5  */
-|   dict_formal_list COMMA ID COLON expr { DictAssign($3, $5) :: $1 }           /*   w : 5        */
-|   dict_formal_list COMMA literal COLON expr { DictAssign(string_of_expr $3, $5) :: $1 }
+    ID COLON expr { [DictAssign(Id($1), $3)] }                                      /*   w : 5        */
+|   literal COLON expr {  [DictAssign($1, $3)] }                 /*   "hello" : 5  */
+|   dict_formal_list COMMA ID COLON expr { DictAssign(Id($3), $5) :: $1 }           /*   w : 5        */
+|   dict_formal_list COMMA literal COLON expr { DictAssign($3, $5) :: $1 }
 
 /* comma separated list of operations on nodes
  * for use with graph declarations 
@@ -131,12 +133,12 @@ vdecl:
 /* PRIMITIVE INITIALIZERS */
 prim_decl_prefix:
 | prim_type ID { Vdecl($1, $2) }                                                   /* num x */
-| prim_type ID ASSIGN expr { Block([Vdecl($1, $2); Expr(Assign($2, $4))]) }                                       /* MOVE THESE  */
+| prim_type ID ASSIGN expr { Block([Vdecl($1, $2); Expr(Assign($2, $4))]) }        /* MOVE THESE  */
 
 /* NODE INITIALIZERS */
 node_decl_prefix:
 | NODE ID { Vdecl("node", $2) }                                                        /* node x;    */
-| NODE ID LPAREN expr RPAREN { Block([Vdecl("node", $2); Expr(Assign($2, $4))]) }                                     /* node x("Chicago") */
+| NODE ID LPAREN expr RPAREN { Block([Vdecl("node", $2); Expr(Assign($2, $4))]) }      /* node x("chicago") */                           /* node x("Chicago") */
 
 /* GRAPH INITIALIZERS */
 graph_decl_prefix:
@@ -161,7 +163,8 @@ stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { $2 :: $1 }
 
-/* statements are defined inside functions */
+/* statements are defined inside functions or executed like a script */
+/* a statement is just an action. ex. x = 5; */
 stmt:
    expr SEMI { Expr($1) } 
   | RETURN expr SEMI { Return($2) } 
