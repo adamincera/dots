@@ -22,8 +22,8 @@ let string_of_cfunc func =
 let translate_vdecl id = function
 | Sast.String -> "char *" ^ id ^ ";"
 | Sast.Num -> "float " ^ id ^ ";"
-| Sast.List(dtv) -> ""
-| Sast.Dict(dtk, dtv) -> "TODO"
+| Sast.List(dtv) -> "list todo"
+| Sast.Dict(dtk, dtv) -> "dict todo"
 | x -> raise (Failure ("invalid type in var declaration"))
 
 let string_of_fname = function
