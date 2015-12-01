@@ -8,10 +8,10 @@ module StringMap = Map.Make(String)
 let headers = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
 
 type translation_env = {
-            var_inds : int StringMap.t ref list;
-            var_types : Sast.dataType StringMap.t ref list;
+            var_inds : int StringMap.t ref list; (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
+            var_types : Sast.dataType StringMap.t ref list; (* maps a var name to its type  ex. x -> num *)
             func_inds : int StringMap.t ref list;
-            func_types : Sast.dataType StringMap.t ref list;
+            func_types : Sast.dataType StringMap.t ref list; (* maps a func name to its return type *)
             return_type : Sast.dataType
     }
 
@@ -191,19 +191,22 @@ let translate (env, functions, cmds) =
     | Sast.Binop(e1, op, e2, dt) -> "TODO"
     | Sast.Assign(v, e, dt) ->
         if not( (find_var v env.var_types) = get_expr_type e)
-        then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
+        then raise (Failure ("assignment exprecssion not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e)
     | Sast.AssignList(v, el, dt) -> "TODO"
     | Sast.DictAssign(k, v, dtk, dtv) -> "TODO"
-    | Sast.Call(func_name, el, dt) -> (match func_name with
+    | Sast.Call(func_name, el, dt) -> 
+        (match func_name with
         | "print" ->
-            let rec build_str fmt vals = function
-        | [] -> (fmt, vals)
-        | hd :: tl -> build_str (fmt ^ (dt_fmt(get_expr_type hd))) (vals ^ "," ^ (translate_expr env hd)) tl
-            in
-            let result = build_str "" "" el
-            in
-            "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
+          (* fmt is all the format types so far: ex. %s%f%f *)
+          (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
+          let rec build_str fmt vals = function
+          | [] -> (fmt, vals)
+          | hd :: tl -> build_str (fmt ^ (dt_fmt(get_expr_type hd))) (vals ^ "," ^ (translate_expr env hd)) tl
+              in
+              let result = build_str "" "" el
+              in
+              "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
 
         | fname -> (try
                string_of_int(find_var fname env.func_inds) ^ 
@@ -254,7 +257,7 @@ let translate (env, functions, cmds) =
                    string_of_cfunc main_func )
     
 
-  (* creates a new default environment var *)
+  (* creates a new default environment *)
   let create_env =
       let basic_env = 
       let bf_names = [ "print"; "range";] in
@@ -272,7 +275,6 @@ let translate (env, functions, cmds) =
 print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_types)));
 *)
 
-(* translate version *)
 
 let print_bindings m =
   let bindings = StringMap.bindings m in
@@ -282,10 +284,11 @@ let print_bindings m =
   in
   printer bindings
 
+(* translate version *)
 let _ =
   let lexbuf = Lexing.from_channel stdin in
-  let ast_prg = (Parser.program Scanner.token lexbuf) in
-  let sast_env = 
+  let ast_prg = (Parser.program Scanner.token lexbuf) in (* outputs the Ast from parsing and scanning *)
+  let sast_env = (* set up default environment *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
@@ -296,7 +299,7 @@ let _ =
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
   let prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in
-  let trans_env = 
+  let trans_env = (* set up default environ *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
