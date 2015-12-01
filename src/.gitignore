@@ -1,5 +1,5 @@
 exec
-gdc
+dotc
 parser.output
 parser.automaton
 parser.ml
