@@ -1,17 +1,19 @@
-type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
+type op = | Add | Sub | Mult | Div 
+          | Equal | Neq | Less | Leq | Greater | Geq 
+          | LogAnd (* && *)
+          | LogOr (* || *)
+
 type bool = True | False
 
 type expr =
     NumLiteral of string
   | StrLiteral of string
   | Boolean of bool
-  | LogAnd of expr * expr (* for use with && symbol *)
-  | LogOr of expr * expr (* for use with || symbol *)
   | Id of string
   | Binop of expr * op * expr
   | Assign of string * expr
   | AssignList of string * expr list (* when a list of expressions is assigned to a variable *)
-  | DictAssign of  expr * expr (* key, value *)
+  | DictAssign of  expr * expr (* key, value  --> ex. "foo" : 8 *)
   | Call of string * expr list
   | Access of string * expr (* for dict and list element access *)
   | MemberVar of string * string (* parent variable, the accessed member *)
@@ -70,8 +72,6 @@ let rec string_of_expr = function
     NumLiteral(l) -> l
   | StrLiteral(l) -> "\"" ^ l ^ "\""
   | Boolean(b) -> if b = True then "true" else "false"
-  | LogOr (e1, e2) -> string_of_expr e1 ^ " || " ^ string_of_expr e2 
-  | LogAnd (e1, e2) -> string_of_expr e1 ^ " && " ^ string_of_expr e2 
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
@@ -85,7 +85,11 @@ let rec string_of_expr = function
           | Less -> "<" 
           | Leq -> "<=" 
           | Greater -> ">" 
-          | Geq -> ">=") ^ " " ^
+          | Geq -> ">="
+          | LogAnd -> "&&"
+          | LogOr -> "||"
+        ) ^ " " ^
+
       string_of_expr e2
   | Undir (s1, s2) -> s1 ^ " -- " ^ s2  
   | Dir (s1, s2) -> s1 ^ " --> " ^ s2

@@ -84,8 +84,6 @@ let get_expr_type = function
 | Sast.NumLiteral(v, dt) -> dt
 | Sast.StrLiteral(v, dt) -> dt
 | Sast.Boolean(v, dt) -> dt
-| Sast.LogAnd(e1, e2, dt) -> dt
-| Sast.LogOr(e1, e2, dt) -> dt
 | Sast.Id(v, dt) -> dt
 | Sast.Binop(e1, op, e2, dt) -> dt
 | Sast.Assign(v, e, dt) -> Sast.Void
@@ -109,8 +107,6 @@ let rec expr env = function
 | Ast.NumLiteral(v) -> Sast.NumLiteral(v, Sast.Num)
 | Ast.StrLiteral(v) -> Sast.StrLiteral(v, Sast.String)
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
-| Ast.LogAnd(e1, e2) -> Sast.LogAnd(expr env e1, expr env e2, Sast.Bool)
-| Ast.LogOr(e1, e2) -> Sast.LogOr(expr env e1, expr env e2, Sast.Bool)
 | Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
 | Ast.Binop(e1, op, e2) -> Sast.Binop(expr env e1, op, expr env e2, Sast.String) (* TODO: figure out the type of the expression and use that *)
 | Ast.Assign(v, e) -> (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
@@ -198,8 +194,6 @@ let translate (env, functions, cmds) =
     | Sast.NumLiteral(l, dt) -> l
     | Sast.StrLiteral(l, dt) -> "\"" ^ l ^ "\""
     | Sast.Boolean(b, dt) -> if b = Ast.True then "true" else "false"
-    | Sast.LogAnd(e1, e2, dt) -> "TODO"
-    | Sast.LogOr(e1, e2, dt) -> "TODO"
     | Sast.Id(v, dt) -> 
       (try
            "l" ^ string_of_int(find_var v env.var_inds)
@@ -314,7 +308,7 @@ let _ =
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
   let prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in
-  (* comment out for real: *) print_endline ("converted ast to sast");
+  (* comment out for real: *) (* print_endline ("converted ast to sast"); *)
   let trans_env = (* set up default environ *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in

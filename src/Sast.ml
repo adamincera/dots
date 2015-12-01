@@ -12,8 +12,6 @@ type s_expr =
     NumLiteral of string  * dataType                (* 5 *)
   | StrLiteral of string  * dataType                (* "Hello" *)
   | Boolean of Ast.bool * dataType                      (* True *)
-  | LogAnd of s_expr * s_expr * dataType            (* for use with && symbol *)
-  | LogOr of s_expr * s_expr * dataType             (* for use with || symbol *)
   | Id of string * dataType                         (* x *)
   | Binop of s_expr * op * s_expr * dataType        (* x + y *)
   | Assign of string * s_expr * dataType         (* x = 5; *)
