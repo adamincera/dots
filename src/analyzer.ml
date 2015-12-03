@@ -101,6 +101,9 @@ let get_expr_type = function
 | Sast.NoOp(v, dt) -> Sast.Void
 | Sast.Noexpr -> Sast.Void
 
+(******************************)
+(* CONVERTS AN AST TO AN SAST *)
+(******************************)
 let convert_ast prog env =
 (* convert an Ast.expr object to Sast.expr object *)
 let rec expr env = function
@@ -187,6 +190,9 @@ let dt_fmt = function
 | Sast.List(dt) -> "" (* TODO *)
 | Sast.Void -> "" (* TODO *)
 
+(**********************)
+(* TRANSLATES AN SAST *)
+(**********************)
 (* the meat of the compiler *)
 (* actually converts Sast objects into strings of C code *)
 let translate (env, functions, cmds) =
@@ -279,10 +285,6 @@ let translate (env, functions, cmds) =
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
         basic_env
-
-(* How to print all the bindings in locals_types: 
-print_endline ( "locals: " ^ List.fold_left (fun acc x -> acc ^ x ^ " ") "" (List.map (fun kv -> fst kv ^ ":" ^ snd kv) (StringMap.bindings !locals_types)));
-*)
 
 
 let print_bindings m =
