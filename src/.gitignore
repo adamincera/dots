@@ -1,5 +1,5 @@
 exec
-gdc
+dotc
 parser.output
 parser.automaton
 parser.ml
@@ -9,3 +9,6 @@ testall.log
 *.cmo
 *.cmi
 *.diff
+*.dots.c
+*.outgdc
+*.exec

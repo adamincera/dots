@@ -28,6 +28,7 @@ args = parser.parse_args()
 #########
 
 path = r'dtest'
+summary_results = {}
 for dir_entry in os.listdir(path):
     filepath = os.path.join(path, dir_entry)
     if os.path.isfile(filepath) and filepath[-5:] == '.dots':
@@ -43,6 +44,7 @@ for dir_entry in os.listdir(path):
                 comp_success = True
             else:
                 print 'COMPILATION FAILED'
+                summary_results[dir_entry[:-5]] = 'fail'
         except:
             print 'compile executable. Stop.'
             continue;
@@ -66,14 +68,26 @@ for dir_entry in os.listdir(path):
 
                 if diff_output.strip() == '':
                     print 'PASSED TEST'
+                    summary_results[dir_entry[:-5]] = 'pass'
                 else: 
                     print 'FAILED TEST....writing diff files'
+                    summary_results[dir_entry[:-5]] = 'fail'
                     with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
                         output_diff.write(diff_output.strip())
             else:
                 print "FAIL: no .out file exists to check against"
 
 print('\n Tests completed.')
+print('\n Summary below (checked boxes = performed as expected): \n')
+
+#################
+# PRINT SUMMARY #
+#################
+for test_name in sorted(summary_results):
+    if summary_results[test_name] == 'pass':
+        print('[X] ' + test_name)
+    else:
+        print('[ ] ' + test_name)
 
 ############
 # CLEAN-UP #

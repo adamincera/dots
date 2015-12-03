@@ -19,3 +19,9 @@ Order doesn't matter for flags.
 
 Adding tests:
 Testing script will ignore lines that begin with newline or lines that begin with ***, which denotes a comment. Lines that begin with f** are expected to fail, and if they pass, print an appropriate error message. Add sequences of tokens to .txt files, or add additional .txt files. 
+
+Other tests:
+before running runtest.py,
+
+pip install -r requirements.txt
+

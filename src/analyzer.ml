@@ -63,20 +63,20 @@ let find_var var map_list =
 | "bool" -> Sast.Bool
 | "graph" -> Sast.Graph
 | "node" -> Sast.Node
-| "dict" -> Sast.Dict
-| "list" -> Sast.List
+| "dict" -> Sast.Dict(Sast.Void, Sast.Void)
+| "list" -> Sast.List(Sast.Void)
 | "void" -> Sast.Void
 | x -> raise (Failure ("unknown type: " ^ x))
 
 (* converts a dataType to a string *)
-let type_to_str = function
+let rec type_to_str = function
 | Sast.Num -> "num"
 | Sast.String -> "string"
 | Sast.Bool -> "bool"
 | Sast.Graph -> "graph"
 | Sast.Node -> "node"
-| Sast.Dict -> "dict"
-| Sast.List -> "list"
+| Sast.Dict(dtk, dtv) -> "dict <" ^ type_to_str dtk ^ ", " ^ type_to_str dtv ^ ">"
+| Sast.List(dt) -> "list <" ^ type_to_str dt ^ ">"
 | Sast.Void -> "void"
 
 (* returns the datatype of an Sast expressions *)
@@ -84,13 +84,11 @@ let get_expr_type = function
 | Sast.NumLiteral(v, dt) -> dt
 | Sast.StrLiteral(v, dt) -> dt
 | Sast.Boolean(v, dt) -> dt
-| Sast.LogAnd(e1, e2, dt) -> dt
-| Sast.LogOr(e1, e2, dt) -> dt
 | Sast.Id(v, dt) -> dt
 | Sast.Binop(e1, op, e2, dt) -> dt
 | Sast.Assign(v, e, dt) -> Sast.Void
 | Sast.AssignList(s, el, dt) -> Sast.Void
-| Sast.DictAssign(k, v, dtk, dtv) -> Sast.Void
+| Sast.DictAssign(k, v, dt) -> Sast.Void
 | Sast.Call(v, el, dt) -> dt
 | Sast.Access(v, e, dt) -> dt
 | Sast.MemberVar(v, m, dt) -> dt
@@ -109,8 +107,6 @@ let rec expr env = function
 | Ast.NumLiteral(v) -> Sast.NumLiteral(v, Sast.Num)
 | Ast.StrLiteral(v) -> Sast.StrLiteral(v, Sast.String)
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
-| Ast.LogAnd(e1, e2) -> Sast.LogAnd(expr env e1, expr env e2, Sast.Bool)
-| Ast.LogOr(e1, e2) -> Sast.LogOr(expr env e1, expr env e2, Sast.Bool)
 | Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
 | Ast.Binop(e1, op, e2) -> Sast.Binop(expr env e1, op, expr env e2, Sast.String) (* TODO: figure out the type of the expression and use that *)
 | Ast.Assign(v, e) -> (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
@@ -120,7 +116,7 @@ let rec expr env = function
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
 | Ast.AssignList(v, el) -> Sast.AssignList(v, List.map (fun e -> expr env e) el, Sast.Void) (* TODO: figure out the type of v and check *)
-| Ast.DictAssign(v, e) -> Sast.DictAssign(v, expr env e, Sast.Void, Sast.Void) (* TODO: figure out the type of v and check *)
+| Ast.DictAssign(v, e) -> Sast.DictAssign(expr env v, expr env e, Sast.Void) (* TODO: figure out the type of v and check *)
 | Ast.Call(f, el) -> Sast.Call(f, List.map (fun e -> expr env e) el, Sast.String) (* TODO: figure out the return type and use that *)
 | Ast.Access(v, e) -> Sast.Access(v, expr env e, Sast.String) (* TODO: figure out the type of v and check *)
 | Ast.MemberVar(v, m) -> Sast.MemberVar(v, m, Sast.String) (* TODO: figure out the type of v and check *)
@@ -145,8 +141,25 @@ let rec stmt env = function
           | Failure(f) -> raise (Failure (f) ) 
     );
     Sast.Vdecl(str_to_type dt, id)
-| Ast.ListDecl(dt, v) -> Sast.ListDecl(str_to_type dt, v)
-| Ast.DictDecl(dtk, dtv, v) -> Sast.DictDecl(str_to_type dtk, str_to_type dtv, v)
+| Ast.ListDecl(dt, id) -> (* Sast.ListDecl(str_to_type dt, v) *)
+    let vtype = Sast.List(str_to_type dt) in
+    (try 
+        StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
+     with | Not_found -> (List.hd env.var_types) := StringMap.add id vtype !(List.hd env.var_types); (* add type map *)
+                (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+          | Failure(f) -> raise (Failure (f) ) 
+    );
+    Sast.Vdecl(vtype, id)
+| Ast.DictDecl(dtk, dtv, id) -> (*Sast.DictDecl(str_to_type dtk, str_to_type dtv, v)*)
+    let vtype = Sast.Dict(str_to_type dtk, str_to_type dtv) in
+    (try
+        StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
+     with | Not_found -> (List.hd env.var_types) := StringMap.add id vtype !(List.hd env.var_types);
+                (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds);
+          | Failure(f) -> raise (Failure (f) )
+    ); 
+    Sast.Vdecl(vtype, id)
+(*| _ -> failwith "Unknown") *)
 | Ast.Return(e) -> Sast.Return(expr env e)
 | Ast.If(cond, s1, s2) -> Sast.If(expr env cond, stmt env s1, stmt env s2)
 | Ast.For(v1, v2, sl) -> Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
@@ -170,18 +183,17 @@ let dt_fmt = function
 | Sast.Bool -> "%d"
 | Sast.Graph -> "" (* TODO *)
 | Sast.Node -> "" (* TODO *)
-| Sast.Dict -> "" (* TODO *)
-| Sast.List -> "" (* TODO *)
+| Sast.Dict(dtk, dtv) -> "" (* TODO *)
+| Sast.List(dt) -> "" (* TODO *)
 | Sast.Void -> "" (* TODO *)
 
 (* the meat of the compiler *)
+(* actually converts Sast objects into strings of C code *)
 let translate (env, functions, cmds) =
     let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> l
     | Sast.StrLiteral(l, dt) -> "\"" ^ l ^ "\""
     | Sast.Boolean(b, dt) -> if b = Ast.True then "true" else "false"
-    | Sast.LogAnd(e1, e2, dt) -> "TODO"
-    | Sast.LogOr(e1, e2, dt) -> "TODO"
     | Sast.Id(v, dt) -> 
       (try
            "l" ^ string_of_int(find_var v env.var_inds)
@@ -194,7 +206,7 @@ let translate (env, functions, cmds) =
         then raise (Failure ("assignment exprecssion not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e)
     | Sast.AssignList(v, el, dt) -> "TODO"
-    | Sast.DictAssign(k, v, dtk, dtv) -> "TODO"
+    | Sast.DictAssign(k, v, dt) -> "TODO"
     | Sast.Call(func_name, el, dt) -> 
         (match func_name with
         | "print" ->
@@ -236,11 +248,8 @@ let translate (env, functions, cmds) =
         StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
       with | Not_found -> (List.hd env.var_types) := StringMap.add id t !(List.hd env.var_types); (* add type map *)
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
-                print_endline("did decl");
                 translate_vdecl ("l" ^ string_of_int(find_var id env.var_inds)) t        
            | Failure(f) -> raise (Failure (f) ) )
-    | Sast.ListDecl(t, v) -> "TODO"
-    | Sast.DictDecl(kt, vt, v) -> "TODO"
     | Sast.Return(e) -> "TODO"
     | Sast.If (cond, s1, s2) -> "TODO"
     | Sast.For (temp, iter, sl) -> "TODO"
@@ -263,7 +272,7 @@ let translate (env, functions, cmds) =
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
-      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List, "range")]) in
+      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List(Sast.Num), "range")]) in
      {var_types = [ref StringMap.empty];
                        var_inds = [ref StringMap.empty];
                        func_types = [bf_type_map];
@@ -292,18 +301,19 @@ let _ =
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
-      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List, "range")]) in
+      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List(Sast.Num), "range")]) in
      {var_types = [ref StringMap.empty];
                        var_inds = [ref StringMap.empty];
                        func_types = [bf_type_map];
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
   let prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in
+  (* comment out for real: *) (* print_endline ("converted ast to sast"); *)
   let trans_env = (* set up default environ *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
-      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List, "range")]) in
+      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List(Sast.Num), "range")]) in
      {var_types = [ref StringMap.empty];
                        var_inds = [ref StringMap.empty];
                        func_types = [bf_type_map];
