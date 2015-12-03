@@ -74,7 +74,11 @@ let op_to_str = function
 | LogAnd -> "&&"
 | LogOr -> "||"
 
-let translate (libs, globals, cfuncs) =
+let translate (globals, cfuncs) = 
+    (* "\"graph.h\"" *)
+    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
+    in     
+
     let rec translate_expr = function
     | Literal(dt, v) ->
        (match dt with
@@ -121,14 +125,12 @@ let translate (libs, globals, cfuncs) =
         "\n}\n"
     in
 
-    (* ask Rachel how this is being handled i.e. should we just hardcode all header files? What is in argument libs? *)
-    (* assuming that lib is a string of library name, ex: stdio.h *)
-    let translate_lib lib =
-        "#include <" ^ lib ^ ">\n"
-    in 
 
-    
-    
+    (* now we are going to translate a program *)
+    (String.concat "\n" (List.map (fun f -> "#include " ^ f) libs)) ^ 
+    (String.concat "\n" (List.map translate_stmt globals)) ^ 
+    (String.concat "\n" (List.map translate_func cfuncs))
+    ;
     print_endline("foo")
    (* List.map print_endline (List.map translate_expr cfuncs.cbody) *)
 
