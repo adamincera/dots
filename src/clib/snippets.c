@@ -89,3 +89,17 @@ g1 = plus(g2, g3);
 
 /* g1 += g2 */
 plus_equals(g1, g2);
+
+/* list<num> l = [1, 2, 3] */
+list_t *l = NULL;
+int *i;
+
+i = (int *) malloc(sizeof(int));
+*i = 1;
+l = add_back(l, i);
+i = (int *) malloc(sizeof(int));
+*i = 2;
+l = add_back(l, i);
+i = (int *) malloc(sizeof(int));
+*i = 3;
+l = add_back(l, i);
