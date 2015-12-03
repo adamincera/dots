@@ -27,7 +27,7 @@ type cstmt =
 type c_func = { crtype : string; (* c return type *)
                 cfname : string; (* function name *)
                 cformals : (string * string) list; (* (data type, id) list *)
-                cbody : string list; (* yo this should be cstmt *)
+                cbody : cstmt list; (* yo this should be cstmt *)
               }
 
 type cprogram = {
@@ -35,13 +35,6 @@ type cprogram = {
                     globals : cstmt list; (* global variables -- Note: should ONLY be Vdecl list *)
                     cfuncs : c_func list; 
                 }
-
-let string_of_cfunc func = 
-    func.crtype ^ " " ^ func.cfname ^ " (" ^ 
-    String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) func.cformals) ^
-     ")\n{\n" ^
-    String.concat "\n" func.cbody ^
-    "\n}\n"
 
 (* 
    creates a variable declaration statement based on the variable's data type
@@ -74,57 +67,62 @@ let op_to_str = function
 | LogAnd -> "&&"
 | LogOr -> "||"
 
+let rec translate_expr = function
+| Literal(dt, v) ->
+   (match dt with
+    | Float -> v
+    | Int -> v
+    | Cstring -> "\"" ^ v ^ "\""
+    | Array(adt) -> v
+   )
+
+| Id(id) -> "v" ^ string_of_int(id)
+| Binop(e1, op, e2) -> translate_expr e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_expr e2
+| Assign(id, e) -> "v" ^ string_of_int(id) ^ " = " ^  translate_expr e
+| Call(id, el) -> "f" ^ string_of_int(id) ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
+| Access(id, e) -> "v" ^ string_of_int(id) ^ "[" ^ translate_expr e ^ "]"
+| Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_expr e ^ ")"
+| Noexpr -> ""
+
+let rec translate_stmt = function
+| Block(sl) -> String.concat "\n" (List.map translate_stmt sl)
+| Expr(e) -> translate_expr e ^ ";"
+| Vdecl(dt, id) -> type_to_str dt ^ " v" ^ string_of_int(id) ^ ";"
+| Return(e) -> "return " ^ translate_expr e ^ ";"
+| If(cond, sl1, sl2) -> "if (" ^ translate_expr cond ^ ") {\n" ^
+    String.concat "\n" (List.map translate_stmt sl1) ^
+    "} else {\n" ^
+    String.concat "\n" (List.map translate_stmt sl2) ^
+    "}"
+| For(init, cond, incr, sl) -> "for (" ^ translate_expr init ^ "; " ^
+    translate_expr cond ^ "; " ^
+    translate_expr incr ^ ") {\n" ^
+    String.concat "\n" (List.map translate_stmt sl) ^
+    "}"
+| While(cond, sl) -> "while (" ^ translate_expr cond ^ ") {\n" ^
+    String.concat "\n" (List.map translate_stmt sl) ^
+    "}"
+
+
+let translate_func func = 
+    func.crtype ^ " " ^ func.cfname ^ " (" ^ 
+    String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) func.cformals) ^
+    ")\n{\n" ^
+    String.concat "\n" (List.map translate_stmt func.cbody) ^
+    "\n}\n"
+
+(* eventually won't be used by analyzer.ml *)
+let string_of_cfunc func = 
+    func.crtype ^ " " ^ func.cfname ^ " (" ^ 
+    String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) func.cformals) ^
+     ")\n{\n" ^
+    (String.concat "\n" (List.map translate_stmt func.cbody)) ^
+    "\n}\n"
+
 let translate (globals, cfuncs) = 
     (* "\"graph.h\"" *)
     let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
     in     
-
-    let rec translate_expr = function
-    | Literal(dt, v) ->
-       (match dt with
-        | Float -> v
-        | Int -> v
-        | Cstring -> "\"" ^ v ^ "\""
-        | Array(adt) -> v
-       )
-
-    | Id(id) -> "v" ^ string_of_int(id)
-    | Binop(e1, op, e2) -> translate_expr e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_expr e2
-    | Assign(id, e) -> "v" ^ string_of_int(id) ^ " = " ^  translate_expr e
-    | Call(id, el) -> "f" ^ string_of_int(id) ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
-    | Access(id, e) -> "v" ^ string_of_int(id) ^ "[" ^ translate_expr e ^ "]"
-    | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_expr e ^ ")"
-    | Noexpr -> ""
-    in
-
-    let rec translate_stmt = function
-    | Block(sl) -> String.concat "\n" (List.map translate_stmt sl)
-    | Expr(e) -> translate_expr e ^ ";"
-    | Vdecl(dt, id) -> type_to_str dt ^ " v" ^ string_of_int(id) ^ ";"
-    | Return(e) -> "return " ^ translate_expr e ^ ";"
-    | If(cond, sl1, sl2) -> "if (" ^ translate_expr cond ^ ") {\n" ^
-        String.concat "\n" (List.map translate_stmt sl1) ^
-        "} else {\n" ^
-        String.concat "\n" (List.map translate_stmt sl2) ^
-        "}"
-    | For(init, cond, incr, sl) -> "for (" ^ translate_expr init ^ "; " ^
-        translate_expr cond ^ "; " ^
-        translate_expr incr ^ ") {\n" ^
-        String.concat "\n" (List.map translate_stmt sl) ^
-        "}"
-    | While(cond, sl) -> "while (" ^ translate_expr cond ^ ") {\n" ^
-        String.concat "\n" (List.map translate_stmt sl) ^
-        "}"
-    in
-
-    let translate_func func = 
-        func.crtype ^ " " ^ func.cfname ^ " (" ^ 
-        String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) func.cformals) ^
-        ")\n{\n" ^
-        String.concat "\n" func.cbody ^
-        "\n}\n"
-    in
-
 
     (* now we are going to translate a program *)
     (String.concat "\n" (List.map (fun f -> "#include " ^ f) libs)) ^ 
