@@ -245,10 +245,10 @@ let translate (env, functions, cmds) =
 
     let rec translate_stmt env = function 
     | Sast.Block(sl) -> (match sl with
-        | [] -> ""
+        | [] -> Block([Expr(Noexpr)])
         | hd :: tl -> translate_stmt env hd ^ translate_stmt env (Sast.Block(tl)) 
     )
-    | Sast.Expr(e) -> translate_expr env e ^ ";"
+    | Sast.Expr(e) -> Expr(translate_expr env e) 
     | Sast.Vdecl(t, id) ->
       (try 
         StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
@@ -256,10 +256,10 @@ let translate (env, functions, cmds) =
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
                 translate_vdecl ("l" ^ string_of_int(find_var id env.var_inds)) t        
            | Failure(f) -> raise (Failure (f) ) )
-    | Sast.Return(e) -> "TODO"
-    | Sast.If (cond, s1, s2) -> "TODO"
-    | Sast.For (temp, iter, sl) -> "TODO"
-    | Sast.While (cond, sl) -> "TODO"
+    | Sast.Return(e) -> Expr(Noexpr) (*TODO*)
+    | Sast.If (cond, s1, s2) -> Expr(Noexpr) (*TODO*)
+    | Sast.For (temp, iter, sl) -> Expr(Noexpr) (*TODO*)
+    | Sast.While (cond, sl) -> Expr(Noexpr) (*TODO*)
     in
 
     let main_func = { crtype = "int";
