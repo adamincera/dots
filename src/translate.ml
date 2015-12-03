@@ -120,6 +120,14 @@ let translate (libs, globals, cfuncs) =
         String.concat "\n" func.cbody ^
         "\n}\n"
     in
+
+    (* ask Rachel how this is being handled i.e. should we just hardcode all header files? What is in argument libs? *)
+    (* assuming that lib is a string of library name, ex: stdio.h *)
+    let translate_lib lib =
+        "#include <" ^ lib ^ ">\n"
+    in 
+
+    
     
     print_endline("foo")
    (* List.map print_endline (List.map translate_expr cfuncs.cbody) *)
