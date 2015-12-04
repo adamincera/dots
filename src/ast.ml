@@ -61,6 +61,10 @@ type program = { funcs : func_decl list;
 
 (* type program = string list * func_decl list *)
 
+/////////////////////////////////////////////////////////////////////////////
+                              /* PRETTY PRINTER */
+/////////////////////////////////////////////////////////////////////////////
+
 (* prepends prelist at the head of postlst *)
 let rec base_concat postlst = function
   | [] -> postlst

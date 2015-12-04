@@ -12,7 +12,7 @@ type translation_env = {
             var_types : Sast.dataType StringMap.t ref list; (* maps a var name to its type  ex. x -> num *)
             func_inds : int StringMap.t ref list;
             func_types : Sast.dataType StringMap.t ref list; (* maps a func name to its return type *)
-            return_type : Sast.dataType
+            return_type : Sast.dataType (* what should the return type be of the current scope *)
     }
 
 (* val enum : int -> 'a list -> (int * 'a) list *)
@@ -40,7 +40,8 @@ let find_max_index map =
     in
     max 0 bindings
 
-(* returns the value associated with a given key,
+(* 
+   returns the value associated with a given key,
    traversing through the list of maps until it finds the
    first occurrence of the key, or raises an error if none of
    the maps contain that key
@@ -102,7 +103,8 @@ let get_expr_type = function
 | Sast.Noexpr -> Sast.Void
 
 (******************************)
-(* CONVERTS AN AST TO AN SAST *)
+(* CONVERTS AN AST TO AN SAST *) 
+(* STOP hoho time *) 
 (******************************)
 let convert_ast prog env =
 (* convert an Ast.expr object to Sast.expr object *)
@@ -111,11 +113,18 @@ let rec expr env = function
 | Ast.StrLiteral(v) -> Sast.StrLiteral(v, Sast.String)
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
 | Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
-| Ast.Binop(e1, op, e2) -> Sast.Binop(expr env e1, op, expr env e2, Sast.String) (* TODO: figure out the type of the expression and use that *)
+| Ast.Binop(e1, op, e2) -> 
+    Sast.Binop(expr env e1, op, expr env e2, Sast.String) (* TODO: figure out the type of the expression and use that *)
 | Ast.Assign(v, e) -> (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
-      let s_e = expr env e in
-      let e_dt = get_expr_type s_e in
-      if not( (find_var v env.var_types) = e_dt)
+      let s_e = expr env e in (* func rec until it knows datatype -- sast version of ast expr e *)
+      let e_dt = get_expr_type s_e in (* data type of that sast expr with function get_expr_type*)
+      (try        (*sees if variable defined*)
+          (find_var v env.var_inds)
+       with
+       | Not_found -> raise (Failure("undeclared variable: " ^ v))
+      )
+      in
+      if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
 | Ast.AssignList(v, el) -> Sast.AssignList(v, List.map (fun e -> expr env e) el, Sast.Void) (* TODO: figure out the type of v and check *)
@@ -176,8 +185,10 @@ let fdecl env func =
     Sast.s_body = List.map (fun s -> stmt env s) func.body
   }
 in
-{Sast.s_funcs = List.map (fun f -> fdecl env f) prog.funcs;
- Sast.s_cmds = List.map (fun s -> stmt env s) prog.cmds}
+{
+  Sast.s_funcs = List.map (fun f -> fdecl env f) prog.funcs;
+  Sast.s_cmds = List.map (fun s -> stmt env s) prog.cmds
+}
 
 (* get printf fmt string for Sast.dataType types *)
 let dt_fmt = function
@@ -193,6 +204,7 @@ let dt_fmt = function
 (**********************)
 (* TRANSLATES AN SAST *)
 (**********************)
+
 (* the meat of the compiler *)
 (* actually converts Sast objects into strings of C code *)
 let translate (env, functions, cmds) =
