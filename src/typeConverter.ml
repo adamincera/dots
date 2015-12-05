@@ -35,25 +35,25 @@ let rec expr env = function
             (match e2_dt with
               | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Num)
               | String -> Sast.Binop(s_e1,op,s_e2,Sast.String)
-              | _ -> raise (Failure("wrong type dummy: Num"))
+              | _ -> raise (Failure("wrong type: Num + ? "))
             )
         |  String -> 
             (match e2_dt with
               | Num -> Sast.Binop(s_e1,op,s_e2,Sast.String)
               | String -> Sast.Binop(s_e1,op,s_e2,Sast.String)
-              | _ -> "failure"
+              | _ -> raise (Failure("wrong type: String + ? "))
             )
         |  Graph -> 
             (match e2_dt with
               | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
               | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
-              | _ -> "failure"
+              | _ -> raise (Failure("wrong type: Graph + ? "))
             )
         |  Node -> 
             (match e2_dt with
                   | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
                   | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
-                  | _ -> "failure"
+                  | _ -> raise (Failure("wrong type: Node + ? "))
             )
         |  List -> 
             (match e2_dt with
@@ -61,11 +61,24 @@ let rec expr env = function
                           if (e1_dt = e2_dt) then
                             Sast.Binop(s_e1,op,s_e2,Sast.List)
                           else 
-                            "failure"
-                      | _ -> "failure"
+                            raise (Failure("wrong type: List + List<?> "))
+                      | _ -> raise (Failure("wrong type: List + ? "))
             )
-        |  _ -> "signify particular expr. shouldn't work"
-    | Sub -> expr
+        |  _ -> "Expr using + has incompatible types"
+    | Sub -> 
+     (match e1_dt with
+        |  Num ->
+            (match e2_dt with
+              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Num)
+              | _ -> raise (Failure("wrong type: Num - ? "))
+            )
+        |  Graph -> 
+            (match e2_dt with
+              | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
+              | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
+              | _ -> raise (Failure("wrong type: Graph - ? "))
+            )
+        |  _ -> "Expr using - has incompatible types"
     | Mult -> expr
     | Div -> expr
     | Equal -> expr
