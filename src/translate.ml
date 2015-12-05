@@ -1,18 +1,19 @@
 (* c AST is a library that handles c Asts pretty prints a c file *)
+open Sast
 module StringMap = Map.Make(String)
 
-type cop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq
-           | Greater | Geq | LogAnd | LogOr
+(* type cop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq
+           | Greater | Geq | LogAnd | LogOr *)
 
-type ctype = | Float | Int | Cstring | Array of ctype
+type ctype = | Float | Int | Cstring | Array of ctype | Void
 
 type cexpr = 
 | Literal of ctype * string
-| Id of int                           (* ids are ints ex. Id(2) -> v2 *)
-| Binop of cexpr * cop * cexpr
+| Id of ctype * int                   (* ids are ints ex. Id(2) -> v2 *)
+| Binop of ctype * cexpr * op * cexpr
 | Assign of int * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
-| Call of int * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
-| Access of int * cexpr               (* array access: id[cexpr] *)
+| Call of ctype * int * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
+| Access of ctype * int * cexpr               (* array access: id[cexpr] *)
 | Cast of ctype * cexpr               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
 | Noexpr
 
@@ -72,6 +73,7 @@ let rec type_to_str = function
 | Int -> "int"
 | Cstring -> "char *"
 | Array(dt) -> type_to_str dt ^ "[]"
+| Void -> "void"
 
 let op_to_str = function
 | Add -> "+"
@@ -94,13 +96,14 @@ let rec translate_expr = function
     | Int -> v
     | Cstring -> "\"" ^ v ^ "\""
     | Array(adt) -> v
+    | Void -> raise (Failure "literals cannot have type 'Void'")
    )
 
-| Id(id) -> "v" ^ string_of_int(id)
-| Binop(e1, op, e2) -> translate_expr e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_expr e2
+| Id(dt, id) -> "v" ^ string_of_int(id)
+| Binop(dt, e1, op, e2) -> translate_expr e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_expr e2
 | Assign(id, e) -> "v" ^ string_of_int(id) ^ " = " ^  translate_expr e
-| Call(id, el) -> "f" ^ string_of_int(id) ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
-| Access(id, e) -> "v" ^ string_of_int(id) ^ "[" ^ translate_expr e ^ "]"
+| Call(dt, id, el) -> "f" ^ string_of_int(id) ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
+| Access(dt, id, e) -> "v" ^ string_of_int(id) ^ "[" ^ translate_expr e ^ "]"
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_expr e ^ ")"
 | Noexpr -> ""
 
@@ -139,7 +142,7 @@ let string_of_cfunc func =
     (String.concat "\n" (List.map translate_stmt func.cbody)) ^
     "\n}\n"
 
-let translate (globals, cfuncs) = 
+let translate_c (globals, cfuncs) = 
     (* "\"graph.h\"" *)
     let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
     in     
@@ -148,7 +151,6 @@ let translate (globals, cfuncs) =
     (String.concat "\n" (List.map (fun f -> "#include " ^ f) libs)) ^ 
     (String.concat "\n" (List.map translate_stmt globals)) ^ 
     (String.concat "\n" (List.map translate_func cfuncs))
-    ;
-    print_endline("foo")
+
    (* List.map print_endline (List.map translate_expr cfuncs.cbody) *)
 

@@ -1,7 +1,9 @@
 (*ties together parsing scanning ast sast the whole fucking thing *)
 open Ast
 open Sast
+open TypeConverter
 open Translate
+open Analyzer
 
 (* translate version *)
 let _ =
@@ -17,8 +19,8 @@ let _ =
                        func_types = [bf_type_map];
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
-  let prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in
-  (* comment out for real: *) (* print_endline ("converted ast to sast"); *)
+  let sast_prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in
+  (*comment out for real: *) print_endline ("converted ast to sast"); 
   let trans_env = (* set up default environ *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
@@ -29,7 +31,10 @@ let _ =
                        func_types = [bf_type_map];
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
-  translate (trans_env, prg.s_funcs, prg.s_cmds)
+  let main = translate (trans_env, sast_prg.s_funcs, sast_prg.s_cmds) in
+  let cprg = {libs = ["<stdio.h>"]; globals = [] ; cfuncs = [main]} in
+  print_endline (translate_c(cprg.globals, cprg.cfuncs))
+
    (* print_endline (String.concat "\n" (List.map string_of_stmt (List.rev prg.cmds))) *)
 
 (* pretty printing version *)

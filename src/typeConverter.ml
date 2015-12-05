@@ -4,6 +4,7 @@
 (******************************)
 open Ast
 open Sast
+open Analyzer
 
 let convert_ast prog env =
 (* convert an Ast.expr object to Sast.expr object *)
@@ -13,7 +14,7 @@ let rec expr env = function
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
 | Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
 | Ast.Binop(e1, op, e2) -> 
-    Sast.Binop(expr env e1, op, expr env e2, Sast.String) (* TODO: figure out the type of the expression and use that *)
+    Sast.Binop(expr env e1, Add, expr env e2, Sast.String) (* TODO: figure out the type of the expression and use that *)
 | Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
       let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
       let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
@@ -21,8 +22,7 @@ let rec expr env = function
           (find_var v env.var_inds)
        with
        | Not_found -> raise (Failure("undeclared variable: " ^ v))
-      )
-      in
+      );
       if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
