@@ -1,3 +1,4 @@
+(* c AST is a library that handles c Asts pretty prints a c file *)
 module StringMap = Map.Make(String)
 
 type cop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq
@@ -7,12 +8,12 @@ type ctype = | Float | Int | Cstring | Array of ctype
 
 type cexpr = 
 | Literal of ctype * string
-| Id of int (* ids are ints ex. Id(2) -> v2 *)
+| Id of int                           (* ids are ints ex. Id(2) -> v2 *)
 | Binop of cexpr * cop * cexpr
-| Assign of int * cexpr (* ex. Assign(2, 5) -> v2 = 5 *)
-| Call of int * cexpr list (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
-| Access of int * cexpr (* array access: id[cexpr] *)
-| Cast of ctype * cexpr (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
+| Assign of int * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
+| Call of int * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
+| Access of int * cexpr               (* array access: id[cexpr] *)
+| Cast of ctype * cexpr               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
 | Noexpr
 
 type cstmt =
@@ -36,6 +37,25 @@ type cprogram = {
                     cfuncs : c_func list; 
                 }
 
+(*
+(match func_name with
+        | "print" ->
+          (* fmt is all the format types so far: ex. %s%f%f *)
+          (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
+          let rec build_str fmt vals = function
+          | [] -> (fmt, vals)
+          | hd :: tl -> build_str (fmt ^ (dt_fmt(get_expr_type hd))) (vals ^ "," ^ (translate_expr env hd)) tl
+              in
+              let result = build_str "" "" el
+              in
+              "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
+
+        | fname -> (try
+               string_of_int(find_var fname env.func_inds) ^ 
+               "(" ^ String.concat ", " (List.map (fun e -> translate_expr env e) el) ^ ")"
+            with Not_found -> raise (Failure ("undefined function " ^ fname))
+           ) )
+*)
 (* 
    creates a variable declaration statement based on the variable's data type
    params --> id : variable name ; 2nd arg : variable type 

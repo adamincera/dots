@@ -1,6 +1,10 @@
-open Ast
-
+(* this defines semantically typed dots ast *)
 module StringMap = Map.Make(String)
+
+type op = | Add | Sub | Mult | Div 
+          | Equal | Neq | Less | Leq | Greater | Geq 
+          | LogAnd (* && *)
+          | LogOr (* || *)
 
 type dataType = | Num | String | Bool 
                 | Graph | Node 
@@ -9,22 +13,22 @@ type dataType = | Num | String | Bool
                 | Void
 
 type s_expr =
-    NumLiteral of string  * dataType                (* 5 *)
-  | StrLiteral of string  * dataType                (* "Hello" *)
-  | Boolean of Ast.bool * dataType                      (* True *)
-  | Id of string * dataType                         (* x *)
-  | Binop of s_expr * op * s_expr * dataType        (* x + y *)
-  | Assign of string * s_expr * dataType         (* x = 5; *)
-  | AssignList of string * s_expr list * dataType   (* when a list of expressions is assigned to a variable *)
-  | DictAssign of  s_expr * s_expr * dataType    (* key, value *)
+    NumLiteral of string  * dataType                         (* 5 *)
+  | StrLiteral of string  * dataType                         (* "Hello" *)
+  | Boolean of Ast.bool * dataType                           (* True *)
+  | Id of string * dataType                                  (* x *)
+  | Binop of s_expr * op * s_expr * dataType                 (* x + y *)
+  | Assign of string * s_expr * dataType                     (* x = 5; *)
+  | AssignList of string * s_expr list * dataType            (* when a list of expressions is assigned to a variable *)
+  | DictAssign of  s_expr * s_expr * dataType                (* key, value *)
   | Call of string * s_expr list * dataType
-  | Access of string * s_expr  * dataType          (* for dict and list element access *)
-  | MemberVar of string * string   * dataType      (* parent variable, the accessed member *)
-  | MemberCall of string * string * s_expr list * dataType (* parent variable, accessed funct, parameters *)
-  | Undir of string * string  * dataType           (* id, id *)
-  | Dir of string * string  * dataType             (* id, id *)
-  | UndirVal of string * string * s_expr * dataType (* id, id, weight *)
-  | DirVal of string * string * s_expr * dataType   (* id, id, weight *)
+  | Access of string * s_expr  * dataType                    (* for dict and list element access *)
+  | MemberVar of string * string   * dataType                (* parent variable, the accessed member *)
+  | MemberCall of string * string * s_expr list * dataType   (* parent variable, accessed funct, parameters *)
+  | Undir of string * string  * dataType                     (* id, id *)
+  | Dir of string * string  * dataType                       (* id, id *)
+  | UndirVal of string * string * s_expr * dataType          (* id, id, weight *)
+  | DirVal of string * string * s_expr * dataType            (* id, id, weight *)
   | BidirVal of s_expr * string * string * s_expr * dataType (* weight, id, id, weight *)
   | NoOp of string * dataType
   | Noexpr
