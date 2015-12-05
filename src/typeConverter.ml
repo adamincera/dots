@@ -6,15 +6,79 @@ open Ast
 open Sast
 open Analyzer
 
-let convert_ast prog env =
+
 (* convert an Ast.expr object to Sast.expr object *)
+let get_list_type = function
+ | Sast.List(dt) ->  dt
+ | _ -> "failure"
+
+ let get_dict_type = function
+ | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
+ | _ -> "failure"
+
+let convert_ast prog env =
+
 let rec expr env = function
 | Ast.NumLiteral(v) -> Sast.NumLiteral(v, Sast.Num)
 | Ast.StrLiteral(v) -> Sast.StrLiteral(v, Sast.String)
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
 | Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
 | Ast.Binop(e1, op, e2) -> 
-    Sast.Binop(expr env e1, Add, expr env e2, Sast.String) (* TODO: figure out the type of the expression and use that *)
+    let s_e1 = expr env e1 in
+    let s_e2 = expr env e2 in              
+    let e1_dt = get_expr_type s_e1 in
+    let e2_dt = get_expr_type s_e2 in
+    (match op with
+    | Add -> 
+     (match e1_dt with
+        |  Num ->
+            (match e2_dt with
+              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Num)
+              | String -> Sast.Binop(s_e1,op,s_e2,Sast.String)
+              | _ -> raise (Failure("wrong type dummy: Num"))
+            )
+        |  String -> 
+            (match e2_dt with
+              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.String)
+              | String -> Sast.Binop(s_e1,op,s_e2,Sast.String)
+              | _ -> "failure"
+            )
+        |  Graph -> 
+            (match e2_dt with
+              | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
+              | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
+              | _ -> "failure"
+            )
+        |  Node -> 
+            (match e2_dt with
+                  | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
+                  | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Graph)
+                  | _ -> "failure"
+            )
+        |  List -> 
+            (match e2_dt with
+                      | List -> 
+                          if (e1_dt = e2_dt) then
+                            Sast.Binop(s_e1,op,s_e2,Sast.List)
+                          else 
+                            "failure"
+                      | _ -> "failure"
+            )
+        |  _ -> "signify particular expr. shouldn't work"
+    | Sub -> expr
+    | Mult -> expr
+    | Div -> expr
+    | Equal -> expr
+    | Neq -> expr
+    | Less -> expr
+    | Leq -> expr
+    | Greater -> expr
+    | Geq -> expr
+    | LogAnd -> expr
+    | LogOr -> expr
+    | _ -> "raise failure")
+
+    Sast.Binop(expr env e1, op, expr env e2, Sast.String) (* TODO: figure out the type of the expression and use that *)
 | Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
       let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
       let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
@@ -76,6 +140,7 @@ let rec stmt env = function
 | Ast.For(v1, v2, sl) -> Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
 | Ast.While(cond, sl) -> Sast.While(expr env cond, List.map (fun s -> stmt env s) sl)
 in
+
 let fdecl env func = 
   {
     Sast.s_fname = func.fname;
@@ -84,6 +149,7 @@ let fdecl env func =
     Sast.s_body = List.map (fun s -> stmt env s) func.body
   }
 in
+
 {
   Sast.s_funcs = List.map (fun f -> fdecl env f) prog.funcs;
   Sast.s_cmds = List.map (fun s -> stmt env s) prog.cmds

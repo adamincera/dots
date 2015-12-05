@@ -50,6 +50,9 @@ let find_max_index map =
    first occurrence of the key, or raises an error if none of
    the maps contain that key
 
+   value: type 
+   key: variable name  
+   
    intended for things like: finding the type of a variable
 *)
 let find_var var map_list =
