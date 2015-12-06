@@ -4,22 +4,29 @@ module StringMap = Map.Make(String)
 (* type cop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq
            | Greater | Geq | LogAnd | LogOr *)
 
-type ctype = | Float | Int | Cstring | Array of ctype | Void
+type ctype = | Float | Int | Cstring 
+             | Array of ctype 
+             | List
+             | Dict
+             | Graph
+             | Node
+             | Ptr of ctype (* pointer to a data type *)
+             | Void
 
 type cexpr = 
 | Literal of ctype * string
-| Id of ctype * int                   (* ids are ints ex. Id(2) -> v2 *)
+| Id of ctype * string                   (* ids are ints ex. Id(2) -> v2 *)
 | Binop of ctype * cexpr * Ast.op * cexpr
-| Assign of int * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
-| Call of ctype * int * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
-| Access of ctype * int * cexpr               (* array access: id[cexpr] *)
+| Assign of string * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
+| Call of ctype * string * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
+| Access of ctype * string * cexpr               (* array access: id[cexpr] *)
 | Cast of ctype * cexpr               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
 | Noexpr
 
 type cstmt =
 | Block of cstmt list
 | Expr of cexpr
-| Vdecl of  ctype * int (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
+| Vdecl of  ctype * string (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
 | Return of cexpr
 | If of cexpr * cstmt list * cstmt list
 | For of cexpr * cexpr * cexpr * cstmt list (* For(Assign(1, Literal(3)), Binop(Id(1), Less, Literal(10)), Assign(Id(1), Binop(Id(1), Add, Literal(1), list of stuff) -> for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
@@ -60,19 +67,41 @@ type cprogram = {
    creates a variable declaration statement based on the variable's data type
    params --> id : variable name ; 2nd arg : variable type 
 *)
-let translate_vdecl id = function
+
+(* let translate_vdecl id = function
 | Sast.String -> "char *" ^ id ^ ";"
 | Sast.Num -> "float " ^ id ^ ";"
 | Sast.List(dtv) -> "list todo"
 | Sast.Dict(dtk, dtv) -> "dict todo"
-| x -> raise (Failure ("invalid type in var declaration"))
+| x -> raise (Failure ("invalid type in var declaration")) *)
 
 let rec type_to_str = function
 | Float -> "float"
 | Int -> "int"
 | Cstring -> "char *"
 | Array(dt) -> type_to_str dt ^ "[]"
+| List -> "list_t"
+| Dict -> "dict_t"
+| Node -> "node_t"
+| Graph -> "graph_t"
+| Ptr(dt) -> type_to_str dt ^ "*"
 | Void -> "void"
+
+let fmt_str = function 
+| Float -> "%f"
+| Int -> "%d"
+| Cstring -> "%s"
+| _ -> raise (Failure ("can't print that shit straight up"))
+
+let rec get_expr_type = function
+| Literal(dt, str) -> dt
+| Id(dt, id) -> dt
+| Binop(dt, e1, op, e2) -> dt
+| Assign(id, e1) -> Void
+| Call(dt, id, el) -> dt
+| Access(dt, id, e) -> dt
+| Cast(dt, e) -> dt
+| Noexpr -> Void
 
 let op_to_str = function
 | Ast.Add -> "+"
@@ -95,21 +124,34 @@ let rec translate_expr = function
     | Int -> v
     | Cstring -> "\"" ^ v ^ "\""
     | Array(adt) -> v
-    | Void -> raise (Failure "literals cannot have type 'Void'")
+    | _ -> raise (Failure "invalid C literal type")
    )
 
-| Id(dt, id) -> "v" ^ string_of_int(id)
+| Id(dt, id) -> "v" ^ id
 | Binop(dt, e1, op, e2) -> translate_expr e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_expr e2
-| Assign(id, e) -> "v" ^ string_of_int(id) ^ " = " ^  translate_expr e
-| Call(dt, id, el) -> "f" ^ string_of_int(id) ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
-| Access(dt, id, e) -> "v" ^ string_of_int(id) ^ "[" ^ translate_expr e ^ "]"
+| Assign(id, e) -> "v" ^ id ^ " = " ^  translate_expr e
+| Call(dt, id, el) -> 
+    (match id with
+        | "1" -> 
+            (* fmt is all the format types so far: ex. %s%f%f *)
+            (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
+            let rec build_str fmt vals = function
+            | [] -> (fmt, vals)
+            | hd :: tl -> build_str (fmt ^ (fmt_str(get_expr_type hd))) (vals ^ "," ^ (translate_expr hd)) tl
+            in
+            let result = build_str "" "" el
+            in
+            "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
+        | _ -> "f" ^ id ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
+    )
+| Access(dt, id, e) -> "v" ^ id ^ "[" ^ translate_expr e ^ "]"
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_expr e ^ ")"
 | Noexpr -> ""
 
 let rec translate_stmt = function
 | Block(sl) -> String.concat "\n" (List.map translate_stmt sl)
 | Expr(e) -> translate_expr e ^ ";"
-| Vdecl(dt, id) -> type_to_str dt ^ " v" ^ string_of_int(id) ^ ";"
+| Vdecl(dt, id) -> type_to_str dt ^ " v" ^ id ^ ";"
 | Return(e) -> "return " ^ translate_expr e ^ ";"
 | If(cond, sl1, sl2) -> "if (" ^ translate_expr cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl1) ^
