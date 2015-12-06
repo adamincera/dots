@@ -1,23 +1,20 @@
 (* this defines semantically typed dots ast *)
 module StringMap = Map.Make(String)
 
-type op = | Add | Sub | Mult | Div 
-          | Equal | Neq | Less | Leq | Greater | Geq 
-          | LogAnd (* && *)
-          | LogOr (* || *)
-
 type dataType = | Num | String | Bool 
                 | Graph | Node 
                 | List of dataType (* val type *)
                 | Dict of dataType * dataType (* key type, val type *)
                 | Void
 
+
+
 type s_expr =
     NumLiteral of string  * dataType                         (* 5 *)
   | StrLiteral of string  * dataType                         (* "Hello" *)
   | Boolean of Ast.bool * dataType                           (* True *)
   | Id of string * dataType                                  (* x *)
-  | Binop of s_expr * op * s_expr * dataType                 (* x + y *)
+  | Binop of s_expr * Ast.op * s_expr * dataType                 (* x + y *)
   | Assign of string * s_expr * dataType                     (* x = 5; *)
   | AssignList of string * s_expr list * dataType            (* when a list of expressions is assigned to a variable *)
   | DictAssign of  s_expr * s_expr * dataType                (* key, value *)
