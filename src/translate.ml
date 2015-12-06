@@ -1,5 +1,4 @@
 (* c AST is a library that handles c Asts pretty prints a c file *)
-open Sast
 module StringMap = Map.Make(String)
 
 (* type cop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq
@@ -10,7 +9,7 @@ type ctype = | Float | Int | Cstring | Array of ctype | Void
 type cexpr = 
 | Literal of ctype * string
 | Id of ctype * int                   (* ids are ints ex. Id(2) -> v2 *)
-| Binop of ctype * cexpr * op * cexpr
+| Binop of ctype * cexpr * Ast.op * cexpr
 | Assign of int * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * int * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
 | Access of ctype * int * cexpr               (* array access: id[cexpr] *)
@@ -76,18 +75,18 @@ let rec type_to_str = function
 | Void -> "void"
 
 let op_to_str = function
-| Add -> "+"
-| Sub -> "-"
-| Mult -> "*"
-| Div -> "/"
-| Equal -> "=="
-| Neq -> "!="
-| Less -> "<"
-| Leq -> "<="
-| Greater -> ">"
-| Geq -> ">="
-| LogAnd -> "&&"
-| LogOr -> "||"
+| Ast.Add -> "+"
+| Ast.Sub -> "-"
+| Ast.Mult -> "*"
+| Ast.Div -> "/"
+| Ast.Equal -> "=="
+| Ast.Neq -> "!="
+| Ast.Less -> "<"
+| Ast.Leq -> "<="
+| Ast.Greater -> ">"
+| Ast.Geq -> ">="
+| Ast.LogAnd -> "&&"
+| Ast.LogOr -> "||"
 
 let rec translate_expr = function
 | Literal(dt, v) ->
