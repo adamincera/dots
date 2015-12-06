@@ -146,7 +146,7 @@ graph_decl_prefix:
 | GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { Block([Vdecl("graph", $2); Expr(AssignList($2, $5))]) }                     /*  graph g = { x --[5] y; y -->[3] z; }  */
 
 list_decl_prefix:
-| LIST LT data_type GT ID { Vdecl("list", $3) }                                                              /*  list<node> min; */ 
+| LIST LT data_type GT ID { ListDecl($3, $5) }                                                              /*  list<node> min; */ 
 | LIST LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { Block([ListDecl($3, $5); Expr(AssignList($5, $8))]) }                        /*  list<node> min_path = { x, y, z; }; */
 
 dict_decl_prefix:
