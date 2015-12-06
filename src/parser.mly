@@ -133,25 +133,25 @@ vdecl:
 /* PRIMITIVE INITIALIZERS */
 prim_decl_prefix:
 | prim_type ID { Vdecl($1, $2) }                                                   /* num x */
-| prim_type ID ASSIGN expr { Block([Vdecl($1, $2); Expr(Assign($2, $4))]) }        /* MOVE THESE  */
+| prim_type ID ASSIGN expr { Block([Vdecl($1, $2); Assign($2, $4)]) }        /* MOVE THESE  */
 
 /* NODE INITIALIZERS */
 node_decl_prefix:
 | NODE ID { Vdecl("node", $2) }                                                        /* node x;    */
-| NODE ID LPAREN expr RPAREN { Block([Vdecl("node", $2); Expr(Assign($2, $4))]) }      /* node x("chicago") */                           /* node x("Chicago") */
+| NODE ID LPAREN expr RPAREN { Block([Vdecl("node", $2); Assign($2, $4)]) }      /* node x("chicago") */                           /* node x("Chicago") */
 
 /* GRAPH INITIALIZERS */
 graph_decl_prefix:
 | GRAPH ID { Vdecl("graph", $2) }                                                       /*  graph g;    */
-| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { Block([Vdecl("graph", $2); Expr(AssignList($2, $5))]) }                     /*  graph g = { x --[5] y; y -->[3] z; }  */
+| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { Block([Vdecl("graph", $2); AssignList($2, $5)]) }                     /*  graph g = { x --[5] y; y -->[3] z; }  */
 
 list_decl_prefix:
 | LIST LT data_type GT ID { Vdecl("list", $3) }                                                              /*  list<node> min; */ 
-| LIST LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { Block([ListDecl($3, $5); Expr(AssignList($5, $8))]) }                        /*  list<node> min_path = { x, y, z; }; */
+| LIST LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { Block([ListDecl($3, $5); AssignList($5, $8)]) }                        /*  list<node> min_path = { x, y, z; }; */
 
 dict_decl_prefix:
 | DICT LT data_type COMMA data_type GT ID { DictDecl($3, $5, $7) }                                         /* dict<node, num> parents; */ 
-| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { Block([DictDecl($3, $5, $7); Expr(AssignList($7, $10))]) }   /* dict<node, num> parents = { x; y; z; }; */
+| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { Block([DictDecl($3, $5, $7); AssignList($7, $10)]) }   /* dict<node, num> parents = { x; y; z; }; */
 
    
 /////////////////////////////////////////////////////////////////////////////
@@ -167,6 +167,7 @@ stmt_list:
 /* a statement is just an action. ex. x = 5; */
 stmt:
    expr SEMI { Expr($1) } 
+  | ID ASSIGN expr   { Assign($1, $3) }
   | RETURN expr SEMI { Return($2) } 
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
@@ -204,7 +205,6 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr LOGAND expr { Binop($1, LogAnd, $3) }
   | expr LOGOR expr  { Binop($1, LogOr, $3) }
-  | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | ID DOT ID %prec NOCALL { MemberVar($1, $3) }
   | ID DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
