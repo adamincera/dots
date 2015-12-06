@@ -3,9 +3,6 @@ open Ast
 open Sast
 open Translate
 
-(* #load "str.cma" *) (* makes the Str library accessible (i.e. regexps) *)
-open Str
-
 module StringMap = Map.Make(String)
 
 (* "\"graph.h\"" *)
@@ -52,7 +49,7 @@ let find_max_index map =
 
    value: type 
    key: variable name  
-   
+
    intended for things like: finding the type of a variable
 *)
 let find_var var map_list =
@@ -94,8 +91,6 @@ let get_expr_type = function
 | Sast.Boolean(v, dt) -> dt
 | Sast.Id(v, dt) -> dt
 | Sast.Binop(e1, op, e2, dt) -> dt
-| Sast.Assign(v, e, dt) -> Sast.Void
-| Sast.AssignList(s, el, dt) -> Sast.Void
 | Sast.DictAssign(k, v, dt) -> Sast.Void
 | Sast.Call(v, el, dt) -> dt
 | Sast.Access(v, e, dt) -> dt
@@ -109,96 +104,53 @@ let get_expr_type = function
 | Sast.NoOp(v, dt) -> Sast.Void
 | Sast.Noexpr -> Sast.Void
 
+(*| Sast.Assign(v, e, dt) -> Sast.Void
+| Sast.AssignList(s, el, dt) -> Sast.Void
+*)
 
 (**********************)
 (* TRANSLATES AN SAST *)
 (**********************)
 
-(* determines whether a num string is an Int or a Float *)
-let num_type num_str = 
-    let numregex = Str.regexp "-?[0-9]+$"
-    in
-    if Str.string_match numregex num_str 0 then Int else Float
-
-let dt_to_ct = function
-| Sast.Num -> Float
-| Sast.String -> Cstring
-| Sast.Bool -> Int
-| Sast.Graph -> Void (* TODO *)
-| Sast.Node -> Void (* TODO *)
-| Sast.List(dt) -> Void (* TODO *)
-| Sast.Dict(dtk, dtv) -> Void (* TODO *)
-| Sast.Void -> Void
-
 (* the meat of the compiler *)
 (* actually converts Sast objects into strings of C code *)
 let translate (env, functions, cmds) =
     let rec translate_expr env = function 
-    | Sast.NumLiteral(l, dt) -> 
-        (
-         match l with
-         | "[-]?[0-9]+" -> Literal(Int, l)
-         | _ -> Literal(Float, l)
-        )
-    | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
-    | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
+    | Sast.NumLiteral(l, dt) -> l
+    | Sast.StrLiteral(l, dt) -> "\"" ^ l ^ "\""
+    | Sast.Boolean(b, dt) -> if b = Ast.True then "true" else "false"
     | Sast.Id(v, dt) -> 
       (try
-           let index = find_var v env.var_inds (* see if id exists, get the num index of the var *)
-           in
-           Id(Void, index)
+           "l" ^ string_of_int(find_var v env.var_inds)
        with
        | Not_found -> raise (Failure("undeclared variable: " ^ v))
-      )   
-    | Sast.Binop(e1, op, e2, dt) ->
-        let ce1 = translate_expr env e1 in
-        let ce2 = translate_expr env e2 in
-        (
-          match dt with
-          | Num -> Binop(Float, ce1, op, ce2) (* how can we tell if it's really an int? *)
-          | String -> Binop(Cstring, ce1, op, ce2)
-          | Bool -> Binop(Int, ce1, op, ce2)
-          | Graph -> Noexpr (* TODO *)
-          | Node -> Noexpr (* TODO *)
-          | List(dt) -> Noexpr (* TODO *)
-          | Dict(dtk, dtv) -> Noexpr (* TODO *)
-          | Void -> raise (Failure "why is there a void binop?")
-        )
-    | Sast.Assign(v, e, dt) ->
-        let ce = translate_expr env e in
-        let index = find_var v env.var_inds in
-        Assign(index, ce)
-        (*         if not( (find_var v env.var_types) = get_expr_type e)
-        then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-        else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
-    | Sast.AssignList(v, el, dt) -> Noexpr (* TODO *)
-    | Sast.DictAssign(k, v, dt) -> Noexpr (* TODO *)
-    | Sast.Call(func_name, el, dt) -> 
-        let cel = List.map (translate_expr env) el in
-        let index = find_var func_name env.func_inds in
-        Call(dt_to_ct dt, index, cel)
-  | Sast.Access(v, e, dt) -> 
-      let index = find_var v env.var_inds in
-      let ce = translate_expr env e in
-      Access(dt_to_ct dt, index, ce)
-  | Sast.MemberVar(v, m, dt) -> Noexpr (* TODO *)
-  | Sast.MemberCall(v, f, el, dt) -> Noexpr (* TODO *)
-  | Sast.Undir(v1, v2, dt) -> Noexpr (* TODO *)
-  | Sast.Dir(v1, v2, dt) -> Noexpr (* TODO *)
-  | Sast.UndirVal(v1, v2, w, dt) -> Noexpr (* TODO *)
-  | Sast.DirVal(v1, v2, w, dt) -> Noexpr (* TODO *)
-  | Sast.BidirVal(w1, v1, v2, w2, dt) -> Noexpr (* TODO *)
-  | Sast.NoOp(s, dt) -> Noexpr (* TODO *)
-  | Sast.Noexpr -> Noexpr
+      )
+    | Sast.Binop(e1, op, e2, dt) -> "TODO"
+    | Sast.Call(func_name, el, dt) -> "TODO"
+  | Sast.DictAssign(k, v, dt) -> "TODO"                   (*TODO*)
+  | Sast.Access(v, e, dt) -> "TODO"
+  | Sast.MemberVar(v, m, dt) -> "TODO"
+  | Sast.MemberCall(v, f, el, dt) -> "TODO"
+  | Sast.Undir(v1, v2, dt) -> "TODO"
+  | Sast.Dir(v1, v2, dt) -> "TODO"
+  | Sast.UndirVal(v1, v2, w, dt) -> "TODO"
+  | Sast.DirVal(v1, v2, w, dt) -> "TODO"
+  | Sast.BidirVal(w1, v1, v2, w2, dt) -> "TODO"
+  | Sast.NoOp(s, dt) -> "TODO"
+  | Sast.Noexpr -> "TODO"
     in
 
+(*   if not( (find_var v env.var_types) = get_expr_type e)
+          then raise (Failure ("assignment exprecssion not of type: " ^ type_to_str (find_var v env.var_types) ))
+          else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e)
+*)
     let rec translate_stmt env = function 
     | Sast.Block(sl) -> (match sl with
         | [] -> Block([Expr(Noexpr)])
         | hd :: tl -> Block([Expr(Noexpr)])
        (*) | hd :: tl -> translate_stmt env hd ^ translate_stmt env (Sast.Block(tl)) *)
     )
-    | Sast.Expr(e) -> Expr(translate_expr env e)
+    | Sast.Expr(e) -> (* Expr(translate_expr env e)  *) Expr(Noexpr)
     | Sast.Vdecl(t, id) ->
       (try 
         StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
@@ -207,6 +159,8 @@ let translate (env, functions, cmds) =
                 (*translate_vdecl ("l" ^ string_of_int(find_var id env.var_inds)) t  *)
                 Expr(Noexpr)                   (*TODO*)     
            | Failure(f) -> raise (Failure (f) ) )
+    | Sast.Assign(v, e, dt) -> Expr(Noexpr)                   (*TODO*)
+    | Sast.AssignList(v, el) -> Expr(Noexpr)                   (*TODO*)
     | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) -> Expr(Noexpr)        (*TODO*)
@@ -217,9 +171,10 @@ let translate (env, functions, cmds) =
                   cfname = "main";
                   cformals = [("int", "argc"); ("char**", "argv")];
                   cbody = List.map (fun s -> translate_stmt env s) cmds}
-    in
-    main_func
-    (* print_endline ((String.concat "\n" (List.map (fun h -> "#include " ^ h) headers)) ^ "\n" ^
+     in
+     main_func
+
+    (*print_endline ((String.concat "\n" (List.map (fun h -> "#include " ^ h) headers)) ^ "\n" ^
                    string_of_cfunc main_func ) *)
     
 

@@ -1,4 +1,4 @@
-(******************************)
+(*****************************)
 (* CONVERTS AN AST TO AN SAST *) 
 (*      STOP hoho time        *) 
 (******************************)
@@ -12,26 +12,25 @@ let get_list_type = function
  | Sast.List(dt) ->  dt
  | _ -> raise (Failure("wrong type: not a list"))
 
-(* let find_var var map_list =
-  let rec finder var = function
-  | m :: tl -> 
-      (try StringMap.find var !m
+(*       let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
+      let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
+      (try                                (*sees if variable defined*)
+          (find_var v env.var_inds)
        with
-       | Not_found -> finder var tl)
-  | [] -> raise (Not_found)
-  in 
-  finder var map_list
+       | Not_found -> raise (Failure("undeclared variable: "))
+      );
+      if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
+      then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
+      else Sast.Assign(v, s_e, e_dt)
 *)
 
-let rec check_list env = function
- | [] -> []
+let rec check_list env v_e = function
+ | [] -> ""
  | hd::tl -> 
-    (try (find_var hd env.var_types); check_list tl 
-       with
-       | Not_found -> raise (Failure("undeclared variable: " ^ v)))
-
- | _ -> "failure"
-
+    if not(v_e = (get_expr_type hd)) then 
+       raise (Failure ("assignment expression not of type: " ^ type_to_str ( v_e )) )
+    else 
+        check_list env v_e tl
 
  let get_dict_type = function
  | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
@@ -306,32 +305,8 @@ let rec expr env = function
       )
     | _ -> raise (Failure("raise failure"))
   )
-
-| Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
-      let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-      let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
-      (try                                (*sees if variable defined*)
-          (find_var v env.var_inds)
-       with
-       | Not_found -> raise (Failure("undeclared variable: " ^ v))
-      );
-      if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
-      then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-      else Sast.Assign(v, s_e, e_dt)
-| Ast.AssignList(v, el) -> 
-      let s_e = expr env e in 
-      let e_dt = get_expr_type s_e in
-      (*insert a recursive function*)                            (*sees if variable defined*)
-      (try 
-          if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
-          then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-          check_list el env 
-          Sast.AssignList(v, el, Sast.AssignList)         (* TODO: figure out the type of v and check *)
-       with
-       | Not_found -> raise (Failure("undeclared variable: " ^ v))
-      );
-      then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) )) 
-| Ast.DictAssign(v, e) -> Sast.DictAssign(expr env v, expr env e, Sast.Void)                        (* TODO: figure out the type of v and check *)
+                        (* TODO: figure out the type of v and check *)
+| Ast.DictAssign(v, e) -> Sast.DictAssign(expr env v, expr env e, Sast.Void)
 | Ast.Call(f, el) -> Sast.Call(f, List.map (fun e -> expr env e) el, Sast.String)                   (* TODO: figure out the return type and use that *)
 | Ast.Access(v, e) -> Sast.Access(v, expr env e, Sast.String)                                       (* TODO: figure out the type of v and check *)
 | Ast.MemberVar(v, m) -> Sast.MemberVar(v, m, Sast.String)                                          (* TODO: figure out the type of v and check *)
@@ -376,6 +351,27 @@ let rec stmt env = function
     ); 
     Sast.Vdecl(vtype, id)
 (*| _ -> failwith "Unknown") *)
+| Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
+      let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
+      let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
+      (try                                (*sees if variable defined*)
+          (find_var v env.var_inds)
+       with
+       | Not_found -> raise (Failure("undeclared variable: "))
+      );
+      if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
+      then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
+      else Sast.Assign(v, s_e, e_dt)
+| Ast.AssignList(v, el) -> 
+      (*insert a recursive function*) 
+      (try                                (*sees if variable defined*)
+          let v_e = (find_var v env.var_types) in 
+           let s_el = List.map (expr env) el in 
+            check_list env v_e s_el;
+            Sast.AssignList(v, s_el)
+       with
+       | Not_found -> raise (Failure("undeclared variable: "))
+      );                           (*sees if variable defined*)
 | Ast.Return(e) -> Sast.Return(expr env e)
 | Ast.If(cond, s1, s2) -> Sast.If(expr env cond, stmt env s1, stmt env s2)
 | Ast.For(v1, v2, sl) -> Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
