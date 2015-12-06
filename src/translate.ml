@@ -20,6 +20,7 @@ type cexpr =
 | Assign of string * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
 | Access of ctype * string * cexpr               (* array access: id[cexpr] *)
+| Member of ctype * string * string (* id, member *)
 | Cast of ctype * cexpr               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
 | Noexpr
 
@@ -29,7 +30,7 @@ type cstmt =
 | Vdecl of  ctype * string (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
 | Return of cexpr
 | If of cexpr * cstmt list * cstmt list
-| For of cexpr * cexpr * cexpr * cstmt list (* For(Assign(1, Literal(3)), Binop(Id(1), Less, Literal(10)), Assign(Id(1), Binop(Id(1), Add, Literal(1), list of stuff) -> for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
+| For of cexpr * cexpr * cexpr * cstmt list (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
 | While of cexpr * cstmt list
 
 type c_func = { crtype : string; (* c return type *)
@@ -100,6 +101,7 @@ let rec get_expr_type = function
 | Assign(id, e1) -> Void
 | Call(dt, id, el) -> dt
 | Access(dt, id, e) -> dt
+| Member(dt, id, m) -> dt
 | Cast(dt, e) -> dt
 | Noexpr -> Void
 
@@ -145,6 +147,7 @@ let rec translate_expr = function
         | _ -> "f" ^ id ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
     )
 | Access(dt, id, e) -> "v" ^ id ^ "[" ^ translate_expr e ^ "]"
+| Member(dt, id, m) -> "v" ^ id ^ "->" ^ m
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_expr e ^ ")"
 | Noexpr -> ""
 
