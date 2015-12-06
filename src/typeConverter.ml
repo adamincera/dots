@@ -12,6 +12,27 @@ let get_list_type = function
  | Sast.List(dt) ->  dt
  | _ -> "failure"
 
+(* let find_var var map_list =
+  let rec finder var = function
+  | m :: tl -> 
+      (try StringMap.find var !m
+       with
+       | Not_found -> finder var tl)
+  | [] -> raise (Not_found)
+  in 
+  finder var map_list
+*)
+
+let rec check_list env = function
+ | [] -> []
+ | hd::tl -> 
+    (try (find_var hd env.var_types); check_list tl 
+       with
+       | Not_found -> raise (Failure("undeclared variable: " ^ v)))
+
+ | _ -> "failure"
+
+
  let get_dict_type = function
  | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
  | _ -> "failure"
@@ -203,7 +224,19 @@ let rec expr env = function
       if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
-| Ast.AssignList(v, el) -> Sast.AssignList(v, List.map (fun e -> expr env e) el, Sast.Void)         (* TODO: figure out the type of v and check *)
+| Ast.AssignList(v, el) -> 
+      let s_e = expr env e in 
+      let e_dt = get_expr_type s_e in
+      (*insert a recursive function*)                            (*sees if variable defined*)
+      (try 
+          if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
+          then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
+          check_list el env 
+          Sast.AssignList(v, el, Sast.AssignList)         (* TODO: figure out the type of v and check *)
+       with
+       | Not_found -> raise (Failure("undeclared variable: " ^ v))
+      );
+      then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) )) 
 | Ast.DictAssign(v, e) -> Sast.DictAssign(expr env v, expr env e, Sast.Void)                        (* TODO: figure out the type of v and check *)
 | Ast.Call(f, el) -> Sast.Call(f, List.map (fun e -> expr env e) el, Sast.String)                   (* TODO: figure out the return type and use that *)
 | Ast.Access(v, e) -> Sast.Access(v, expr env e, Sast.String)                                       (* TODO: figure out the type of v and check *)
