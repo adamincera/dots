@@ -92,7 +92,7 @@ let fmt_str = function
 | Float -> "%f"
 | Int -> "%d"
 | Cstring -> "%s"
-| _ -> raise (Failure ("can't print that shit straight up"))
+| _ -> raise (Failure ("can't print other types directly"))
 
 let rec get_expr_type = function
 | Literal(dt, str) -> dt
@@ -188,11 +188,12 @@ let string_of_cfunc func =
 
 let translate_c (globals, cfuncs) = 
     (* "\"graph.h\"" *)
-    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
+    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"; "\"clib/graph.h\""]
     in     
 
     (* now we are going to translate a program *)
     (String.concat "\n" (List.map (fun f -> "#include " ^ f) libs)) ^ 
+    "\n" ^
     (String.concat "\n" (List.map translate_stmt globals)) ^ 
     (String.concat "\n" (List.map translate_func cfuncs))
 

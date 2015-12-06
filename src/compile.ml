@@ -20,7 +20,7 @@ let _ =
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
   let sast_prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in
-  (* comment out for real: *)  print_endline ("converted ast to sast"); 
+  (* comment out for real: *)  (* print_endline ("converted ast to sast");  *)
   let trans_env = (* set up default environ *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
