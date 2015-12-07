@@ -1,0 +1,3 @@
+node single_node;
+for (n in single_node) {
+}

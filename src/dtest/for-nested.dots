@@ -1,0 +1,7 @@
+list <num> l1;
+list <num> l2;
+
+for (n1 in l1) {
+    for (n2 in l2) {
+    }
+}

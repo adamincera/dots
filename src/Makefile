@@ -29,7 +29,10 @@ TARFILES = Makefile testall.sh scanner.mll parser.mly \
 	$(TESTS:%=tests/test-%.mc) \
 	$(TESTS:%=tests/test-%.out)
 
-build: analyzer
+build: analyzer clib
+
+clib:
+	make -f clib/Makefile
 
 analyzer : str $(OBJS)
 	ocamlc -o dotc str.cma $(OBJS)

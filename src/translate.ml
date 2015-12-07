@@ -22,6 +22,8 @@ type cexpr =
 | Access of ctype * string * cexpr               (* array access: id[cexpr] *)
 | Member of ctype * string * string (* id, member *)
 | Cast of ctype * cexpr               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
+| Deref of cexpr (* ex. *var *)
+| Ref of cexpr (* ex. &var *)
 | Noexpr
 
 type cstmt =
@@ -103,6 +105,8 @@ let rec get_expr_type = function
 | Access(dt, id, e) -> dt
 | Member(dt, id, m) -> dt
 | Cast(dt, e) -> dt
+| Ref(e) -> Void
+| Deref(e) -> Void
 | Noexpr -> Void
 
 let op_to_str = function
@@ -126,6 +130,7 @@ let rec translate_expr = function
     | Int -> v
     | Cstring -> "\"" ^ v ^ "\""
     | Array(adt) -> v
+    | Void -> if v = "NULL" then v else raise (Failure "Void lit should only be 'NULL'")
     | _ -> raise (Failure "invalid C literal type")
    )
 
@@ -149,6 +154,8 @@ let rec translate_expr = function
 | Access(dt, id, e) -> "v" ^ id ^ "[" ^ translate_expr e ^ "]"
 | Member(dt, id, m) -> "v" ^ id ^ "->" ^ m
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_expr e ^ ")"
+| Ref(e) -> "&(" ^ translate_expr e ^ ")"
+| Deref(e) -> "*(" ^ translate_expr e ^ ")"
 | Noexpr -> ""
 
 let rec translate_stmt = function

@@ -130,6 +130,13 @@ let dt_to_ct = function
 (* the meat of the compiler *)
 (* actually converts Sast objects into strings of C code *)
 let translate (env, functions, cmds) =
+    (* 
+       every time a var has to be auto-created 
+       incr a counter so that we don't repeat vars in C 
+    *)
+    let auto_cnt = ref 0 
+    in
+
     let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
@@ -214,29 +221,39 @@ let translate (env, functions, cmds) =
     | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->
+        let auto_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
         let index = string_of_int (find_var iter env.var_inds) in
         let dt = (find_var iter env.var_types) in
         let csl = List.map (translate_stmt env) sl in
         (match dt with
-         | List(dt) -> Block([Vdecl(Ptr(List), "i"); 
-                              For(Assign("i", Id(Ptr(List), index)),
-                                  Id(Ptr(List), "i"),
-                                  Assign("i", Member(Ptr(List), "i", "next")),
+         | List(dt) -> Block([Vdecl(Ptr(List), auto_var); 
+                              For(Assign(auto_var, Id(Ptr(List), index)),
+                                  Id(Ptr(List), auto_var),
+                                  Assign(auto_var, Member(Ptr(List), auto_var, "next")),
                                   csl
                                  )
                              ])
          | Dict(dtk, dtv) -> Expr(Noexpr)
-         | Node -> Expr(Noexpr)
-         | Graph -> Block([Vdecl(Ptr(Node), "i"); 
-                              For(Assign("i", Member(Ptr(Node), index, "nodes")),
-                                  Id(Ptr(List), "i"),
-                                  Assign("i", Member(Ptr(List), "i", "next")),
+         | Node -> Block([Vdecl(Ptr(Node), auto_var); 
+                          For(Assign(auto_var, Ref(Id(Ptr(Node), index))),
+                              Id(Ptr(Node), auto_var),
+                              Assign(auto_var, Literal(Void, "NULL")),
+                              csl
+                             )
+                          ])
+         | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
+                              For(Assign(auto_var, Member(Ptr(Node), index, "nodes")),
+                                  Id(Ptr(Node), auto_var),
+                                  Assign(auto_var, Member(Ptr(Node), auto_var, "next")),
                                   csl
                                  )
                              ])
          | _ -> raise (Failure(iter ^ " is not iterable"))
        )
-    | Sast.While (cond, sl) -> Expr(Noexpr)            (*TODO*)
+    | Sast.While (cond, sl) -> 
+        let c_cond = translate_expr env cond in
+        let csl = List.map (translate_stmt env) sl in
+        While(c_cond, csl)
     in
 
     let main_func = { crtype = "int";
