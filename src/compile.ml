@@ -1,4 +1,4 @@
-(*ties together parsing scanning ast sast the whole fucking thing *)
+(* ties together parsing scanning ast sast the whole fucking thing *)
 open Ast
 open Sast
 open TypeConverter
@@ -39,8 +39,9 @@ let _ =
 
 (* pretty printing version *)
 
-(* let _ =
+(*  let _ =
   let lexbuf = Lexing.from_channel stdin in
   let prg = Parser.program Scanner.token lexbuf in
   let result = string_of_program (prg.funcs, List.rev prg.cmds) in
-  print_endline result;; *)
+  print_endline result;; 
+  *)

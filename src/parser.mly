@@ -109,6 +109,11 @@ edge_op:
 literal:
 | NUM_LIT { NumLiteral($1) }
 | STR_LIT { StrLiteral($1) }
+| list_literal {$1}
+
+list_literal:
+| LBRACKET actuals_opt RBRACKET { ListLiteral($2) }
+
 
 /* Primitive Typenames */
 prim_type:
@@ -143,15 +148,15 @@ node_decl_prefix:
 /* GRAPH INITIALIZERS */
 graph_decl_prefix:
 | GRAPH ID { Vdecl("graph", $2) }                                                       /*  graph g;    */
-| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { Block([Vdecl("graph", $2); AssignList($2, $5)]) }                     /*  graph g = { x --[5] y; y -->[3] z; }  */
+/*| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { Block([Vdecl("graph", $2); AssignList($2, $5)]) } */                    /*  graph g = { x --[5] y; y -->[3] z; }  */
 
 list_decl_prefix:
 | LIST LT data_type GT ID { ListDecl($3, $5) }                                                              /*  list<node> min; */ 
-| LIST LT data_type GT ID ASSIGN LBRACKET actuals_list RBRACKET { Block([ListDecl($3, $5); AssignList($5, $8)]) }                        /*  list<node> min_path = { x, y, z; }; */
+| LIST LT data_type GT ID ASSIGN expr { Block([ListDecl($3, $5); Assign($5, $7)]) }                        /*  list<node> min_path = { x, y, z; }; */
 
 dict_decl_prefix:
 | DICT LT data_type COMMA data_type GT ID { DictDecl($3, $5, $7) }                                         /* dict<node, num> parents; */ 
-| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { Block([DictDecl($3, $5, $7); AssignList($7, $10)]) }   /* dict<node, num> parents = { x; y; z; }; */
+/*| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { Block([DictDecl($3, $5, $7); AssignList($7, $10)]) } */  /* dict<node, num> parents = { x; y; z; }; */
 
    
 /////////////////////////////////////////////////////////////////////////////
@@ -168,6 +173,7 @@ stmt_list:
 stmt:
    expr SEMI { Expr($1) } 
   | ID ASSIGN expr SEMI { Assign($1, $3) }
+  | ID ASSIGN list_literal SEMI { Assign($1, $3) }
   | RETURN expr SEMI { Return($2) } 
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }

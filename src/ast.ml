@@ -8,6 +8,7 @@ type bool = True | False
 type expr =
     NumLiteral of string
   | StrLiteral of string
+  | ListLiteral of expr list (* ex. [1, 3, 42.33] *)
   | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
@@ -41,7 +42,7 @@ type stmt =
   | ListDecl of  string * string (* elem_type, id *)
   | DictDecl of string * string * string (* key_type, elem_type, id *)
   | Assign of string * expr
-  | AssignList of string * expr list (* when a list of expressions is assigned to a variable *)
+(*   | AssignList of string * expr  *)(* when a list of expressions is assigned to a variable *)
   | Return of expr
   | If of expr * stmt * stmt
   | For of string * string * stmt list (* temp var, iterable var, var decls, stmts *)
@@ -75,6 +76,7 @@ let concat prelst postlst = base_concat postlst (List.rev prelst)
 let rec string_of_expr = function
     NumLiteral(l) -> l
   | StrLiteral(l) -> "\"" ^ l ^ "\""
+  | ListLiteral(el) -> "[" ^ String.concat "," (List.map string_of_expr el) ^ "]"
   | Boolean(b) -> if b = True then "true" else "false"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
@@ -115,8 +117,8 @@ let rec string_of_stmt = function
   | Vdecl(dt, id) -> dt ^ " " ^ id ^ ";\n";
   | ListDecl(dt, id) -> "list <" ^ dt ^ "> " ^ id ^ ";\n"
   | DictDecl(kdt, vdt, id) -> "dict <" ^ kdt ^ ", " ^ vdt ^ "> " ^ id ^ ";\n"
-  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
-  | AssignList(id, el) -> " ~TODO~ "
+  | Assign(v, e) -> v ^ " = " ^ string_of_expr e ^ ";"
+(*   | AssignList(id, el) -> " ~TODO~ " *)
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^

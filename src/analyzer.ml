@@ -88,6 +88,7 @@ let rec type_to_str = function
 let get_expr_type = function
 | Sast.NumLiteral(v, dt) -> dt
 | Sast.StrLiteral(v, dt) -> dt
+| Sast.ListLiteral(el, dt) -> dt
 | Sast.Boolean(v, dt) -> dt
 | Sast.Id(v, dt) -> dt
 | Sast.Binop(e1, op, e2, dt) -> dt
@@ -140,6 +141,7 @@ let translate (env, functions, cmds) =
     let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
+    | Sast.ListLiteral(el, dt) -> Noexpr (* TODO *)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
          let index = "v" ^ string_of_int(find_var v env.var_inds) (* see if id exists, get the num index of the var *)
@@ -220,7 +222,7 @@ let translate (env, functions, cmds) =
           | Node -> Block([Vdecl(Ptr(Node), index); 
                            Expr(Assign(index, Call(Void, "init_node", [Literal(Cstring, "")])))
                          ]) (* C: node_t *x = init_node(""); *)
-          | List(dt) -> Vdecl(List, index) (* TODO *)
+          | List(dt) -> Vdecl(Ptr(List), index) (* C: list_t *x; *)
           | Dict(dtk, dtv) -> Vdecl(Dict, index) (* TODO *)
           | Void -> raise (Failure ("should not be using Void as a datatype"))
         )
@@ -239,7 +241,7 @@ let translate (env, functions, cmds) =
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
     | Sast.AssignList(v, el) -> Expr(Noexpr) (* TODO *)
-         (*  | List(dt) -> Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
+          (* Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
                            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
     | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
