@@ -148,7 +148,7 @@ let translate (env, functions, cmds) =
     | Sast.Binop(e1, op, e2, dt) ->
         let ce1 = translate_expr env e1 in
         let ce2 = translate_expr env e2 in
-        (
+(*         (
           match dt with
           | Num -> Binop(Float, ce1, op, ce2) (* how can we tell if it's really an int? *)
           | String -> Binop(Cstring, ce1, op, ce2)
@@ -158,7 +158,20 @@ let translate (env, functions, cmds) =
           | List(dt) -> Noexpr (* TODO *)
           | Dict(dtk, dtv) -> Noexpr (* TODO *)
           | Void -> raise (Failure "why is there a void binop?")
-        )
+        ) *)
+            (match op with
+              | Add -> Noexpr (* TODO *)
+              | Sub -> Noexpr (* TODO *)
+              | Mult | Div -> Binop(Float, ce1, op, ce2)
+              | Equal -> Noexpr (* TODO *)
+              | Neq -> Noexpr (* TODO *)
+              | Less -> Noexpr (* TODO *)
+              | Leq -> Noexpr (* TODO *)
+              | Greater -> Noexpr (* TODO *)
+              | Geq -> Noexpr (* TODO *)
+              | LogAnd -> Noexpr (* TODO *)
+              | LogOr -> Noexpr (* TODO *)
+            )
     | Sast.DictAssign(k, v, dt) -> Noexpr (* TODO *)
     | Sast.Call(func_name, el, dt) -> 
         let cel = List.map (translate_expr env) el in
@@ -184,11 +197,14 @@ let translate (env, functions, cmds) =
           else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e)
 *)
     let rec translate_stmt env = function 
-    | Sast.Block(sl) -> (match sl with
+    | Sast.Block(sl) -> 
+        let csl = List.map (translate_stmt env) sl in
+        Block(csl)
+    (*     (match sl with
         | [] -> Block([Expr(Noexpr)])
         | hd :: tl -> Block([Expr(Noexpr)])
        (* | hd :: tl -> translate_stmt env hd ^ translate_stmt env (Sast.Block(tl)) *)
-    )
+    ) *)
     | Sast.Expr(e) -> Expr(translate_expr env e)
     | Sast.Vdecl(dt, id) ->
      (List.hd env.var_types) := StringMap.add id dt !(List.hd env.var_types); (* add type map *)
@@ -198,9 +214,12 @@ let translate (env, functions, cmds) =
           | Num -> Vdecl(Float, index)
           | String -> Vdecl(Cstring, index)
           | Bool -> Vdecl(Int, index)
-          | Graph -> Vdecl(Graph, index)
+          | Graph -> Block([Vdecl(Ptr(Graph), index);
+                            Expr(Assign(index, Call(Void, "init_graph", [])))
+                          ]) (* C: graph_t *g1 = init_graph(); *)
           | Node -> Block([Vdecl(Ptr(Node), index); 
-                           Expr(Assign(index, Call(Void, "init_node", [Literal(Cstring, "")])))])
+                           Expr(Assign(index, Call(Void, "init_node", [Literal(Cstring, "")])))
+                         ]) (* C: node_t *x = init_node(""); *)
           | List(dt) -> Vdecl(List, index) (* TODO *)
           | Dict(dtk, dtv) -> Vdecl(Dict, index) (* TODO *)
           | Void -> raise (Failure ("should not be using Void as a datatype"))
@@ -209,9 +228,9 @@ let translate (env, functions, cmds) =
         let ce = translate_expr env e in
         let var_type = get_expr_type e in
         let index = "v" ^ string_of_int(find_var v env.var_inds) in
+        let auto_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
         (match var_type with
             | Num | String | Bool | Node | Void -> Expr(Assign(index, ce))
-(*             | List(dt) -> Block([Vdecl(Ptr(dt_to_ct dt), "inter"), Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))]) *)
             | List(dt) -> Expr(Assign(index, ce)) (* TODO *)   
             | Dict(dtk, dtv) -> Expr(Assign(index, ce)) (* TODO *)
             | Graph -> Expr(Assign(index, Call(Graph, "copy", [ce])))
@@ -220,6 +239,9 @@ let translate (env, functions, cmds) =
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
     | Sast.AssignList(v, el) -> Expr(Noexpr) (* TODO *)
+         (*  | List(dt) -> Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
+                           Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
+                         ]) *)
     | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->
