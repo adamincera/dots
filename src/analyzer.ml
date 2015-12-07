@@ -142,7 +142,7 @@ let translate (env, functions, cmds) =
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
-         let index = string_of_int(find_var v env.var_inds) (* see if id exists, get the num index of the var *)
+         let index = "v" ^ string_of_int(find_var v env.var_inds) (* see if id exists, get the num index of the var *)
          in
          Id(Void, index) 
     | Sast.Binop(e1, op, e2, dt) ->
@@ -162,10 +162,10 @@ let translate (env, functions, cmds) =
     | Sast.DictAssign(k, v, dt) -> Noexpr (* TODO *)
     | Sast.Call(func_name, el, dt) -> 
         let cel = List.map (translate_expr env) el in
-        let index = string_of_int(find_var func_name env.func_inds) in
+        let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
         Call(dt_to_ct dt, index, cel)
   | Sast.Access(v, e, dt) -> 
-      let index = string_of_int(find_var v env.var_inds) in
+      let index = "v" ^ string_of_int(find_var v env.var_inds) in
       let ce = translate_expr env e in
       Access(dt_to_ct dt, index, ce)
   | Sast.MemberVar(v, m, dt) -> Noexpr (* TODO *)
@@ -193,13 +193,14 @@ let translate (env, functions, cmds) =
     | Sast.Vdecl(dt, id) ->
      (List.hd env.var_types) := StringMap.add id dt !(List.hd env.var_types); (* add type map *)
         (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index map *)
-        let index = string_of_int(find_var id env.var_inds) in
+        let index = "v" ^ string_of_int(find_var id env.var_inds) in
         (match dt with
           | Num -> Vdecl(Float, index)
           | String -> Vdecl(Cstring, index)
           | Bool -> Vdecl(Int, index)
           | Graph -> Vdecl(Graph, index)
-          | Node -> Vdecl(Node, index)
+          | Node -> Block([Vdecl(Ptr(Node), index); 
+                           Expr(Assign(index, Call(Void, "init_node", [Literal(Cstring, "")])))])
           | List(dt) -> Vdecl(List, index) (* TODO *)
           | Dict(dtk, dtv) -> Vdecl(Dict, index) (* TODO *)
           | Void -> raise (Failure ("should not be using Void as a datatype"))
@@ -207,12 +208,13 @@ let translate (env, functions, cmds) =
     | Sast.Assign(v, e, dt) ->
         let ce = translate_expr env e in
         let var_type = get_expr_type e in
-        let index = string_of_int(find_var v env.var_inds) in
+        let index = "v" ^ string_of_int(find_var v env.var_inds) in
         (match var_type with
-            | Num | String | Bool | Node | Graph | Void -> Expr(Assign(index, ce))
+            | Num | String | Bool | Node | Void -> Expr(Assign(index, ce))
 (*             | List(dt) -> Block([Vdecl(Ptr(dt_to_ct dt), "inter"), Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))]) *)
             | List(dt) -> Expr(Assign(index, ce)) (* TODO *)   
             | Dict(dtk, dtv) -> Expr(Assign(index, ce)) (* TODO *)
+            | Graph -> Expr(Assign(index, Call(Graph, "copy", [ce])))
         )
         (*         if not( (find_var v env.var_types) = get_expr_type e)
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
@@ -222,7 +224,7 @@ let translate (env, functions, cmds) =
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->
         let auto_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
-        let index = string_of_int (find_var iter env.var_inds) in
+        let index = "v" ^ string_of_int (find_var iter env.var_inds) in
         let dt = (find_var iter env.var_types) in
         let csl = List.map (translate_stmt env) sl in
         (match dt with
@@ -233,7 +235,7 @@ let translate (env, functions, cmds) =
                                   csl
                                  )
                              ])
-         | Dict(dtk, dtv) -> Expr(Noexpr)
+         | Dict(dtk, dtv) -> Expr(Noexpr) (* TODO *)
          | Node -> Block([Vdecl(Ptr(Node), auto_var); 
                           For(Assign(auto_var, Ref(Id(Ptr(Node), index))),
                               Id(Ptr(Node), auto_var),

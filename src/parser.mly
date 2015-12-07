@@ -167,7 +167,7 @@ stmt_list:
 /* a statement is just an action. ex. x = 5; */
 stmt:
    expr SEMI { Expr($1) } 
-  | ID ASSIGN expr   { Assign($1, $3) }
+  | ID ASSIGN expr SEMI { Assign($1, $3) }
   | RETURN expr SEMI { Return($2) } 
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
