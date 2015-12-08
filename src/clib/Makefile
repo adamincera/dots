@@ -10,11 +10,13 @@ graph.o: graph.h node.h graph.c
 
 node.o: node.h node.c
 
-test: test.o translations.o
+test: test.o list.o dict.o
 
-translations.o: translations.c translations.h
+list.o: list.c list.h
 
-test.o: translations.h test.c
+test.o: list.h test.c
+
+dict.o: dict.c dict.h
 
 .PHONY: clean
 clean:
