@@ -9,4 +9,5 @@ if [ -z "$2" ]; then
     OUT_FILE="exec"
 fi
 
-gcc -I ${DOTS} -o ${OUT_FILE} $1.c
+#gcc -I ${DOTS} -o ${OUT_FILE} $1.c
+gcc -I ${DOTS} -o ${OUT_FILE} $1.c -L${DOTS} -ldots

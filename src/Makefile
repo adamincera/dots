@@ -37,6 +37,9 @@ clib:
 analyzer : str $(OBJS)
 	ocamlc -o dotc str.cma $(OBJS)
 
+ast_print : str $(OBJS)
+	ocamlc -o dotc str.cma $(OBJS) astPrinter.ml
+
 str : 
 	ocamlopt str.cmxa
 
