@@ -2,6 +2,8 @@ CC = gcc
 
 CFLAGS = -Wall 
 
+CFILES= graph.c node.c list.c
+
 main: main.o graph.o node.o
 
 main.o: main.c graph.h node.h
@@ -17,6 +19,14 @@ list.o: list.c list.h
 test.o: list.h test.c
 
 dict.o: dict.c dict.h
+
+.PHONY: objects
+objects:
+	$(CC) -c $(CFILES)
+
+.PHONY: library
+library: objects
+	ar -cvq libdots.a *.o
 
 .PHONY: clean
 clean:
