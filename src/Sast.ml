@@ -12,10 +12,11 @@ type dataType = | Num | String | Bool
 type s_expr =
     NumLiteral of string  * dataType                         (* 5 *)
   | StrLiteral of string  * dataType                         (* "Hello" *)
-  | ListLiteral of s_expr list * dataType                      (* [2.5, 3, x] *)
+  | ListLiteral of s_expr list * dataType                    (* [2.5, 3, x] *)
+  | DictLiteral of (s_expr * s_expr) list * dataType                   (* [(Hello, 15)] *)
   | Boolean of Ast.bool * dataType                           (* True *)
   | Id of string * dataType                                  (* x *)
-  | Binop of s_expr * Ast.op * s_expr * dataType                 (* x + y *)
+  | Binop of s_expr * Ast.op * s_expr * dataType             (* x + y *)
   | Call of string * s_expr list * dataType
   | Access of string * s_expr  * dataType                    (* for dict and list element access *)
   | MemberVar of string * string   * dataType                (* parent variable, the accessed member *)
