@@ -79,10 +79,10 @@ formal_list:
 /* assigning  to a dict */
 /* ex. d = {"foo" : "blah", "bar" : "dd"} */
 dict_formal_list:
-    ID COLON expr { [DictAssign(Id($1), $3)] }                                      /*   w : 5        */
-|   literal COLON expr {  [DictAssign($1, $3)] }                 /*   "hello" : 5  */
-|   dict_formal_list COMMA ID COLON expr { DictAssign(Id($3), $5) :: $1 }           /*   w : 5        */
-|   dict_formal_list COMMA literal COLON expr { DictAssign($3, $5) :: $1 }
+    ID COLON expr { [DictAssign([(Id($1), $3)])] }                                      /*   w : 5        */
+|   literal COLON expr {  [DictAssign($1, $3)] }                                    /*   "hello" : 5  */
+|   dict_formal_list COMMA ID COLON expr { DictAssign([(Id($3), $5)]) :: $1 }           /*   w : 5        */
+|   dict_formal_list COMMA literal COLON expr { DictAssign([($3, $5)]) :: $1 }
 
 /* comma separated list of operations on nodes
  * for use with graph declarations 

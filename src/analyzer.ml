@@ -92,7 +92,6 @@ let get_expr_type = function
 | Sast.Boolean(v, dt) -> dt
 | Sast.Id(v, dt) -> dt
 | Sast.Binop(e1, op, e2, dt) -> dt
-| Sast.DictAssign(k, v, dt) -> Sast.Void
 | Sast.Call(v, el, dt) -> dt
 | Sast.Access(v, e, dt) -> dt
 | Sast.MemberVar(v, m, dt) -> dt
@@ -106,6 +105,8 @@ let get_expr_type = function
 | Sast.Noexpr -> Sast.Void
 
 (*| Sast.Assign(v, e, dt) -> Sast.Void
+| Sast.DictAssign(k, v, dt) -> Sast.Void
+
 | Sast.AssignList(s, el, dt) -> Sast.Void
 *)
 
@@ -160,6 +161,7 @@ let translate (env, functions, cmds) =
           | List(dt) -> Noexpr (* TODO *)
           | Dict(dtk, dtv) -> Noexpr (* TODO *)
           | Void -> raise (Failure "why is there a void binop?")
+        )
         ) *)
             (match op with
               | Add -> Noexpr (* TODO *)
@@ -241,9 +243,13 @@ let translate (env, functions, cmds) =
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
     | Sast.AssignList(v, el) -> Expr(Noexpr) (* TODO *)
+<<<<<<< HEAD
+    | Sast.DictAssign(k, v) -> Expr(Noexpr) (* TODO *)
+=======
           (* Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
                            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
+>>>>>>> 7f12856fa664c8237d18f982f77948a94aa3d33f
     | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->

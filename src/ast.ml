@@ -12,7 +12,6 @@ type expr =
   | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
-  | DictAssign of  expr * expr (* key, value  --> ex. "foo" : 8 *)
   | Call of string * expr list
   | Access of string * expr (* for dict and list element access *)
   | MemberVar of string * string (* parent variable, the accessed member *)
