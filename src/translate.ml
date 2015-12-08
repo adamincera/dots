@@ -195,7 +195,8 @@ let string_of_cfunc func =
 
 let translate_c (globals, cfuncs) = 
     (* "\"graph.h\"" *)
-    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"; "\"clib/graph.h\""]
+    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"; 
+                "\"clib/graph.h\""; (*"\"clib/dict.h\"";*) "\"clib/list.h\""]
     in     
 
     (* now we are going to translate a program *)
