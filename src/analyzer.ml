@@ -147,9 +147,8 @@ let translate (env, cmds) =
     | Sast.DictLiteral(kvl, dt) -> Noexpr (* TODO *)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
-         let index = "v" ^ string_of_int(find_var v env.var_inds) (* see if id exists, get the num index of the var *)
-         in
-         Id(Void, index) 
+         let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
+         Id(dt_to_ct dt, index) 
     | Sast.Binop(e1, op, e2, dt) ->
         let ce1 = translate_expr env e1 in
         let ce2 = translate_expr env e2 in
