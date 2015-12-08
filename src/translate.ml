@@ -34,6 +34,7 @@ type cstmt =
 | If of cexpr * cstmt list * cstmt list
 | For of cexpr * cexpr * cexpr * cstmt list (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
 | While of cexpr * cstmt list
+| Nostmt
 
 type c_func = { crtype : string; (* c return type *)
                 cfname : string; (* function name *)
@@ -176,6 +177,7 @@ let rec translate_stmt = function
 | While(cond, sl) -> "while (" ^ translate_expr cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl) ^
     "\n}"
+| Nostmt -> ""
 
 
 let translate_func func = 

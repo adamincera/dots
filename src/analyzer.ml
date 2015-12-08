@@ -89,6 +89,7 @@ let get_expr_type = function
 | Sast.NumLiteral(v, dt) -> dt
 | Sast.StrLiteral(v, dt) -> dt
 | Sast.ListLiteral(el, dt) -> dt
+| Sast.DictLiteral(kvl, dt) -> dt
 | Sast.Boolean(v, dt) -> dt
 | Sast.Id(v, dt) -> dt
 | Sast.Binop(e1, op, e2, dt) -> dt
@@ -143,6 +144,7 @@ let translate (env, functions, cmds) =
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
     | Sast.ListLiteral(el, dt) -> Noexpr (* TODO *)
+    | Sast.DictLiteral(kvl, dt) -> Noexpr (* TODO *)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
          let index = "v" ^ string_of_int(find_var v env.var_inds) (* see if id exists, get the num index of the var *)
@@ -176,7 +178,6 @@ let translate (env, functions, cmds) =
               | LogAnd -> Noexpr (* TODO *)
               | LogOr -> Noexpr (* TODO *)
             )
-    | Sast.DictAssign(k, v, dt) -> Noexpr (* TODO *)
     | Sast.Call(func_name, el, dt) -> 
         let cel = List.map (translate_expr env) el in
         let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
@@ -242,14 +243,11 @@ let translate (env, functions, cmds) =
         (*         if not( (find_var v env.var_types) = get_expr_type e)
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
-    | Sast.AssignList(v, el) -> Expr(Noexpr) (* TODO *)
-<<<<<<< HEAD
-    | Sast.DictAssign(k, v) -> Expr(Noexpr) (* TODO *)
-=======
-          (* Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
+ (* | Sast.AssignList(v, el) -> Expr(Noexpr)
+    | Sast.DictAssign(k, v) -> Expr(Noexpr) 
+           Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
                            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
->>>>>>> 7f12856fa664c8237d18f982f77948a94aa3d33f
     | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->

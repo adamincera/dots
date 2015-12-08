@@ -47,10 +47,14 @@ program:
   decls EOF { $1 }
 
 decls:
-|  /* nothing */ { {funcs = []; cmds = []} }
-/*|  decls vdecl { {vars = $1.vars @ $2; funcs = $1.funcs; cmds = $1.cmds} }*/
+ | /* nothing */ { [] }
+ | decls alt_stmt  { $2 :: $1 }
+
+/* decls:
+|   nothing  { {funcs = []; cmds = []} }
+|  decls vdecl { {vars = $1.vars @ $2; funcs = $1.funcs; cmds = $1.cmds} }
 |  decls fdecl { {funcs = $2 :: $1.funcs; cmds = $1.cmds} }
-|  decls stmt  { {funcs = $1.funcs; cmds = $2 :: $1.cmds} } 
+|  decls stmt  { {funcs = $1.funcs; cmds = $2 :: $1.cmds} }  */
 
 /////////////////////////////////////////////////////////////////////////////
                     /* FUNCTIONS */
@@ -59,12 +63,12 @@ decls:
 /* (1)def (2)func (3)<funcName> ( (5)arg1,...argN ) { (8) <local variables> (9) <body> } */
 fdecl:
    DEF data_type ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
-     { { 
+     { Fdecl({ 
       rtype = $2;
       fname = $3;
       formals = $5;
       body = List.rev $8 
-    } }
+    }) }
 
 /* Optional Formal Args */
 formals_opt:
@@ -77,12 +81,13 @@ formal_list:
 
 /* Dictionary Formal Arguments */
 /* assigning  to a dict */
-/* ex. d = {"foo" : "blah", "bar" : "dd"} */
+/* ex. d = {"foo" : "blah", "bar" : "dd"} 
 dict_formal_list:
-    ID COLON expr { [DictAssign([(Id($1), $3)])] }                                      /*   w : 5        */
-|   literal COLON expr {  [DictAssign($1, $3)] }                                    /*   "hello" : 5  */
-|   dict_formal_list COMMA ID COLON expr { DictAssign([(Id($3), $5)]) :: $1 }           /*   w : 5        */
+    ID COLON expr { [DictAssign([(Id($1), $3)])] }                                       w : 5        
+|   literal COLON expr {  [DictAssign($1, $3)] }                                      "hello" : 5  
+|   dict_formal_list COMMA ID COLON expr { DictAssign([(Id($3), $5)]) :: $1 }              w : 5        
 |   dict_formal_list COMMA literal COLON expr { DictAssign([($3, $5)]) :: $1 }
+*/
 
 /* comma separated list of operations on nodes
  * for use with graph declarations 
@@ -113,6 +118,9 @@ literal:
 
 list_literal:
 | LBRACKET actuals_opt RBRACKET { ListLiteral($2) }
+
+dict_literal:
+| LBRACE tuples_opt RBRACE { DictLiteral($2)}
 
 
 /* Primitive Typenames */
@@ -156,7 +164,7 @@ list_decl_prefix:
 
 dict_decl_prefix:
 | DICT LT data_type COMMA data_type GT ID { DictDecl($3, $5, $7) }                                         /* dict<node, num> parents; */ 
-/*| DICT LT data_type COMMA data_type GT ID ASSIGN LBRACE dict_formal_list RBRACE { Block([DictDecl($3, $5, $7); AssignList($7, $10)]) } */  /* dict<node, num> parents = { x; y; z; }; */
+| DICT LT data_type COMMA data_type GT ID ASSIGN expr { Block([DictDecl($3, $5, $7); Assign($7, $9)]) } /* dict<node, num> parents = { x; y; z; }; */
 
    
 /////////////////////////////////////////////////////////////////////////////
@@ -170,6 +178,7 @@ stmt_list:
 
 /* statements are defined inside functions or executed like a script */
 /* a statement is just an action. ex. x = 5; */
+
 stmt:
    expr SEMI { Expr($1) } 
   | ID ASSIGN expr SEMI { Assign($1, $3) }
@@ -182,6 +191,10 @@ stmt:
      { For($3, $5, $8) }
   | WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
   | vdecl { $1 }
+
+alt_stmt: 
+  | fdecl { $1 }
+  | alt_stmt  { $1 }
 
 /////////////////////////////////////////////////////////////////////////////
                           /* EXPRESSIONS */
@@ -229,6 +242,14 @@ actuals_opt:
     /* nothing */ { [] }
   | actuals_list  { List.rev $1 }
 
+tuples_opt:
+ /* nothing */ {[]}
+ | tuples_list {List.rev $1}
+
+ tuples_list:
+    expr COLON expr { [($1, $3)]  }
+  | tuples_list COMMA expr COLON expr { ($3, $5) :: $1}
+
 actuals_list:
     expr                    { [$1] }
-  | actuals_list COMMA expr { $3 :: $1 }
+  | actuals_list COMMA expr { $3 :: $1 } 
