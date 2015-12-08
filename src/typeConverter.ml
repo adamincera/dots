@@ -202,34 +202,34 @@ let rec expr env = function
         |  Num ->
             (match e2_dt with
               | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num == ? "))
+              | _ -> raise (Failure("wrong type: Num != ? "))
             )
         |  String -> 
             (match e2_dt with
               | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String == ? "))
+              | _ -> raise (Failure("wrong type: String != ? "))
             )
         |  Bool -> 
             (match e2_dt with
               | Bool -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Bool == ? "))
+              | _ -> raise (Failure("wrong type: Bool != ? "))
             )
         | Void -> 
             (match e2_dt with
               | Void -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Void == ? "))
+              | _ -> raise (Failure("wrong type: Void != ? "))
             )
         |  Graph -> 
             (match e2_dt with
               | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
               | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Graph == ? "))
+              | _ -> raise (Failure("wrong type: Graph != ? "))
             )
         |  Node -> 
             (match e2_dt with
               | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
               | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Node == ? "))
+              | _ -> raise (Failure("wrong type: Node != ? "))
             )
         |  List(dt) -> 
             (match e2_dt with
@@ -237,8 +237,8 @@ let rec expr env = function
                   if (e1_dt = e2_dt) then
                     Sast.Binop(s_e1,op,s_e2,Sast.Bool)
                   else 
-                    raise (Failure("wrong type: List == List<?> "))
-              | _ -> raise (Failure("wrong type: List == ? "))
+                    raise (Failure("wrong type: List != List<?> "))
+              | _ -> raise (Failure("wrong type: List != ? "))
             )
         |  Dict(dtk,dtv) -> 
             (match e2_dt with
@@ -246,10 +246,10 @@ let rec expr env = function
                   if (e1_dt = e2_dt) then
                     Sast.Binop(s_e1,op,s_e2,Sast.Bool)
                   else 
-                    raise (Failure("wrong type: Dict == Dict<?> "))
-              | _ -> raise (Failure("wrong type: Dict == ? "))
+                    raise (Failure("wrong type: Dict != Dict<?> "))
+              | _ -> raise (Failure("wrong type: Dict != ? "))
             )
-        |  _ -> raise (Failure("Expr using == has incompatible types"))
+        |  _ -> raise (Failure("Expr using != has incompatible types"))
       )
 
     | Less ->
@@ -285,14 +285,14 @@ let rec expr env = function
         |  Num ->
             (match e2_dt with
               | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num < ? "))
+              | _ -> raise (Failure("wrong type: Num > ? "))
             )
         |  String -> 
             (match e2_dt with
               | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String < ? "))
+              | _ -> raise (Failure("wrong type: String > ? "))
             )
-        |  _ -> raise (Failure("Expr using <= has incompatible types"))
+        |  _ -> raise (Failure("Expr using > has incompatible types"))
       )
 
     | Geq -> 
@@ -300,14 +300,14 @@ let rec expr env = function
         |  Num ->
             (match e2_dt with
               | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num < ? "))
+              | _ -> raise (Failure("wrong type: Num >= ? "))
             )
         |  String -> 
             (match e2_dt with
               | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String < ? "))
+              | _ -> raise (Failure("wrong type: String >= ? "))
             )
-        |  _ -> raise (Failure("Expr using <= has incompatible types"))      )
+        |  _ -> raise (Failure("Expr using >= has incompatible types")))
 
     | LogAnd ->
       (match e1_dt with
@@ -323,16 +323,70 @@ let rec expr env = function
         |  Bool ->
             (match e2_dt with
               | Bool -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Bool && ? "))
+              | _ -> raise (Failure("wrong type: Bool || ? "))
             )
-        |  _ -> raise (Failure("Expr using && has incompatible types"))
+        |  _ -> raise (Failure("Expr using || has incompatible types"))
       )
     | _ -> raise (Failure("raise failure"))
   )
                         (* TODO: figure out the type of v and check *)
 | Ast.Call(f, el) -> Sast.Call(f, List.map (fun e -> expr env e) el, Sast.String)                   (* TODO: figure out the return type and use that *)
-| Ast.Access(v, e) -> Sast.Access(v, expr env e, Sast.String)                                       (* TODO: figure out the type of v and check *)
-| Ast.MemberVar(v, m) -> Sast.MemberVar(v, m, Sast.String)                                          (* TODO: figure out the type of v and check *)
+| Ast.Access(v, e) -> 
+    let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e_dt = get_expr_type s_e in
+    (try                                (*sees if variable defined*)
+        let v_e = find_var v env.var_types in
+         (match v_e with
+           List(dt) -> 
+              (match e_dt with 
+                 | Sast.Num -> Sast.Access(v, s_e, dt)
+                 | _ -> raise (Failure "expr to access list should be Num") 
+              )
+          | Dict(dk,dv) ->  
+            if (e_dt = dk) then
+                Sast.Access(v, s_e, dv)
+            else 
+                raise (Failure("wrong type: Dict != Dict<?> "))
+          )
+     with
+     | Not_found -> raise (Failure("undeclared variable: "))
+    );                                  
+| Ast.MemberVar(v, m) -> 
+    (try                                (*sees if variable defined*)
+        let v_e = find_var v env.var_types in
+         (match v_e with
+          | Sast.Node -> 
+              (try 
+                let mem_r_type = StringMap.find m mem_vars in
+                if (mem_r_type = Sast.Node) then
+                  (match m with
+                    | "in" -> Sast.MemberVar(v,m, Sast.List(Sast.Node))
+                    | "out" -> Sast.MemberVar(v,m, Sast.List(Sast.Node))
+                    | "values" -> Sast.MemberVar(v,m, (Sast.String))
+                    | _ -> raise (Failure("undeclared variable: "))
+                  )
+                else 
+                    raise (Failure("stupid "))
+              with
+                | Not_found -> raise (Failure("not a member function for graphs")) 
+              )
+          | Sast.Graph ->  
+            (try
+              let mem_r_type = StringMap.find m mem_vars in
+              if (mem_r_type = Sast.Graph) then 
+                (match m with
+                  | "nodes" -> Sast.MemberVar(v, m, Sast.List(Sast.Node)) 
+                  | _ -> raise (Failure("undeclared variable: "))
+                )
+              else 
+                  raise (Failure("hosanna tired "))
+            with
+            | Not_found -> raise (Failure("not a member function for graphs"))
+            ) 
+          )
+     with
+     | Not_found -> raise (Failure("undeclared variable: "))
+    )     
 | Ast.MemberCall(v, m, el) -> Sast.MemberCall(v, m, List.map (fun e -> expr env e) el, Sast.String) (* TODO: figure out the return type and use that *)
 | Ast.Undir(v1, v2) -> Sast.Undir(v1, v2, Sast.Void)
 | Ast.Dir(v1, v2) -> Sast.Dir(v1, v2, Sast.Void)
