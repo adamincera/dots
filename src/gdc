@@ -9,6 +9,4 @@ if [ -z "$2" ]; then
     OUT_FILE="exec"
 fi
 
-#DOTS="clib"
-
 gcc -I ${DOTS} -o ${OUT_FILE} $1.c

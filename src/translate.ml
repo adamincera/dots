@@ -34,6 +34,7 @@ type cstmt =
 | If of cexpr * cstmt list * cstmt list
 | For of cexpr * cexpr * cexpr * cstmt list (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
 | While of cexpr * cstmt list
+| Nostmt
 
 type c_func = { crtype : string; (* c return type *)
                 cfname : string; (* function name *)
@@ -139,7 +140,7 @@ let rec translate_expr = function
 | Assign(id, e) -> id ^ " = " ^  translate_expr e
 | Call(dt, id, el) -> 
     (match id with
-        | "1" -> 
+        | "f1" -> 
             (* fmt is all the format types so far: ex. %s%f%f *)
             (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
             let rec build_str fmt vals = function
@@ -176,6 +177,7 @@ let rec translate_stmt = function
 | While(cond, sl) -> "while (" ^ translate_expr cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl) ^
     "\n}"
+| Nostmt -> ""
 
 
 let translate_func func = 
@@ -195,7 +197,8 @@ let string_of_cfunc func =
 
 let translate_c (globals, cfuncs) = 
     (* "\"graph.h\"" *)
-    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"; "\"clib/graph.h\""]
+    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"; 
+                "<graph.h>"; (*"\"clib/dict.h\"";*) "<list.h>"]
     in     
 
     (* now we are going to translate a program *)

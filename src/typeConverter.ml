@@ -420,10 +420,9 @@ let fdecl env func =
   }
 in
 
-{
-  Sast.s_funcs = List.map (fun f -> fdecl env f) prog.funcs;
-  Sast.s_cmds = List.map (fun s -> stmt env s) prog.cmds
-}
+  (* { Sast.s_funcs = List.map (fun f -> fdecl env f) prog.funcs;
+  Sast.s_cmds = List.map (fun s -> stmt env s) prog.cmds } *)
+ { Sast.s_cmds = List.map (fun s -> stmt env s) prog.cmds }
 
 (* get printf fmt string for Sast.dataType types *)
 let dt_fmt = function

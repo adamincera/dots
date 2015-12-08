@@ -9,6 +9,7 @@ type expr =
     NumLiteral of string
   | StrLiteral of string
   | ListLiteral of expr list (* ex. [1, 3, 42.33] *)
+  | DictLiteral of (expr * expr) list (* ex. [(key, value)] *)
   | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
@@ -34,6 +35,9 @@ type expr =
 | NoOp of string
 *)
 
+
+
+
 type stmt =
     Block of stmt list
   | Expr of expr
@@ -46,8 +50,9 @@ type stmt =
   | If of expr * stmt * stmt
   | For of string * string * stmt list (* temp var, iterable var, var decls, stmts *)
   | While of expr * stmt list (* condition, var decls, stmt list *)
+  | Fdecl of func_decl and
 
-type func_decl = {
+   func_decl = {
     rtype : string; 
     fname : string;
     formals : (string * string) list;
@@ -55,9 +60,11 @@ type func_decl = {
     body : stmt list;
   }
 
-(* program: ist of vars, function defs, commands not within a function *)
-type program = { funcs : func_decl list;
-                cmds : stmt list }
+(* program: ist of vars, function defs, commands not within a function  
+    funcs : func_decl list;
+                cmds :
+*)
+type program =  { cmds: stmt list }
 
 (* type program = string list * func_decl list *)
 
@@ -76,6 +83,7 @@ let rec string_of_expr = function
     NumLiteral(l) -> l
   | StrLiteral(l) -> "\"" ^ l ^ "\""
   | ListLiteral(el) -> "[" ^ String.concat "," (List.map string_of_expr el) ^ "]"
+  (* | DictLiteral(k,v) -> "[" ^ String.concat "," (List.map string_of_expr el) ^ "]" *)
   | Boolean(b) -> if b = True then "true" else "false"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
