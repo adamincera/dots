@@ -77,10 +77,11 @@ void print_strings(list_t *r) {
 
 void free_list(list_t *r) {
     if(r->next)
-    for(r = r->next; r->next; r = r->next) {
-        free(r->previous->data);
-        free(r->previous);
-    }
-    free(r->data);
+        for(r = r->next; r->next; r = r->next) {
+            free(r->previous->data);
+            free(r->previous);
+        }
+    else
+        free(r->data);
     free(r);
 }
