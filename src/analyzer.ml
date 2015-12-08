@@ -132,7 +132,7 @@ let dt_to_ct = function
 
 (* the meat of the compiler *)
 (* actually converts Sast objects into strings of C code *)
-let translate (env, functions, cmds) =
+let translate (env, cmds) =
     (* 
        every time a var has to be auto-created 
        incr a counter so that we don't repeat vars in C 

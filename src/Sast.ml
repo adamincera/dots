@@ -49,8 +49,10 @@ type s_fdecl = {
     s_body : s_stmt list;
   }
 
-(* program: ist of vars, function defs, commands not within a function *)
-type program = { s_funcs : s_fdecl list;
-                s_cmds : s_stmt list }
+(* program: ist of vars, function defs, commands not within a function
+s_funcs : s_fdecl list;
+                s_cmds : s_stmt list
+ *)
+type program = { s_cmds : s_stmt list } 
 
 (* end Sast *)
