@@ -265,12 +265,15 @@ let translate (env, cmds) =
                              ])
          | Dict(dtk, dtv) -> Expr(Noexpr) (* TODO *)
          | Node -> Block([Vdecl(Ptr(Node), auto_var); 
+                          Expr(Assign(auto_var, Ref(Id(Ptr(Node), index))))] @ csl)
+
+                      (* Block([Vdecl(Ptr(Node), auto_var); 
                           For(Assign(auto_var, Ref(Id(Ptr(Node), index))),
                               Id(Ptr(Node), auto_var),
                               Assign(auto_var, Literal(Void, "NULL")),
                               csl
                              )
-                          ])
+                          ]) *)
          | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
                               For(Assign(auto_var, Member(Ptr(Node), index, "nodes")),
                                   Id(Ptr(Node), auto_var),
