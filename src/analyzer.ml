@@ -152,12 +152,12 @@ let translate (env, cmds) =
     | Sast.DictLiteral(kvl, dt) -> Noexpr (* TODO *)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
-         let index = "v" ^ string_of_int(find_var v env.var_inds) (* see if id exists, get the num index of the var *)
-         in
-         Id(Void, index) 
+         let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
+         Id(dt_to_ct dt, index) 
     | Sast.Binop(e1, op, e2, dt) ->
         let ce1 = translate_expr env e1 in
         let ce2 = translate_expr env e2 in
+        let cdt = Translate.get_expr_type ce1 in
 (*         (
           match dt with
           | Num -> Binop(Float, ce1, op, ce2) (* how can we tell if it's really an int? *)
@@ -171,17 +171,17 @@ let translate (env, cmds) =
         )
         ) *)
             (match op with
-              | Add -> Noexpr (* TODO *)
-              | Sub -> Noexpr (* TODO *)
+              | Add -> Binop(cdt, ce1, op, ce2) (* TODO *)
+              | Sub -> Binop(cdt, ce1, op, ce2) (* TODO *)
               | Mult | Div -> Binop(Float, ce1, op, ce2)
-              | Equal -> Noexpr (* TODO *)
-              | Neq -> Noexpr (* TODO *)
-              | Less -> Noexpr (* TODO *)
-              | Leq -> Noexpr (* TODO *)
-              | Greater -> Noexpr (* TODO *)
-              | Geq -> Noexpr (* TODO *)
-              | LogAnd -> Noexpr (* TODO *)
-              | LogOr -> Noexpr (* TODO *)
+              | Equal -> Binop(cdt, ce1, op, ce2) (* TODO *)
+              | Neq -> Binop(cdt, ce1, op, ce2) (* TODO *)
+              | Less -> Binop(cdt, ce1, op, ce2) (* TODO *)
+              | Leq -> Binop(cdt, ce1, op, ce2) (* TODO *)
+              | Greater -> Binop(cdt, ce1, op, ce2) (* TODO *)
+              | Geq -> Binop(cdt, ce1, op, ce2) (* TODO *)
+              | LogAnd -> Binop(cdt, ce1, op, ce2) (* TODO *)
+              | LogOr -> Binop(cdt, ce1, op, ce2) (* TODO *)
             )
     | Sast.Call(func_name, el, dt) -> 
         let cel = List.map (translate_expr env) el in

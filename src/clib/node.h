@@ -4,7 +4,7 @@ typedef struct node node_t;
 typedef struct edgelist edgelist_t;
 
 struct node {
-    void *data;
+    char *data;
     edgelist_t *in;
     edgelist_t *out;
 };
@@ -17,7 +17,7 @@ struct edgelist {
 };
 
 /* initialize a new node that contains *data */
-node_t *init_node(void *data);
+node_t *init_node(char *data);
 
 /* compares node data */
 int node_compare(node_t *a, node_t *b, int (* comp) (void *a, void *b));
