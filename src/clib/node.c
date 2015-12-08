@@ -3,7 +3,7 @@
 #include "node.h"
 
 /* initialize a new node that contains *data */
-node_t *init_node(void *data) {
+node_t *init_node(char *data) {
     node_t *n = (node_t *) malloc(sizeof(node_t));
     n->data = data;
     n->in = NULL;
