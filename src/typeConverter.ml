@@ -31,7 +31,7 @@ let rec check_list env v_e = function
  | [] -> ""
  | hd::tl -> 
     if not(v_e = (get_expr_type hd)) then 
-       raise (Failure ("assignment expression not of type: " ^ type_to_str ( v_e )) )
+       raise (Failure ("list element not of type: " ^ type_to_str ( v_e )) )
     else 
         check_list env v_e tl
 
@@ -48,6 +48,23 @@ let convert_ast prog env =
 let rec expr env = function
 | Ast.NumLiteral(v) -> Sast.NumLiteral(v, Sast.Num)
 | Ast.StrLiteral(v) -> Sast.StrLiteral(v, Sast.String)
+| Ast.ListLiteral(el) ->
+(* (try                                (*sees if variable defined*)
+          let v_e = (find_var v env.var_types) in 
+           let s_el = List.map (expr env) el in 
+            check_list env v_e s_el;
+            Sast.AssignList(v, s_el)
+       with
+       | Not_found -> raise (Failure("undeclared variable: "))
+      );          List.map (expr env) el in (*sees if variable defined*) *)
+  let s_el = List.map (expr env) el in
+  (match el with
+   | [] -> ListLiteral([], List(Void))
+   | x ->  let dt = get_expr_type (List.hd s_el) 
+           in
+           check_list env dt s_el;
+           ListLiteral(s_el, List(dt))
+  )
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
 | Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
 | Ast.Binop(e1, op, e2) -> 
@@ -368,7 +385,7 @@ let rec stmt env = function
       if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
-| Ast.AssignList(v, el) -> 
+(* | Ast.AssignList(v, el) -> 
       (*insert a recursive function*) 
       (try                                (*sees if variable defined*)
           let v_e = (find_var v env.var_types) in 
@@ -387,6 +404,7 @@ let rec stmt env = function
      with
      | Not_found -> raise (Failure("undeclared variable: "))
     ); 
+      );                           (*sees if variable defined*) *)
 | Ast.Return(e) -> Sast.Return(expr env e)
 | Ast.If(cond, s1, s2) -> Sast.If(expr env cond, stmt env s1, stmt env s2)
 | Ast.For(v1, v2, sl) -> Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)

@@ -20,7 +20,10 @@ type cexpr =
 | Assign of string * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
 | Access of ctype * string * cexpr               (* array access: id[cexpr] *)
+| Member of ctype * string * string (* id, member *)
 | Cast of ctype * cexpr               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
+| Deref of cexpr (* ex. *var *)
+| Ref of cexpr (* ex. &var *)
 | Noexpr
 
 type cstmt =
@@ -29,7 +32,7 @@ type cstmt =
 | Vdecl of  ctype * string (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
 | Return of cexpr
 | If of cexpr * cstmt list * cstmt list
-| For of cexpr * cexpr * cexpr * cstmt list (* For(Assign(1, Literal(3)), Binop(Id(1), Less, Literal(10)), Assign(Id(1), Binop(Id(1), Add, Literal(1), list of stuff) -> for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
+| For of cexpr * cexpr * cexpr * cstmt list (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
 | While of cexpr * cstmt list
 
 type c_func = { crtype : string; (* c return type *)
@@ -91,7 +94,7 @@ let fmt_str = function
 | Float -> "%f"
 | Int -> "%d"
 | Cstring -> "%s"
-| _ -> raise (Failure ("can't print that shit straight up"))
+| _ -> raise (Failure ("can't print other types directly"))
 
 let rec get_expr_type = function
 | Literal(dt, str) -> dt
@@ -100,7 +103,10 @@ let rec get_expr_type = function
 | Assign(id, e1) -> Void
 | Call(dt, id, el) -> dt
 | Access(dt, id, e) -> dt
+| Member(dt, id, m) -> dt
 | Cast(dt, e) -> dt
+| Ref(e) -> Void
+| Deref(e) -> Void
 | Noexpr -> Void
 
 let op_to_str = function
@@ -124,12 +130,13 @@ let rec translate_expr = function
     | Int -> v
     | Cstring -> "\"" ^ v ^ "\""
     | Array(adt) -> v
+    | Void -> if v = "NULL" then v else raise (Failure "Void lit should only be 'NULL'")
     | _ -> raise (Failure "invalid C literal type")
    )
 
-| Id(dt, id) -> "v" ^ id
+| Id(dt, id) -> id
 | Binop(dt, e1, op, e2) -> translate_expr e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_expr e2
-| Assign(id, e) -> "v" ^ id ^ " = " ^  translate_expr e
+| Assign(id, e) -> id ^ " = " ^  translate_expr e
 | Call(dt, id, el) -> 
     (match id with
         | "1" -> 
@@ -142,16 +149,19 @@ let rec translate_expr = function
             let result = build_str "" "" el
             in
             "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
-        | _ -> "f" ^ id ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
+        | _ -> id ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
     )
-| Access(dt, id, e) -> "v" ^ id ^ "[" ^ translate_expr e ^ "]"
+| Access(dt, id, e) -> id ^ "[" ^ translate_expr e ^ "]"
+| Member(dt, id, m) -> id ^ "->" ^ m
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_expr e ^ ")"
+| Ref(e) -> "&(" ^ translate_expr e ^ ")"
+| Deref(e) -> "*(" ^ translate_expr e ^ ")"
 | Noexpr -> ""
 
 let rec translate_stmt = function
 | Block(sl) -> String.concat "\n" (List.map translate_stmt sl)
 | Expr(e) -> translate_expr e ^ ";"
-| Vdecl(dt, id) -> type_to_str dt ^ " v" ^ id ^ ";"
+| Vdecl(dt, id) -> type_to_str dt ^ " " ^ id ^ ";"
 | Return(e) -> "return " ^ translate_expr e ^ ";"
 | If(cond, sl1, sl2) -> "if (" ^ translate_expr cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl1) ^
@@ -162,10 +172,10 @@ let rec translate_stmt = function
     translate_expr cond ^ "; " ^
     translate_expr incr ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl) ^
-    "}"
+    "\n}"
 | While(cond, sl) -> "while (" ^ translate_expr cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl) ^
-    "}"
+    "\n}"
 
 
 let translate_func func = 
@@ -185,11 +195,12 @@ let string_of_cfunc func =
 
 let translate_c (globals, cfuncs) = 
     (* "\"graph.h\"" *)
-    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
+    let libs = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"; "\"clib/graph.h\""]
     in     
 
     (* now we are going to translate a program *)
     (String.concat "\n" (List.map (fun f -> "#include " ^ f) libs)) ^ 
+    "\n" ^
     (String.concat "\n" (List.map translate_stmt globals)) ^ 
     (String.concat "\n" (List.map translate_func cfuncs))
 

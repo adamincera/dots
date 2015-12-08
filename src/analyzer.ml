@@ -88,6 +88,7 @@ let rec type_to_str = function
 let get_expr_type = function
 | Sast.NumLiteral(v, dt) -> dt
 | Sast.StrLiteral(v, dt) -> dt
+| Sast.ListLiteral(el, dt) -> dt
 | Sast.Boolean(v, dt) -> dt
 | Sast.Id(v, dt) -> dt
 | Sast.Binop(e1, op, e2, dt) -> dt
@@ -131,18 +132,26 @@ let dt_to_ct = function
 (* the meat of the compiler *)
 (* actually converts Sast objects into strings of C code *)
 let translate (env, functions, cmds) =
+    (* 
+       every time a var has to be auto-created 
+       incr a counter so that we don't repeat vars in C 
+    *)
+    let auto_cnt = ref 0 
+    in
+
     let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
+    | Sast.ListLiteral(el, dt) -> Noexpr (* TODO *)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
-         let index = string_of_int(find_var v env.var_inds) (* see if id exists, get the num index of the var *)
+         let index = "v" ^ string_of_int(find_var v env.var_inds) (* see if id exists, get the num index of the var *)
          in
          Id(Void, index) 
     | Sast.Binop(e1, op, e2, dt) ->
         let ce1 = translate_expr env e1 in
         let ce2 = translate_expr env e2 in
-        (
+(*         (
           match dt with
           | Num -> Binop(Float, ce1, op, ce2) (* how can we tell if it's really an int? *)
           | String -> Binop(Cstring, ce1, op, ce2)
@@ -153,12 +162,27 @@ let translate (env, functions, cmds) =
           | Dict(dtk, dtv) -> Noexpr (* TODO *)
           | Void -> raise (Failure "why is there a void binop?")
         )
+        ) *)
+            (match op with
+              | Add -> Noexpr (* TODO *)
+              | Sub -> Noexpr (* TODO *)
+              | Mult | Div -> Binop(Float, ce1, op, ce2)
+              | Equal -> Noexpr (* TODO *)
+              | Neq -> Noexpr (* TODO *)
+              | Less -> Noexpr (* TODO *)
+              | Leq -> Noexpr (* TODO *)
+              | Greater -> Noexpr (* TODO *)
+              | Geq -> Noexpr (* TODO *)
+              | LogAnd -> Noexpr (* TODO *)
+              | LogOr -> Noexpr (* TODO *)
+            )
+    | Sast.DictAssign(k, v, dt) -> Noexpr (* TODO *)
     | Sast.Call(func_name, el, dt) -> 
         let cel = List.map (translate_expr env) el in
-        let index = string_of_int(find_var func_name env.func_inds) in
+        let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
         Call(dt_to_ct dt, index, cel)
   | Sast.Access(v, e, dt) -> 
-      let index = string_of_int(find_var v env.var_inds) in
+      let index = "v" ^ string_of_int(find_var v env.var_inds) in
       let ce = translate_expr env e in
       Access(dt_to_ct dt, index, ce)
   | Sast.MemberVar(v, m, dt) -> Noexpr (* TODO *)
@@ -177,52 +201,91 @@ let translate (env, functions, cmds) =
           else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e)
 *)
     let rec translate_stmt env = function 
-    | Sast.Block(sl) -> (match sl with
+    | Sast.Block(sl) -> 
+        let csl = List.map (translate_stmt env) sl in
+        Block(csl)
+    (*     (match sl with
         | [] -> Block([Expr(Noexpr)])
         | hd :: tl -> Block([Expr(Noexpr)])
-       (*) | hd :: tl -> translate_stmt env hd ^ translate_stmt env (Sast.Block(tl)) *)
-    )
+       (* | hd :: tl -> translate_stmt env hd ^ translate_stmt env (Sast.Block(tl)) *)
+    ) *)
     | Sast.Expr(e) -> Expr(translate_expr env e)
     | Sast.Vdecl(dt, id) ->
      (List.hd env.var_types) := StringMap.add id dt !(List.hd env.var_types); (* add type map *)
         (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index map *)
-        let index = string_of_int(find_var id env.var_inds) in
+        let index = "v" ^ string_of_int(find_var id env.var_inds) in
         (match dt with
           | Num -> Vdecl(Float, index)
           | String -> Vdecl(Cstring, index)
           | Bool -> Vdecl(Int, index)
-          | Graph -> Vdecl(Graph, index)
-          | Node -> Vdecl(Node, index)
-          | List(dt) -> Vdecl(List, index) (* TODO *)
+          | Graph -> Block([Vdecl(Ptr(Graph), index);
+                            Expr(Assign(index, Call(Void, "init_graph", [])))
+                          ]) (* C: graph_t *g1 = init_graph(); *)
+          | Node -> Block([Vdecl(Ptr(Node), index); 
+                           Expr(Assign(index, Call(Void, "init_node", [Literal(Cstring, "")])))
+                         ]) (* C: node_t *x = init_node(""); *)
+          | List(dt) -> Vdecl(Ptr(List), index) (* C: list_t *x; *)
           | Dict(dtk, dtv) -> Vdecl(Dict, index) (* TODO *)
           | Void -> raise (Failure ("should not be using Void as a datatype"))
         )
-    | Sast.Assign(v, e, dt) -> Expr(Noexpr) (* TODO *)
-    (*  let var_type = get_expr_type e in
-        let index = string_of_int(find_var v env.var_inds) in
+    | Sast.Assign(v, e, dt) ->
+        let ce = translate_expr env e in
+        let var_type = get_expr_type e in
+        let index = "v" ^ string_of_int(find_var v env.var_inds) in
+        let auto_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
         (match var_type with
-            | Num | String | Bool | Node | Graph | Void -> Assign(index, ce)
-(*             | List(dt) -> Block([Vdecl(Ptr(dt_to_ct dt), "inter"), Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))]) *)
-            | List(dt) -> Assign(index, ce) (* TODO*)   
-            | Dict(dtk, dtv) -> Assign(index, ce) (* TODO *)
+            | Num | String | Bool | Node | Void -> Expr(Assign(index, ce))
+            | List(dt) -> Expr(Assign(index, ce)) (* TODO *)   
+            | Dict(dtk, dtv) -> Expr(Assign(index, ce)) (* TODO *)
+            | Graph -> Expr(Assign(index, Call(Graph, "copy", [ce])))
         )
         (*         if not( (find_var v env.var_types) = get_expr_type e)
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-        else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *) *)
+        else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
     | Sast.AssignList(v, el) -> Expr(Noexpr) (* TODO *)
+<<<<<<< HEAD
     | Sast.DictAssign(k, v) -> Expr(Noexpr) (* TODO *)
+=======
+          (* Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
+                           Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
+                         ]) *)
+>>>>>>> 7f12856fa664c8237d18f982f77948a94aa3d33f
     | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->
+        let auto_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
+        let index = "v" ^ string_of_int (find_var iter env.var_inds) in
         let dt = (find_var iter env.var_types) in
+        let csl = List.map (translate_stmt env) sl in
         (match dt with
-         | List(dt) -> Block([Expr(Id(Ptr(List), "i"))])
-         | Dict(dtk, dtv) -> Expr(Noexpr)
-         | Node -> Expr(Noexpr)
-         | Graph -> Expr(Noexpr)
+         | List(dt) -> Block([Vdecl(Ptr(List), auto_var); 
+                              For(Assign(auto_var, Id(Ptr(List), index)),
+                                  Id(Ptr(List), auto_var),
+                                  Assign(auto_var, Member(Ptr(List), auto_var, "next")),
+                                  csl
+                                 )
+                             ])
+         | Dict(dtk, dtv) -> Expr(Noexpr) (* TODO *)
+         | Node -> Block([Vdecl(Ptr(Node), auto_var); 
+                          For(Assign(auto_var, Ref(Id(Ptr(Node), index))),
+                              Id(Ptr(Node), auto_var),
+                              Assign(auto_var, Literal(Void, "NULL")),
+                              csl
+                             )
+                          ])
+         | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
+                              For(Assign(auto_var, Member(Ptr(Node), index, "nodes")),
+                                  Id(Ptr(Node), auto_var),
+                                  Assign(auto_var, Member(Ptr(Node), auto_var, "next")),
+                                  csl
+                                 )
+                             ])
          | _ -> raise (Failure(iter ^ " is not iterable"))
        )
-    | Sast.While (cond, sl) -> Expr(Noexpr)            (*TODO*)
+    | Sast.While (cond, sl) -> 
+        let c_cond = translate_expr env cond in
+        let csl = List.map (translate_stmt env) sl in
+        While(c_cond, csl)
     in
 
     let main_func = { crtype = "int";

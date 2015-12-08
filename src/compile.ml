@@ -1,4 +1,4 @@
-(*ties together parsing scanning ast sast the whole fucking thing *)
+(* ties together parsing scanning ast sast the whole fucking thing *)
 open Ast
 open Sast
 open TypeConverter
@@ -20,7 +20,7 @@ let _ =
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
   let sast_prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in
-  (* comment out for real: *)  print_endline ("converted ast to sast"); 
+  (* comment out for real: *)  (* print_endline ("converted ast to sast");  *)
   let trans_env = (* set up default environ *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
@@ -39,8 +39,9 @@ let _ =
 
 (* pretty printing version *)
 
-(* let _ =
+(*  let _ =
   let lexbuf = Lexing.from_channel stdin in
   let prg = Parser.program Scanner.token lexbuf in
   let result = string_of_program (prg.funcs, List.rev prg.cmds) in
-  print_endline result;; *)
+  print_endline result;; 
+  *)
