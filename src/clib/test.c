@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "translations.h"
+#include "list.h"
+#include "dict.h"
 
 int main() {
     list_t *l = range(0, 10);
@@ -28,5 +29,9 @@ int main() {
     l = add_back(l, s2);
     print_strings(l);
     free_list(l);
+
+    entry_t **d = init_dict();
+    put_string(d, "hello", (void *) "world");
+
     return 0;
 }
