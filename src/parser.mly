@@ -47,8 +47,8 @@ program:
   decls EOF { $1 }
 
 decls:
- | /* nothing */ { [] }
- | decls alt_stmt  { $2 :: $1 }
+ | /* nothing */ { { cmds = [] } }
+ | decls stmt  { { cmds = $2 :: $1.cmds } }
 
 /* decls:
 |   nothing  { {funcs = []; cmds = []} }
@@ -248,7 +248,7 @@ tuples_opt:
 
  tuples_list:
     expr COLON expr { [($1, $3)]  }
-  | tuples_list COMMA expr COLON expr { ($3, $5) :: $1}
+  | tuples_list COMMA expr COLON expr { ($3, $5) :: $1 }
 
 actuals_list:
     expr                    { [$1] }
