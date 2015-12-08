@@ -91,7 +91,6 @@ let get_expr_type = function
 | Sast.Boolean(v, dt) -> dt
 | Sast.Id(v, dt) -> dt
 | Sast.Binop(e1, op, e2, dt) -> dt
-| Sast.DictAssign(k, v, dt) -> Sast.Void
 | Sast.Call(v, el, dt) -> dt
 | Sast.Access(v, e, dt) -> dt
 | Sast.MemberVar(v, m, dt) -> dt
@@ -105,6 +104,8 @@ let get_expr_type = function
 | Sast.Noexpr -> Sast.Void
 
 (*| Sast.Assign(v, e, dt) -> Sast.Void
+| Sast.DictAssign(k, v, dt) -> Sast.Void
+
 | Sast.AssignList(s, el, dt) -> Sast.Void
 *)
 
@@ -152,7 +153,6 @@ let translate (env, functions, cmds) =
           | Dict(dtk, dtv) -> Noexpr (* TODO *)
           | Void -> raise (Failure "why is there a void binop?")
         )
-    | Sast.DictAssign(k, v, dt) -> Noexpr (* TODO *)
     | Sast.Call(func_name, el, dt) -> 
         let cel = List.map (translate_expr env) el in
         let index = string_of_int(find_var func_name env.func_inds) in
@@ -210,6 +210,7 @@ let translate (env, functions, cmds) =
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *) *)
     | Sast.AssignList(v, el) -> Expr(Noexpr) (* TODO *)
+    | Sast.DictAssign(k, v) -> Expr(Noexpr) (* TODO *)
     | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->

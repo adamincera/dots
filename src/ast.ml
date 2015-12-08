@@ -11,7 +11,6 @@ type expr =
   | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
-  | DictAssign of  expr * expr (* key, value  --> ex. "foo" : 8 *)
   | Call of string * expr list
   | Access of string * expr (* for dict and list element access *)
   | MemberVar of string * string (* parent variable, the accessed member *)
@@ -42,6 +41,7 @@ type stmt =
   | DictDecl of string * string * string (* key_type, elem_type, id *)
   | Assign of string * expr
   | AssignList of string * expr list (* when a list of expressions is assigned to a variable *)
+  | DictAssign of  string * (expr * expr) list (* (variable name, list of tuples of exprs) *)
   | Return of expr
   | If of expr * stmt * stmt
   | For of string * string * stmt list (* temp var, iterable var, var decls, stmts *)

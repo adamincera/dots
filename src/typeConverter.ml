@@ -23,6 +23,9 @@ let get_list_type = function
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
 *)
+let get_dict_type = function
+ | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
+ | _ -> raise (Failure("wrong type: not a dict "))
 
 let rec check_list env v_e = function
  | [] -> ""
@@ -32,9 +35,13 @@ let rec check_list env v_e = function
     else 
         check_list env v_e tl
 
- let get_dict_type = function
- | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
- | _ -> raise (Failure("wrong type: not a dict "))
+ let rec check_dict env v_e = function
+ | [] -> ""
+ | hd::tl -> 
+    if not(v_e = (get_dict_type hd)) then
+      raise (Failure ("assignment expression not of type: " ) )
+    else 
+        check_dict env v_e tl     
 
 let convert_ast prog env =
 
@@ -306,7 +313,6 @@ let rec expr env = function
     | _ -> raise (Failure("raise failure"))
   )
                         (* TODO: figure out the type of v and check *)
-| Ast.DictAssign(v, e) -> Sast.DictAssign(expr env v, expr env e, Sast.Void)
 | Ast.Call(f, el) -> Sast.Call(f, List.map (fun e -> expr env e) el, Sast.String)                   (* TODO: figure out the return type and use that *)
 | Ast.Access(v, e) -> Sast.Access(v, expr env e, Sast.String)                                       (* TODO: figure out the type of v and check *)
 | Ast.MemberVar(v, m) -> Sast.MemberVar(v, m, Sast.String)                                          (* TODO: figure out the type of v and check *)
@@ -371,7 +377,16 @@ let rec stmt env = function
             Sast.AssignList(v, s_el)
        with
        | Not_found -> raise (Failure("undeclared variable: "))
-      );                           (*sees if variable defined*)
+      );   
+| Ast.DictAssign(v, tl) -> 
+    (try                                (*sees if variable defined*)
+        let v_e = (find_var v env.var_types) in 
+         let s_tl = List.map (expr env) tl in 
+          check_dict env v_e s_tl;
+          Sast.DictAssign(v, s_tl)
+     with
+     | Not_found -> raise (Failure("undeclared variable: "))
+    ); 
 | Ast.Return(e) -> Sast.Return(expr env e)
 | Ast.If(cond, s1, s2) -> Sast.If(expr env cond, stmt env s1, stmt env s2)
 | Ast.For(v1, v2, sl) -> Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
