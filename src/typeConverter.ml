@@ -388,11 +388,80 @@ let rec expr env = function
      | Not_found -> raise (Failure("undeclared variable: "))
     )     
 | Ast.MemberCall(v, m, el) -> Sast.MemberCall(v, m, List.map (fun e -> expr env e) el, Sast.String) (* TODO: figure out the return type and use that *)
-| Ast.Undir(v1, v2) -> Sast.Undir(v1, v2, Sast.Void)
-| Ast.Dir(v1, v2) -> Sast.Dir(v1, v2, Sast.Void)
-| Ast.BidirVal(w1, v1, v2, w2) -> Sast.BidirVal(expr env w1, v1, v2, expr env w2, Sast.Void)
-| Ast.UndirVal(v1, v2, w) -> Sast.UndirVal(v1, v2, expr env w, Sast.Void)
-| Ast.DirVal(v1, v2, w) -> Sast.DirVal(v1, v2, expr env w, Sast.Void)
+| Ast.Undir(v1, v2) -> 
+    (*check if v1 and v2 exist *)
+    (try                                (*sees if variable defined*)
+        let v1_e = find_var v1 env.var_types in
+         if v1_e = Sast.Graph then 
+            let v2_e = find_var v2 env.var_types in 
+              if v2_e = Sast.Graph then 
+                Sast.Undir(v1, v2, Sast.Void)
+              else raise (Failure("undeclared variable: "))
+          else 
+            raise (Failure("undeclared variable: "))
+      with
+     | Not_found -> raise (Failure("undeclared variable: ")))
+
+| Ast.Dir(v1, v2) -> 
+   (try                                (*sees if variable defined*)
+        let v1_e = find_var v1 env.var_types in
+          if v1_e = Sast.Graph then 
+            let v2_e = find_var v2 env.var_types in 
+              if v2_e = Sast.Graph then 
+                Sast.Dir(v1, v2, Sast.Void)
+              else raise (Failure("undeclared variable: "))
+          else raise (Failure("undeclared variable: "))
+      with
+     | Not_found -> raise (Failure("undeclared variable: ")))   
+| Ast.BidirVal(w1, v1, v2, w2) -> 
+     (try                                (*sees if variable defined*)
+          if find_var v1 env.var_types = Sast.Graph then 
+              if find_var v2 env.var_types = Sast.Graph then
+                let s_w1 = expr env w1 in
+                if get_expr_type s_w1 = Sast.Num then
+                  let s_w2 = expr env w2 in
+                  if get_expr_type s_w2 = Sast.Num then 
+                    Sast.BidirVal(expr env w1, v1, v2, expr env w2, Sast.Void)
+                  else 
+                    raise (Failure("undeclared variable: "))
+                else
+                  raise (Failure("undeclared variable: "))
+              else 
+                raise (Failure("undeclared variable: "))
+          else 
+            raise (Failure("undeclared variable: "))
+      with
+     | Not_found -> raise (Failure("undeclared variable: ")))  
+| Ast.UndirVal(v1, v2, w) -> 
+      (try                                (*sees if variable defined*)
+            if find_var v1 env.var_types = Sast.Graph then 
+                if find_var v2 env.var_types = Sast.Graph then 
+                  let s_w = expr env w in
+                  if get_expr_type s_w = Sast.Num then 
+                      Sast.UndirVal(v1, v2, expr env w, Sast.Void)
+                  else 
+                    raise (Failure("undeclared variable: "))
+                else 
+                  raise (Failure("undeclared variable: "))
+            else 
+              raise (Failure("undeclared variable: "))
+      with
+        | Not_found -> raise (Failure("undeclared variable: ")))
+| Ast.DirVal(v1, v2, w) -> 
+    (try 
+        if find_var v1 env.var_types = Sast.Graph then 
+          if find_var v2 env.var_types = Sast.Graph then
+            let s_w = expr env w in
+            if get_expr_type s_w = Sast.Num then 
+                Sast.DirVal(v1, v2, expr env w, Sast.Void)
+            else 
+              raise (Failure("undeclared variable: "))
+          else 
+            raise (Failure("undeclared variable: "))
+        else 
+          raise (Failure("undeclared variable: "))
+      with
+         | Not_found -> raise (Failure("undeclared variable: ")))
 | Ast.NoOp(v) -> Sast.NoOp(v, Sast.Void)
 | Ast.Noexpr -> Sast.Noexpr
 in
