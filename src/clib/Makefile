@@ -30,5 +30,5 @@ library: objects
 
 .PHONY: clean
 clean:
-	rm -f *.o main test
+	rm -f *.o main test *.a
 
