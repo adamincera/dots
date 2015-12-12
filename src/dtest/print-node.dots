@@ -1,0 +1,2 @@
+node x;
+print(x);

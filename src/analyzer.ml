@@ -130,7 +130,7 @@ let dt_to_ct = function
 | Sast.String -> Cstring
 | Sast.Bool -> Int
 | Sast.Graph -> Void (* TODO *)
-| Sast.Node -> Void (* TODO *)
+| Sast.Node -> Node (* TODO *)
 | Sast.List(dt) -> Void (* TODO *)
 | Sast.Dict(dtk, dtv) -> Void (* TODO *)
 | Sast.Void -> Void
