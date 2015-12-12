@@ -45,6 +45,7 @@ type stmt =
   | ListDecl of  string * string (* elem_type, id *)
   | DictDecl of string * string * string (* key_type, elem_type, id *)
   | Assign of string * expr
+  | NodeDef of string * expr (* (node id, what goes inside parens) of item *)
 (*   | AssignList of string * expr  *)(* when a list of expressions is assigned to a variable *)
   | Return of expr
   | If of expr * stmt * stmt

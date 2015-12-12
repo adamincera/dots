@@ -33,6 +33,7 @@ type s_stmt =
     Block of s_stmt list
   | Expr of s_expr
   | Vdecl of dataType * string
+  | NodeDef of string * s_expr * dataType (* (node id, type, item id) *)
   | Assign of string * s_expr * dataType                     (* x = 5; *)
   | AssignList of string * s_expr list            (* when a list of expressions is assigned to a variable *)
   | DictAssign of string * (s_expr * s_expr) list                (* (variable name, list of tuples of key value pairs) *)

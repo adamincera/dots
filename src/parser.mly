@@ -151,7 +151,7 @@ prim_decl_prefix:
 /* NODE INITIALIZERS */
 node_decl_prefix:
 | NODE ID { Vdecl("node", $2) }                                                        /* node x;    */
-| NODE ID LPAREN expr RPAREN { Block([Vdecl("node", $2); Assign($2, $4)]) }      /* node x("chicago") */                           /* node x("Chicago") */
+| NODE ID LPAREN expr RPAREN { Block([Vdecl("node", $2); NodeDef($2, $4)]) }      /* node x("chicago") */                           /* node x("Chicago") */
 
 /* GRAPH INITIALIZERS */
 graph_decl_prefix:
@@ -182,7 +182,6 @@ stmt_list:
 stmt:
    expr SEMI { Expr($1) } 
   | ID ASSIGN expr SEMI { Assign($1, $3) }
-  | ID ASSIGN list_literal SEMI { Assign($1, $3) }
   | RETURN expr SEMI { Return($2) } 
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
