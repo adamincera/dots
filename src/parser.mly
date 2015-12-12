@@ -115,6 +115,7 @@ literal:
 | NUM_LIT { NumLiteral($1) }
 | STR_LIT { StrLiteral($1) }
 | list_literal {$1}
+| dict_literal {$1}
 
 list_literal:
 | LBRACKET actuals_opt RBRACKET { ListLiteral($2) }

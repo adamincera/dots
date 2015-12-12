@@ -253,7 +253,7 @@ let translate (env, cmds) =
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
                            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.Return(e) -> Expr(Noexpr)                   (*TODO*)
+    | Sast.Return(e, dt) -> Expr(Noexpr)                   (*TODO*)
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->
         let auto_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in

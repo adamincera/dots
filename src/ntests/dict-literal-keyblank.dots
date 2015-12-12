@@ -1,0 +1,1 @@
+dict <string, num> d = { : 5, "world" : "hosanna", "ratchel" : 200 };

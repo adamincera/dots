@@ -22,10 +22,12 @@ let get_list_type = function
       if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
-*)
-let get_dict_type = function
+
+      let get_dict_type = function
  | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
  | _ -> raise (Failure("wrong type: not a dict "))
+*)
+
 
 let rec check_list env v_e = function
  | [] -> ""
@@ -35,10 +37,11 @@ let rec check_list env v_e = function
     else 
         check_list env v_e tl
 
+(* v_e = (k_dt, v_dt) *)
  let rec check_dict env v_e = function
  | [] -> ""
  | hd::tl -> 
-    if not(v_e = (get_dict_type hd)) then
+    if not((fst v_e = get_expr_type (fst hd)) && (snd v_e = get_expr_type (snd hd))) then
       raise (Failure ("assignment expression not of type: " ) )
     else 
         check_dict env v_e tl     
@@ -57,6 +60,7 @@ let rec expr env = function
        with
        | Not_found -> raise (Failure("undeclared variable: "))
       );          List.map (expr env) el in (*sees if variable defined*) *)
+(* elem_type, id *)
   let s_el = List.map (expr env) el in
   (match el with
    | [] -> ListLiteral([], List(Void))
@@ -65,6 +69,17 @@ let rec expr env = function
            check_list env dt s_el;
            ListLiteral(s_el, List(dt))
   )
+| Ast.DictLiteral(el) -> 
+(* key_type, elem_type, id [(Hello, 15)] *)
+  let s_el =  List.map (fun f -> (expr env (fst f), expr env (snd f))) el in
+  (match s_el with 
+    | [] -> DictLiteral([], Dict(Void,Void))
+    | x -> 
+      let dt = (get_expr_type (fst(List.hd s_el)), get_expr_type (snd(List.hd s_el))) 
+              in 
+              check_dict env dt s_el;
+              DictLiteral(s_el, Sast.Dict(fst dt, snd dt))
+  ) 
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
 | Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
 | Ast.Binop(e1, op, e2) -> 
@@ -528,10 +543,43 @@ let rec stmt env = function
      | Not_found -> raise (Failure("undeclared variable: "))
     ); 
       );                           (*sees if variable defined*) *)
-| Ast.Return(e) -> Sast.Return(expr env e)
-| Ast.If(cond, s1, s2) -> Sast.If(expr env cond, stmt env s1, stmt env s2)
+| Ast.Return(e) -> 
+    (try  
+      (*let rt = str_to_type fdl.s_rtype in *)
+        let s_e = expr env e in
+        let s_dt = get_expr_type s_e in
+       (match get_expr_type s_e with  
+         | Sast.Node -> Sast.Return(s_e, Sast.Node)
+         | Sast.Num -> Sast.Return(s_e, Sast.Num)
+         | Sast.String -> Sast.Return(s_e, Sast.String)
+         | Sast.Bool -> Sast.Return(s_e, Sast.Bool)
+         | Sast.Graph -> Sast.Return(s_e, Sast.Graph)
+         | Sast.List(s_dt) -> Sast.Return(s_e, Sast.List(s_dt))
+         | Sast.Dict(dtk, dtv) -> Sast.Return(s_e, Sast.Dict(dtk, dtv)) 
+         | Sast.Void -> Sast.Return(s_e, Sast.Void)
+         | _ -> raise (Failure ("return issue")))
+    with 
+     Not_found -> raise (Failure ("return issue")))
+| Ast.If(cond, s1, s2) -> 
+    (try  
+      let s_cond = expr env cond in
+      if (get_expr_type s_cond) = Sast.Bool then 
+        Sast.If(expr env cond, stmt env s1, stmt env s2)
+      else 
+        raise (Failure ("if issue"))
+    with 
+     Not_found -> raise (Failure ("return issue")))
 | Ast.For(v1, v2, sl) -> Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
-| Ast.While(cond, sl) -> Sast.While(expr env cond, List.map (fun s -> stmt env s) sl)
+  (* temp var, iterable var, var decls, stmts *)  
+| Ast.While(cond, sl) -> 
+    (try 
+      let s_cond = expr env cond in 
+      if (get_expr_type s_cond) = Sast.Bool then 
+          Sast.While(expr env cond, List.map (fun s -> stmt env s) sl)
+      else 
+        raise (Failure ("while issue"))
+    with 
+     Not_found -> raise (Failure ("while issue")))
 in
 
 let fdecl env func = 
