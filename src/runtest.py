@@ -28,7 +28,11 @@ args = parser.parse_args()
 #########
 
 path = r'dtest'
+npath = r'ntest'
+
 summary_results = {}
+summary_results_n = {}
+
 for dir_entry in os.listdir(path):
     filepath = os.path.join(path, dir_entry)
     if os.path.isfile(filepath) and filepath[-5:] == '.dots':
@@ -77,18 +81,73 @@ for dir_entry in os.listdir(path):
             else:
                 print "FAIL: no .out file exists to check against"
 
+
+for dir_entry in os.listdir(npath):
+    filepath = os.path.join(npath, dir_entry)
+    if os.path.isfile(filepath) and filepath[-5:] == '.dots':
+        print('\nRunning tests in ' + dir_entry)
+        print('================================')
+
+        comp_success = False
+        try:
+            return_code = call(['./gdc', filepath, os.path.join(npath, dir_entry[:-5] + '.exec')], 
+                timeout=30)
+            if return_code == 0:
+                print 'COMPILATION SUCCESSFUL'
+                comp_success = True
+            else:
+                print 'COMPILATION FAILED'
+                summary_results_n[dir_entry[:-5]] = 'fail'
+        except:
+            
+            continue;
+
+        if (comp_success):
+            out_child = Popen('./' + os.path.join(npath, dir_entry[:-5]) + '.exec', 
+                shell=True, stdout=PIPE)
+            output = out_child.communicate()[0]
+            
+            output_filepath = os.path.join(npath, dir_entry[:-5] + '.outgdc')
+            with open(output_filepath, 'w') as intermediate_output:
+                intermediate_output.write(output)
+
+            out_filepath = os.path.join(npath, dir_entry[:-5] + '.out')
+            output_filepath = os.path.join(npath, dir_entry[:-5] + '.outgdc')
+
+            if (os.path.exists(out_filepath)):
+                diff_command = ['diff', '-bB', out_filepath, output_filepath]
+                diff_child = Popen(diff_command, stdout=PIPE)
+                diff_output = diff_child.communicate()[0]
+
+                if diff_output.strip() == '':
+                    print 'PASSED TEST'
+                    summary_results_n[dir_entry[:-5]] = 'pass'
+                else: 
+                    print 'FAILED TEST....writing diff files'
+                    summary_results_n[dir_entry[:-5]] = 'fail'
+                    with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
+                        output_diff.write(diff_output.strip())
+            else:
+                print "FAIL: no .out file exists to check against"
 print('\n Tests completed.')
 print('\n Summary below (checked boxes = performed as expected): \n')
 
 #################
 # PRINT SUMMARY #
 #################
+print('Tests that should pass:')
 for test_name in sorted(summary_results):
     if summary_results[test_name] == 'pass':
         print('[X] ' + test_name)
     else:
         print('[ ] ' + test_name)
 
+print('Tests that should fail:')
+for test_name in sorted(summary_results_n):
+    if summary_results_n[test_name] == 'pass':
+        print('[ ] ' + test_name)
+    else:
+        print('[X] ' + test_name)
 ############
 # CLEAN-UP #
 ############
