@@ -23,6 +23,7 @@ int main() {
     l = add_front(l, s1);
     print_strings(l);
     free_list(l);
+    printf("list done\n");
 
     l = NULL;
     l = add_back(l, s1);
@@ -32,6 +33,11 @@ int main() {
 
     entry_t **d = init_dict();
     put_string(d, "hello", (void *) "world");
+    put_string(d, "elloh", (void *) "orldw");
+    char *got = (char *) get_string(d, "hello");
+    printf("got %s\n", got);
+    got = (char *) get_string(d, "elloh");
+    printf("got %s\n", got);
 
     return 0;
 }

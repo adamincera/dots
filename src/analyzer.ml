@@ -4,6 +4,8 @@ open Sast
 open Translate
 
 module StringMap = Map.Make(String)
+(* module DataTypeMap = Map.Make(dataType) *)
+
 
 (* "\"graph.h\"" *)
 let headers = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
@@ -11,10 +13,13 @@ let headers = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
 type translation_env = {
             var_inds : int StringMap.t ref list;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
             var_types : Sast.dataType StringMap.t ref list;   (* maps a var name to its type  ex. x -> num *)
-            func_inds : int StringMap.t ref list;
+            func_inds : int StringMap.t ref list;             (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
             func_types : Sast.dataType StringMap.t ref list;  (* maps a func name to its return type *)
-            return_type : Sast.dataType                       (* what should the return type be of the current scope *)
+            return_type : Sast.dataType;                       (* what should the return type be of the current scope *)
     }
+
+let mappings = [("in", Sast.Node); ("out", Sast.Node); ("value", Sast.Node); ("nodes", Sast.Graph)] 
+let mem_vars =  List.fold_left (fun m (k, v) -> StringMap.add k v m) StringMap.empty mappings
 
 (* val enum : int -> 'a list -> (int * 'a) list *)
 (* returns list of tuples mapping each elem of a list to consecutive 
