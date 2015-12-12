@@ -28,7 +28,7 @@ args = parser.parse_args()
 #########
 
 path = r'dtest'
-npath = r'ntest'
+npath = r'ntests'
 
 summary_results = {}
 summary_results_n = {}
