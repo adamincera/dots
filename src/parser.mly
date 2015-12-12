@@ -191,6 +191,7 @@ stmt:
      { For($3, $5, $8) }
   | WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
   | vdecl { $1 }
+  | fdecl { $1 }
 
 alt_stmt: 
   | fdecl { $1 }

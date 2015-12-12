@@ -41,8 +41,9 @@ type s_stmt =
   | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
   | For of string * string * s_stmt list       (* temp var, iterable var, var decls, stmts *)
   | While of s_expr * s_stmt list              (* condition, var decls, stmt list *)
+  | Fdecl of s_fdecl and 
 
-type s_fdecl = {
+ s_fdecl = {
     s_fname : string;
     s_rtype : dataType; 
     (*formals : (string * string) list; *)

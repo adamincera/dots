@@ -590,15 +590,33 @@ let rec stmt env = function
         raise (Failure ("while issue"))
     with 
      Not_found -> raise (Failure ("while issue")))
-in
+| Ast.Fdecl(func) ->  (*Fdecl of func_decl and *)
+   (try
+    let formals = List.map (fun (dt, v) -> (str_to_type dt, v)) func.formals in
+    let rtype = str_to_type func.rtype in
 
-let fdecl env func = 
-  {
-    Sast.s_fname = func.fname;
-    Sast.s_rtype = str_to_type func.rtype; 
-    Sast.s_formals = List.map (fun (dt, v) -> (str_to_type dt, v)) func.formals;
-    Sast.s_body = List.map (fun s -> stmt env s) func.body
-  }
+    (* add formal variables to local scope variable maps *)
+    let map_builder fmls m = (List.map (fun f -> m := (StringMap.add (snd f) (fst f) !m); "") formals) in
+    let types_map = ref StringMap.empty in
+    map_builder formals types_map ;
+    let fml_inds = enum 1 1 (List.map (fun f -> (snd f)) formals) in
+    let inds_map = ref (string_map_pairs StringMap.empty fml_inds) in
+
+    let func_env = {
+            var_inds = inds_map :: env.var_inds;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
+            var_types =  types_map :: env.var_types;   (* maps a var name to its type  ex. x -> num *)
+            func_inds =   ref StringMap.empty :: env.func_inds;            (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
+            func_types =  ref StringMap.empty :: env.func_types; (* maps a func name to its return type *)
+            return_type = rtype;                       (* what should the return type be of the current scope *)
+    }  
+  in Sast.Fdecl({
+                  Sast.s_fname = func.fname;
+                  Sast.s_rtype = rtype;
+                  Sast.s_formals = formals;
+                  Sast.s_body = List.map (fun s -> stmt func_env s) func.body 
+               })
+  with 
+     Not_found -> raise (Failure ("while issue")))
 in
 
   (* { Sast.s_funcs = List.map (fun f -> fdecl env f) prog.funcs;
