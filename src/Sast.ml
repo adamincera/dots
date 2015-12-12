@@ -34,8 +34,8 @@ type s_stmt =
   | Expr of s_expr
   | Vdecl of dataType * string
   | Assign of string * s_expr * dataType                     (* x = 5; *)
-  | AssignList of string * s_expr list            (* when a list of expressions is assigned to a variable *)
-  | DictAssign of string * (s_expr * s_expr) list                (* (variable name, list of tuples of key value pairs) *)
+   (* | AssignList of string * s_expr list           when a list of expressions is assigned to a variable 
+  | DictAssign of string * (s_expr * s_expr) list                (variable name, list of tuples of key value pairs) *)
   | Return of s_expr * dataType                         (* return x (dataType) *)
   | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
   | For of string * string * s_stmt list       (* temp var, iterable var, var decls, stmts *)
