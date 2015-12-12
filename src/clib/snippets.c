@@ -127,3 +127,14 @@ something = *(type *) get_num(d, 1.23);
 
 /* something = d[_node]; */
 something = *(type *) get_other(d, &_node);
+
+/* for(key in d) */
+int i;
+entry_t *temp;
+void *key;
+for(i = 0; i < TABLE_SIZE; i++) {
+    for(temp = d[i]; temp; temp = temp->next) {
+        key = temp->key;
+
+    }
+}

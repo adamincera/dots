@@ -12,6 +12,7 @@ type ctype = | Float | Int | Long | Cstring
              | Node
              | Ptr of ctype (* pointer to a data type *)
              | Void
+             | Entry
 
 type cexpr = 
 | Literal of ctype * string
@@ -91,6 +92,7 @@ let rec type_to_str = function
 | Graph -> "graph_t"
 | Ptr(dt) -> type_to_str dt ^ "*"
 | Void -> "void"
+| Entry -> "entry_t"
 
 let fmt_str = function 
 | Float -> "%f"
@@ -163,7 +165,7 @@ let rec translate_expr = function
                       let addr = translate_expr(Cast(Long, expr)) in
                       let expr_val = translate_expr(Member(Cstring, translate_expr expr, "data")) in
                       [("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
-                  | List | Dict | Graph | Void -> raise (Failure "can't print this type yet")
+                  | List | Dict | Graph | Void | Entry -> raise (Failure "can't print this type yet")
                   | Array(dt) | Ptr(dt) -> raise (Failure "can't print this type yet")
                 )
             in
