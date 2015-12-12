@@ -103,3 +103,27 @@ l = add_back(l, i);
 i = (int *) malloc(sizeof(int));
 *i = 3;
 l = add_back(l, i);
+
+/** dict initialization **/
+/* dict<type, type> d; */
+dict_t *d = init_dict();
+
+/** dict insertion **/
+/* d["literal"] = something */
+put_string(d, "literal", (void *) &something);
+
+/* d[1.23] = something */
+put_num(d, 1.23, (void *) &something);
+
+/* d[_node] = something */
+put_other(d, (void *) &_node, (void *) &something);
+
+/** dict access **/
+/* something = d["key"]; */
+something = *(type *) get_string(d, "key");
+
+/* something = d[1.23]; */
+something = *(type *) get_num(d, 1.23);
+
+/* something = d[_node]; */
+something = *(type *) get_other(d, &_node);
