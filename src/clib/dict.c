@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "dict.h"
 
-#define EPSILON 0.0001
+#define EPSILON 0.000000001
 
 entry_t **init_dict() {
     entry_t **table = (entry_t **) calloc(TABLE_SIZE, sizeof(entry_t *));
@@ -11,7 +12,7 @@ entry_t **init_dict() {
 }
 
 int float_equals(float a, float b) {
-    return a - b < EPSILON * a;
+    return fabsf(a - b) < EPSILON * a;
 }
 
 static int hash_string(char *key) {
@@ -102,7 +103,8 @@ void put_num(entry_t **table, float key, void *value) {
         table[k] = (entry_t *) malloc(sizeof(entry_t));
         table[k]->next = NULL;
         table[k]->value = value;
-        table[k]->key = (void *) &key;
+        table[k]->key = malloc(sizeof(float));
+        *((float *) table[k]->key) = key;
     } else {
         while(temp->next) {
             if(float_equals(*(float *) temp->key, key)) {

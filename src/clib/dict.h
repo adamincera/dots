@@ -21,3 +21,6 @@ void put_string(entry_t **table, char *key, void *value);
 void put_num(entry_t **table, float key, void *value);
 
 void put_other(entry_t **table, void *key, void *value);
+
+int float_equals(float a, float b);
+

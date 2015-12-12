@@ -33,10 +33,27 @@ int main() {
 
     entry_t **d = init_dict();
     put_string(d, "hello", (void *) "world");
+    put_string(d, "hello", (void *) "world2");
     put_string(d, "elloh", (void *) "orldw");
+    put_string(d, "something else", (void *) "new value");
     char *got = (char *) get_string(d, "hello");
     printf("got %s\n", got);
     got = (char *) get_string(d, "elloh");
+    printf("got %s\n", got);
+    got = (char *) get_string(d, "something else");
+    printf("got %s\n", got);
+    got = (char *) get_string(d, "world");
+    printf("got %s\n", got);
+
+    printf("1.23 == 1.24: %d\n", float_equals(1.23,1.24));
+
+    entry_t **nums = init_dict();
+    put_num(nums, 1.23, (void *) "1.23 val");
+    put_num(nums, 1.23, (void *) "1.23 second val");
+    put_num(nums, 1.24, (void *) "1.24 val");
+    got = (char *)get_num(nums, 1.23);
+    printf("got %s\n", got);
+    got = (char *)get_num(nums, 1.24);
     printf("got %s\n", got);
 
     return 0;
