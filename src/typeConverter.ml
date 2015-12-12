@@ -523,6 +523,16 @@ let rec stmt env = function
       if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
+| Ast.NodeDef(v, e) -> (* (node id, what goes inside parens) of item *)
+    (try 
+      let v_e = (find_var v env.var_types) in 
+      let s_e = expr env e in 
+      let e_dt = get_expr_type s_e in 
+      if v_e = Sast.Node then
+        Sast.NodeDef(v, s_e, e_dt)
+      else raise (Failure ("Node Def failure"))
+    with 
+      | Not_found -> raise (Failure("Node Def failure")))
 (* | Ast.AssignList(v, el) -> 
       (*insert a recursive function*) 
       (try                                (*sees if variable defined*)
