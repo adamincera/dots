@@ -4,7 +4,7 @@ module StringMap = Map.Make(String)
 (* type cop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq
            | Greater | Geq | LogAnd | LogOr *)
 
-type ctype = | Float | Int | Cstring 
+type ctype = | Float | Int | Long | Cstring 
              | Array of ctype 
              | List
              | Dict
@@ -82,6 +82,7 @@ type cprogram = {
 let rec type_to_str = function
 | Float -> "float"
 | Int -> "int"
+| Long -> "long"
 | Cstring -> "char *"
 | Array(dt) -> type_to_str dt ^ "[]"
 | List -> "list_t"
@@ -143,14 +144,42 @@ let rec translate_expr = function
         | "f1" -> 
             (* fmt is all the format types so far: ex. %s%f%f *)
             (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
-            let rec build_str fmt vals = function
+(*             let rec build_str fmt vals = function
             | [] -> (fmt, vals)
             | hd :: tl -> build_str (fmt ^ (fmt_str(get_expr_type hd))) (vals ^ "," ^ (translate_expr hd)) tl
             in
-            let result = build_str "" "" el
+            let result = build_str "" "" el *)
+            (* takes expr to translate, data type of expr *)
+            let get_fmt_val expr = 
+                let expr_type = get_expr_type expr in
+                (match expr_type with
+                  | Float -> [("%f", translate_expr expr)]
+                  | Int -> [("%d", translate_expr expr)]
+                  | Long -> [("%l", translate_expr expr)]
+                  | Cstring -> [("%s", translate_expr expr)]
+                  | Node -> 
+                      (* [("%s", "node print")] *)
+                      let addr = translate_expr(Cast(Long, expr)) in
+                      let expr_val = translate_expr(Member(Cstring, translate_expr expr, "data")) in
+                      [("%x", addr); ("%s", expr_val)]
+                  | List | Dict | Graph | Void -> raise (Failure "can't print this type yet")
+                  | Array(dt) | Ptr(dt) -> raise (Failure "can't print this type yet")
+                )
             in
-            "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
-        | _ -> id ^ "(" ^ (String.concat "," (List.map translate_expr el)) ^ ")"
+
+            let rec build_str fmt_val_list = function
+            | [] -> fmt_val_list
+            | hd :: tl -> build_str ((get_fmt_val hd) @ fmt_val_list) tl
+            in
+
+            let fmts = build_str [] el
+            in
+
+            "printf(" ^  
+            "\"" ^ String.concat "" (List.map (fun t -> fst t) fmts) ^ "\", " ^ (* format string *)
+            String.concat ", " (List.map (fun t -> snd t) fmts) ^ (* comma separated inputs to fmt string *)
+            ")"
+        | _ -> id ^ "(" ^ (String.concat ", " (List.map translate_expr el)) ^ ")"
     )
 | Access(dt, id, e) -> id ^ "[" ^ translate_expr e ^ "]"
 | Member(dt, id, m) -> id ^ "->" ^ m
