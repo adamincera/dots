@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "graph.h"
 #include "list.h"
 #include "dict.h"
 
@@ -55,6 +56,14 @@ int main() {
     printf("got %s\n", got);
     got = (char *)get_num(nums, 1.24);
     printf("got %s\n", got);
+
+    node_t *n = init_node("this is a node!");
+    node_t *n2 = init_node("this is a node's value!");
+
+    entry_t **other = init_dict();
+    put_other(other, n, n2);
+    node_t *g = get_other(other, n);
+    printf("got node containing %s\n", g->data);
 
     return 0;
 }

@@ -12,7 +12,7 @@ graph.o: graph.h node.h graph.c
 
 node.o: node.h node.c
 
-test: test.o list.o dict.o
+test: test.o list.o dict.o graph.o node.o
 
 list.o: list.c list.h
 
