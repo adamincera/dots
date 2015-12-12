@@ -106,7 +106,7 @@ l = add_back(l, i);
 
 /** dict initialization **/
 /* dict<type, type> d; */
-dict_t *d = init_dict();
+entry_t **d = init_dict();
 
 /** dict insertion **/
 /* d["literal"] = something */
