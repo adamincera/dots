@@ -292,6 +292,7 @@ let translate (env, cmds) =
         let c_cond = translate_expr env cond in
         let csl = List.map (translate_stmt env) sl in
         While(c_cond, csl)
+    | Sast.Fdecl (func) -> Expr(Noexpr) 
     in
 
     let main_func = { crtype = "int";
