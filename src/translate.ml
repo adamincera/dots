@@ -125,6 +125,8 @@ let op_to_str = function
 | Ast.LogAnd -> "&&"
 | Ast.LogOr -> "||"
 
+let cvar_cnt = ref 0
+
 let rec translate_expr = function
 | Literal(dt, v) ->
    (match dt with
@@ -158,10 +160,9 @@ let rec translate_expr = function
                   | Long -> [("%l", translate_expr expr)]
                   | Cstring -> [("%s", translate_expr expr)]
                   | Node -> 
-                      (* [("%s", "node print")] *)
                       let addr = translate_expr(Cast(Long, expr)) in
                       let expr_val = translate_expr(Member(Cstring, translate_expr expr, "data")) in
-                      [("%x", addr); ("%s", expr_val)]
+                      [("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
                   | List | Dict | Graph | Void -> raise (Failure "can't print this type yet")
                   | Array(dt) | Ptr(dt) -> raise (Failure "can't print this type yet")
                 )
