@@ -2,7 +2,7 @@ CC = gcc
 
 CFLAGS = -Wall 
 
-CFILES= graph.c node.c list.c
+CFILES= graph.c node.c list.c dict.c
 
 main: main.o graph.o node.o
 
