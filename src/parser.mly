@@ -184,7 +184,7 @@ stmt:
    expr SEMI { Expr($1) } 
   | ID ASSIGN expr SEMI { Assign($1, $3) }
   | RETURN expr SEMI { Return($2) } 
-  | LBRACE stmt_list RBRACE { Block(List.rev $2) }
+  /* | LBRACE stmt_list RBRACE { Block(List.rev $2) } */
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
   | FOR LPAREN ID IN ID RPAREN LBRACE stmt_list RBRACE
@@ -243,7 +243,7 @@ actuals_opt:
   | actuals_list  { List.rev $1 }
 
 tuples_opt:
- /* nothing */ {[]}
+ /* nothing*/  {[]} 
  | tuples_list {List.rev $1}
 
  tuples_list:
