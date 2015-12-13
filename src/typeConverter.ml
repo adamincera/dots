@@ -35,7 +35,7 @@ let rec check_list env v_e = function
     if not(v_e = (get_expr_type hd)) then 
        raise (Failure ("list element not of type: " ^ type_to_str ( v_e )) )
     else 
-        check_list env v_e tl
+      check_list env v_e tl
 
 (* v_e = (k_dt, v_dt) *)
  let rec check_dict env v_e = function
@@ -44,7 +44,7 @@ let rec check_list env v_e = function
     if not((fst v_e = get_expr_type (fst hd)) && (snd v_e = get_expr_type (snd hd))) then
       raise (Failure ("assignment expression not of type: " ) )
     else 
-        check_dict env v_e tl 
+      check_dict env v_e tl
 
  let rec formal_check s_formal_list s_el = 
   match s_formal_list, s_el with
@@ -73,7 +73,7 @@ let rec expr env = function
    | [] -> ListLiteral([], List(Void))
    | x ->  let dt = get_expr_type (List.hd s_el) 
            in
-           check_list env dt s_el;
+           ignore (check_list env dt s_el); 
            ListLiteral(s_el, List(dt))
   )
 | Ast.DictLiteral(el) -> 
@@ -84,7 +84,7 @@ let rec expr env = function
     | x -> 
       let dt = (get_expr_type (fst(List.hd s_el)), get_expr_type (snd(List.hd s_el))) 
               in 
-              check_dict env dt s_el;
+              ignore (check_dict env dt s_el);
               DictLiteral(s_el, Sast.Dict(fst dt, snd dt))
   ) 
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
@@ -217,7 +217,6 @@ let rec expr env = function
                     raise (Failure("wrong type: Dict == Dict<?> "))
               | _ -> raise (Failure("wrong type: Dict == ? "))
             )
-        |  _ -> raise (Failure("Expr using == has incompatible types"))
       )
     | Neq ->
       (match e1_dt with
@@ -271,7 +270,6 @@ let rec expr env = function
                     raise (Failure("wrong type: Dict != Dict<?> "))
               | _ -> raise (Failure("wrong type: Dict != ? "))
             )
-        |  _ -> raise (Failure("Expr using != has incompatible types"))
       )
 
     | Less ->
@@ -349,7 +347,6 @@ let rec expr env = function
             )
         |  _ -> raise (Failure("Expr using || has incompatible types"))
       )
-    | _ -> raise (Failure("raise failure"))
   )
 | Ast.Call(f, el) ->
     let s_el = List.map (expr env) el in
@@ -365,18 +362,18 @@ let rec expr env = function
       (let len = List.length el in 
       if (len = 1) then 
         let arg_types = [(Sast.Num, "foo")] in 
-        formal_check arg_types s_el;
+        ignore (formal_check arg_types s_el);
         Sast.Call(f, s_el , Sast.List(Sast.Num))
       else if (len = 2) then 
         let arg_types = [(Sast.Num, "foo"); (Sast.Num, "foo")] in 
-        formal_check arg_types s_el;
+        ignore (formal_check arg_types s_el);
         Sast.Call(f, s_el , Sast.List(Sast.Num))
       else 
         raise(Failure("range can only take 1 or 2 args"))
     )
   else 
       let fdecl = find_var f env.func_obj in 
-       formal_check fdecl.s_formals s_el;
+       ignore (formal_check fdecl.s_formals s_el);
        let rtype = fdecl.s_rtype in
        Sast.Call(f, s_el , rtype) (* TODO: figure out the return type and use that *)
 | Ast.Access(v, e) -> 
@@ -395,6 +392,7 @@ let rec expr env = function
                 Sast.Access(v, s_e, dv)
             else 
                 raise (Failure("wrong type: Dict != Dict<?> "))
+          | _ -> raise (Failure("must use Dict or List with access!"))
           )
      with
      | Not_found -> raise (Failure("undeclared variable: "))
@@ -430,7 +428,8 @@ let rec expr env = function
                   raise (Failure("hosanna tired "))
             with
             | Not_found -> raise (Failure("not a member function for graphs"))
-            ) 
+            )
+          | _ ->  raise (Failure("must use Node or Graph ya bish"))
           )
      with
      | Not_found -> raise (Failure("undeclared variable: "))
@@ -520,7 +519,8 @@ let rec stmt env = function
 | Ast.Expr(e) -> Sast.Expr(expr env e)
 | Ast.Vdecl(dt, id) -> 
     (try 
-        StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
+        ignore (StringMap.find id !(List.hd env.var_types)); 
+        raise (Failure ("variable already declared in local scope: " ^ id))
      with | Not_found -> (List.hd env.var_types) := StringMap.add id (str_to_type dt) !(List.hd env.var_types); (* add type map *)
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
           | Failure(f) -> raise (Failure (f) ) 
@@ -529,7 +529,8 @@ let rec stmt env = function
 | Ast.ListDecl(dt, id) -> (* Sast.ListDecl(str_to_type dt, v) *)
     let vtype = Sast.List(str_to_type dt) in
     (try 
-        StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
+        ignore (StringMap.find id !(List.hd env.var_types)); 
+        raise (Failure ("variable already declared in local scope: " ^ id))
      with | Not_found -> (List.hd env.var_types) := StringMap.add id vtype !(List.hd env.var_types); (* add type map *)
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
           | Failure(f) -> raise (Failure (f) ) 
@@ -538,7 +539,8 @@ let rec stmt env = function
 | Ast.DictDecl(dtk, dtv, id) -> (*Sast.DictDecl(str_to_type dtk, str_to_type dtv, v)*)
     let vtype = Sast.Dict(str_to_type dtk, str_to_type dtv) in
     (try
-        StringMap.find id !(List.hd env.var_types); raise (Failure ("variable already declared in local scope: " ^ id))
+        ignore (StringMap.find id !(List.hd env.var_types)); 
+        raise (Failure ("variable already declared in local scope: " ^ id))
      with | Not_found -> (List.hd env.var_types) := StringMap.add id vtype !(List.hd env.var_types);
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds);
           | Failure(f) -> raise (Failure (f) )
@@ -548,11 +550,6 @@ let rec stmt env = function
 | Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
       let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
       let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
-      (try                                (*sees if variable defined*)
-          (find_var v env.var_inds)
-       with
-       | Not_found -> raise (Failure("undeclared variable: "))
-      );
       if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
       then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
       else Sast.Assign(v, s_e, e_dt)
@@ -590,7 +587,6 @@ let rec stmt env = function
     (try  
       (*let rt = str_to_type fdl.s_rtype in *)
         let s_e = expr env e in
-        let s_dt = get_expr_type s_e in
        (match get_expr_type s_e with  
          | Sast.Node -> Sast.Return(s_e, Sast.Node)
          | Sast.Num -> Sast.Return(s_e, Sast.Num)
@@ -599,8 +595,7 @@ let rec stmt env = function
          | Sast.Graph -> Sast.Return(s_e, Sast.Graph)
          | Sast.List(s_dt) -> Sast.Return(s_e, Sast.List(s_dt))
          | Sast.Dict(dtk, dtv) -> Sast.Return(s_e, Sast.Dict(dtk, dtv)) 
-         | Sast.Void -> Sast.Return(s_e, Sast.Void)
-         | _ -> raise (Failure ("return issue")))
+         | Sast.Void -> Sast.Return(s_e, Sast.Void))
     with 
      Not_found -> raise (Failure ("return issue")))
 | Ast.If(cond, s1, s2) -> 
@@ -631,7 +626,7 @@ let rec stmt env = function
     (* add formal variables to local scope variable maps *)
     let map_builder fmls m = (List.map (fun f -> m := (StringMap.add (snd f) (fst f) !m); "") formals) in
     let types_map = ref StringMap.empty in
-    map_builder formals types_map ;
+      ignore (map_builder formals types_map);
     let fml_inds = enum 1 1 (List.map (fun f -> (snd f)) formals) in
     let inds_map = ref (string_map_pairs StringMap.empty fml_inds) in
 

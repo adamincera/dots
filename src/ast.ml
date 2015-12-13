@@ -84,7 +84,7 @@ let rec string_of_expr = function
     NumLiteral(l) -> l
   | StrLiteral(l) -> "\"" ^ l ^ "\""
   | ListLiteral(el) -> "[" ^ String.concat "," (List.map string_of_expr el) ^ "]"
-  (* | DictLiteral(k,v) -> "[" ^ String.concat "," (List.map string_of_expr el) ^ "]" *)
+  | DictLiteral(el) -> "[" ^ String.concat "," (List.map (fun f -> "(" ^ (string_of_expr (fst f)) ^ " : " ^ (string_of_expr (snd f)) ^ ")" ) el)
   | Boolean(b) -> if b = True then "true" else "false"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
@@ -126,7 +126,7 @@ let rec string_of_stmt = function
   | ListDecl(dt, id) -> "list <" ^ dt ^ "> " ^ id ^ ";\n"
   | DictDecl(kdt, vdt, id) -> "dict <" ^ kdt ^ ", " ^ vdt ^ "> " ^ id ^ ";\n"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e ^ ";"
-(*   | AssignList(id, el) -> " ~TODO~ " *)
+  | NodeDef(v, e) -> v ^ "(" ^ string_of_expr e ^ ")" (* (node id, what goes inside parens) of item *)
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
@@ -135,16 +135,18 @@ let rec string_of_stmt = function
       "for (" ^ e1  ^ " in " ^ e2 
       ^ ") { " ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
   | While(e, sl) -> "while (" ^ string_of_expr e ^ ") {" ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
+  | Fdecl(f) ->  string_of_fdecl f and 
 
-let string_of_vdecl id = "type " ^ id ^ ";\n"
-
-let string_of_fdecl fdecl =
+  string_of_fdecl fdecl =
   "def " ^ fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^ 
     String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) fdecl.formals) ^
      ")\n{\n" ^
   (*String.concat "" (List.map string_of_vdecl fdecl.locals) ^*)
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
+
+let string_of_vdecl id = "type " ^ id ^ ";\n"
+
 
 let string_of_program (funcs,  cmds) =
   String.concat "\n" (List.map string_of_fdecl funcs) ^
