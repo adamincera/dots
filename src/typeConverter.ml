@@ -372,6 +372,34 @@ let rec expr env = function
         raise(Failure("range can only take 1 or 2 args"))
     )
   else if f = "print" then Sast.Call(f, s_el, Sast.Void)
+  else if (f = "min" || f = "max") then    
+      (try                            
+        let s_el = List.map (expr env) el in
+        let data_type = get_expr_type (List.hd s_el) in
+        let len = List.length el in 
+          if (len = 1) then
+             (match data_type with 
+                Sast.List(dt) -> Sast.Call(f, s_el, dt)
+                | Sast.Dict(dtk, dtv) -> Sast.Call(f, s_el, dtk) 
+                | _ -> raise(Failure("member call failed")))
+          else 
+            raise(Failure("member call failed"))
+        with 
+          Not_found -> raise (Failure("undeclared variable: ")))
+  else if f = "len" then 
+        (try                            
+        let s_el = List.map (expr env) el in
+        let data_type = get_expr_type (List.hd s_el) in
+        let len = List.length el in 
+          if (len = 1) then
+             (match data_type with 
+                Sast.List(dt) -> Sast.Call(f, s_el, Sast.Num)
+                | Sast.Dict(dtk, dtv) -> Sast.Call(f, s_el, Sast.Num) 
+                | _ -> raise(Failure("member call failed")))
+          else 
+            raise(Failure("member call failed"))
+        with 
+          Not_found -> raise (Failure("undeclared variable: ")))
   else 
       let fdecl = find_var f env.func_obj in 
        ignore (formal_check fdecl.s_formals s_el);
@@ -434,8 +462,42 @@ let rec expr env = function
           )
      with
      | Not_found -> raise (Failure("undeclared variable: "))
-    )     
-| Ast.MemberCall(v, m, el) -> Sast.MemberCall(v, m, List.map (fun e -> expr env e) el, Sast.String) (* TODO: figure out the return type and use that *)
+    );     
+| Ast.MemberCall(v, m, el) -> 
+    (try 
+          let v_e = find_var v env.var_types in
+          let len = List.length el in
+          if (len = 1) then
+              let s_el = List.map (expr env) el in 
+              let data_type = get_expr_type (List.hd s_el) in
+              let mem_r_type = StringMap.find m mem_vars in
+              (match v_e with
+                  | Sast.List(dt) ->  
+                          if (mem_r_type = data_type) then
+                            (match m with
+                              | "enqueue" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
+                              | "dequeue" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
+                              | "remove" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
+                              | _ -> raise (Failure("undeclared variable: "))
+                            )
+                           else 
+                             raise (Failure("stupid "))     
+                  | Sast.Dict(dtk, dtv) ->  
+                      let mem_r_type = StringMap.find m mem_vars in
+                      if (mem_r_type = Sast.Graph) then 
+                        (match m with
+                           | "remove" -> Sast.MemberCall(v,m, s_el, Sast.List(Sast.Node))
+                           | _ -> raise (Failure("undeclared variable: "))
+                        )
+                      else 
+                          raise (Failure("dict can't be member vared like that "))
+                  | _ ->  raise (Failure("must use Node or Graph ya bish"))
+              )
+          else 
+              raise (Failure("more than 1 argument"))
+      with
+        | Not_found -> raise (Failure("not a member function for graphs"))
+      );
 | Ast.Undir(v1, v2) -> 
     (*check if v1 and v2 exist *)
     (try                                (*sees if variable defined*)
