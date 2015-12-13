@@ -231,7 +231,7 @@ let rec translate_stmt env = function
             Expr(Assign(index, Call(Void, "init_node", [Literal(Cstring, "")])))
             ]) (* C: node_t *x = init_node(""); *)
             | List(dt) -> Vdecl(Ptr(List), index) (* C: list_t *x; *)
-            | Dict(dtk, dtv) -> Vdecl(Dict, index) (* TODO *)
+            | Dict(dtk, dtv) -> Vdecl(Ptr(Ptr(Entry)), index) (* TODO *)
             | Void -> raise (Failure ("should not be using Void as a datatype"))
             )
             | Sast.Assign(v, e, dt) ->
@@ -266,12 +266,12 @@ let rec translate_stmt env = function
             let csl = List.map (translate_stmt env) sl in
             (match dt with
             | List(dt) -> Block([Vdecl(Ptr(List), auto_var); 
-            For(Assign(auto_var, Id(Ptr(List), index)),
-            Id(Ptr(List), auto_var),
-            Assign(auto_var, Member(Ptr(List), auto_var, "next")),
-            csl
-            )
-                             ])
+                For(Assign(auto_var, Id(Ptr(List), index)),
+                Id(Ptr(List), auto_var),
+                Assign(auto_var, Member(Ptr(List), auto_var, "next")),
+                csl
+                )
+                                 ])
             | Dict(dtk, dtv) -> 
                     let int_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
                     let entry_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
@@ -283,7 +283,7 @@ let rec translate_stmt env = function
                             Assign(int_var, 
                                 Binop(Int, Id(Int, int_var), Ast.Add,
                                       Literal(Int, "1"))),
-                            [For(Assign(entry_var, Access(Entry, iter, Id(Int, int_var))), 
+                            [For(Assign(entry_var, Access(Entry, index, Id(Int, int_var))), 
                                  Id(Entry, entry_var),
                                  Assign(entry_var, Member(Entry, entry_var, "next")),
                                  List.map (translate_stmt env) sl
