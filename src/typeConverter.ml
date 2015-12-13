@@ -374,6 +374,7 @@ let rec expr env = function
       else 
         raise(Failure("range can only take 1 or 2 args"))
     )
+  else if f = "print" then Sast.Call(f, s_el, Sast.Void)
   else 
       let fdecl = find_var f env.func_obj in 
        formal_check fdecl.s_formals s_el;
