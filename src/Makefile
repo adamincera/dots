@@ -29,7 +29,12 @@ TARFILES = Makefile testall.sh scanner.mll parser.mly \
 	$(TESTS:%=tests/test-%.mc) \
 	$(TESTS:%=tests/test-%.out)
 
+
 build: analyzer clib
+
+.PHONY: setup
+setup:
+	cd clib ; make library
 
 clib:
 	make -f clib/Makefile

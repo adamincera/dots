@@ -12,6 +12,7 @@ type ctype = | Float | Int | Long | Cstring
              | Node
              | Ptr of ctype (* pointer to a data type *)
              | Void
+             | Entry
 
 type cexpr = 
 | Literal of ctype * string
@@ -91,6 +92,7 @@ let rec type_to_str = function
 | Graph -> "graph_t"
 | Ptr(dt) -> type_to_str dt ^ "*"
 | Void -> "void"
+| Entry -> "entry_t"
 
 let fmt_str = function 
 | Float -> "%f"
@@ -125,6 +127,8 @@ let op_to_str = function
 | Ast.LogAnd -> "&&"
 | Ast.LogOr -> "||"
 
+let cvar_cnt = ref 0
+
 let rec translate_expr = function
 | Literal(dt, v) ->
    (match dt with
@@ -158,11 +162,10 @@ let rec translate_expr = function
                   | Long -> [("%l", translate_expr expr)]
                   | Cstring -> [("%s", translate_expr expr)]
                   | Node -> 
-                      (* [("%s", "node print")] *)
                       let addr = translate_expr(Cast(Long, expr)) in
                       let expr_val = translate_expr(Member(Cstring, translate_expr expr, "data")) in
-                      [("%x", addr); ("%s", expr_val)]
-                  | List | Dict | Graph | Void -> raise (Failure "can't print this type yet")
+                      [("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
+                  | List | Dict | Graph | Void | Entry -> raise (Failure "can't print this type yet")
                   | Array(dt) | Ptr(dt) -> raise (Failure "can't print this type yet")
                 )
             in
