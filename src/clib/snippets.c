@@ -144,7 +144,7 @@ for(i = 0; i < TABLE_SIZE; i++) {
 int i;
 entry_t *temp;
 void *key;
-/* print "{ "; */
+/* print "{"; */
 int first = 1;
 for(i = 0; i < TABLE_SIZE; i++) {
     for(temp = d[i]; temp; temp = temp->next) {
@@ -157,5 +157,26 @@ for(i = 0; i < TABLE_SIZE; i++) {
         }
     }
 }
-/* print " }\n" */
+/* print "}\n" */
 
+/** printing lists **/
+/** print list_1; **/
+list_t *temp;
+int first = 1;
+/* print "[" */
+for(temp = list_l; temp; temp = temp->next) {
+    if(first) {
+        first = 0;
+        /* print temp->data */
+    } else {
+        /* print ", ", temp->data */
+    }
+}
+/* print "]\n" */
+
+/** adding strings **/
+/* s3 = s1 + s2; */
+int len = strlen(s1) + strlen(s2) + 1;
+char *s3 = (char *) calloc(len, sizeof(char));
+strncpy(s3, s1, strlen(s1));
+strncpy(s3, s2, strlen(s2));
