@@ -9,14 +9,34 @@ open Analyzer
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let ast_prg = (Parser.program Scanner.token lexbuf) in (* outputs the Ast from parsing and scanning *)
+      let print_decl = {
+          s_fname = "print";
+          s_rtype = Sast.Void;
+          s_formals = [];
+          s_body = [];
+      } in
+      let range_decl = {
+          s_fname = "range";
+          s_rtype = Sast.List(Sast.Num);
+          s_formals = [];
+          s_body = [];
+      } in
+
   let sast_env = (* set up default environment *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
-      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List(Sast.Num), "range")]) in
+      (*  s_fdecl = {
+    s_fname : string;
+    s_rtype : dataType; 
+    (*formals : (string * string) list; *)
+    s_formals : (dataType * string) list;
+    s_body : s_stmt list;
+  }*)
+      let bf_fdecl_map = ref (string_map_pairs StringMap.empty [(print_decl, "print"); (range_decl, "range")]) in
      {var_types = [ref StringMap.empty];
                        var_inds = [ref StringMap.empty];
-                       func_types = [bf_type_map];
+                       func_obj = [bf_fdecl_map];
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
   (* let sast_prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in *)
@@ -26,10 +46,10 @@ let _ =
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
-      let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List(Sast.Num), "range")]) in
+      let bf_fdecl_map = ref (string_map_pairs StringMap.empty [(print_decl, "print"); (range_decl, "range")]) in
      {var_types = [ref StringMap.empty];
                        var_inds = [ref StringMap.empty];
-                       func_types = [bf_type_map];
+                       func_obj = [bf_fdecl_map];
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
  (* let main = translate (trans_env, sast_prg.s_funcs, sast_prg.s_cmds) in *)

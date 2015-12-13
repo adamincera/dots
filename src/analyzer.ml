@@ -11,12 +11,12 @@ module StringMap = Map.Make(String)
 let headers = ["<stdio.h>"; "<stdlib.h>"; "<string.h>"]
 
 type translation_env = {
-    var_inds : int StringMap.t ref list;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
-    var_types : Sast.dataType StringMap.t ref list;   (* maps a var name to its type  ex. x -> num *)
-    func_inds : int StringMap.t ref list;             (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
-    func_types : Sast.dataType StringMap.t ref list;  (* maps a func name to its return type *)
-    return_type : Sast.dataType;                       (* what should the return type be of the current scope *)
-}
+            var_inds : int StringMap.t ref list;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
+            var_types : Sast.dataType StringMap.t ref list;   (* maps a var name to its type  ex. x -> num *)
+            func_inds : int StringMap.t ref list;             (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
+            func_obj : Sast.s_fdecl StringMap.t ref list;  (* maps a func name to its return type *)
+            return_type : Sast.dataType;                       (* what should the return type be of the current scope *)
+    }
 
 let mappings = [("in", Sast.Node); ("out", Sast.Node); ("value", Sast.Node); ("nodes", Sast.Graph)] 
 let mem_vars =  List.fold_left (fun m (k, v) -> StringMap.add k v m) StringMap.empty mappings
@@ -325,22 +325,6 @@ main_func
 
 (*print_endline ((String.concat "\n" (List.map (fun h -> "#include " ^ h) headers)) ^ "\n" ^
 string_of_cfunc main_func ) *)
-
-
-(* creates a new default environment *)
-                    let create_env =
-                        let basic_env = 
-                            let bf_names = [ "print"; "range";] in
-                            let bf_inds = enum 1 1 bf_names in
-                            let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
-                            let bf_type_map = ref (string_map_pairs StringMap.empty [(Sast.Void, "print"); (Sast.List(Sast.Num), "range")]) in
-                            {var_types = [ref StringMap.empty];
-                            var_inds = [ref StringMap.empty];
-                            func_types = [bf_type_map];
-                            func_inds = [bf_ind_map];
-                            return_type = Sast.Void} in
-                        basic_env
-
 
                     let print_bindings m =
                         let bindings = StringMap.bindings m in

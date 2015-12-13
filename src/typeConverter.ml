@@ -44,7 +44,14 @@ let rec check_list env v_e = function
     if not((fst v_e = get_expr_type (fst hd)) && (snd v_e = get_expr_type (snd hd))) then
       raise (Failure ("assignment expression not of type: " ) )
     else 
-        check_dict env v_e tl     
+        check_dict env v_e tl 
+
+ let rec formal_check s_formal_list s_el = 
+  match s_formal_list, s_el with
+    | [], [] -> true
+    | [], _ -> raise (Failure ("formal list fucked up" ) )
+    | _, [] -> raise (Failure ("formal list fucked up" ) )
+    | hd1::tl1, hd2::tl2 -> ((fst hd1) = (get_expr_type hd2)) && (formal_check tl1 tl2)  
 
 let convert_ast prog env =
 
@@ -344,14 +351,40 @@ let rec expr env = function
       )
     | _ -> raise (Failure("raise failure"))
   )
-                        (* TODO: figure out the type of v and check *)
-| Ast.Call(f, el) -> Sast.Call(f, List.map (fun e -> expr env e) el, Sast.String)                   (* TODO: figure out the return type and use that *)
+| Ast.Call(f, el) ->
+    let s_el = List.map (expr env) el in
+  (*
+  match range can only take 1 or two args not 0 or 3+ and make sure nums...
+  instead of f try check with the func name 
+  if it does exist put the value of the key function name for the map func_types
+  s_formals : (dataType * string) list;
+  range(1,5)
+    [1,2,3,4,5]
+   *)
+  if f = "range" then 
+      (let len = List.length el in 
+      if (len = 1) then 
+        let arg_types = [(Sast.Num, "foo")] in 
+        formal_check arg_types s_el;
+        Sast.Call(f, s_el , Sast.List(Sast.Num))
+      else if (len = 2) then 
+        let arg_types = [(Sast.Num, "foo"); (Sast.Num, "foo")] in 
+        formal_check arg_types s_el;
+        Sast.Call(f, s_el , Sast.List(Sast.Num))
+      else 
+        raise(Failure("range can only take 1 or 2 args"))
+    )
+  else 
+      let fdecl = find_var f env.func_obj in 
+       formal_check fdecl.s_formals s_el;
+       let rtype = fdecl.s_rtype in
+       Sast.Call(f, s_el , rtype) (* TODO: figure out the return type and use that *)
 | Ast.Access(v, e) -> 
     let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
     let e_dt = get_expr_type s_e in
     (try                                (*sees if variable defined*)
         let v_e = find_var v env.var_types in
-         (match v_e with
+         (match v_e with 
            List(dt) -> 
               (match e_dt with 
                  | Sast.Num -> Sast.Access(v, s_e, dt)
@@ -606,7 +639,7 @@ let rec stmt env = function
             var_inds = inds_map :: env.var_inds;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
             var_types =  types_map :: env.var_types;   (* maps a var name to its type  ex. x -> num *)
             func_inds =   ref StringMap.empty :: env.func_inds;            (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
-            func_types =  ref StringMap.empty :: env.func_types; (* maps a func name to its return type *)
+            func_obj = ref StringMap.empty :: env.func_obj;
             return_type = rtype;                       (* what should the return type be of the current scope *)
     }  
   in Sast.Fdecl({
