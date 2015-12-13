@@ -163,8 +163,11 @@ let rec translate_expr = function
                       let addr = translate_expr(Cast(Long, expr)) in
                       let expr_val = translate_expr(Member(Cstring, translate_expr expr, "data")) in
                       [("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
-                  | List | Graph | Void | Entry -> raise (Failure "can't print this type yet")
-                  | Array(dt) | Ptr(dt) -> raise (Failure "can't print this type yet")
+                  | Entry -> raise (Failure "can't print this type yet")
+                  | List | Graph -> raise (Failure "type requires iterable print handling")
+                  | Array(dt) -> raise (Failure "type requires iterable print handling")
+                  | Void -> raise (Failure "can't directly print Void")
+                  | Ptr(dt) -> raise (Failure "can't directly print pointer")
                 )
             in
 
