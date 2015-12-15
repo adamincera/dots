@@ -5,7 +5,7 @@
  */
 
 def dict<node, num> relax (node u, dict<node, num> w) {
-        for node v in u.out {
+        for (v in u.out) {
             if w[v] > u.out[v] {
                 w[v] = u.out[v];
             }
@@ -16,11 +16,12 @@ def dict<node, num> relax (node u, dict<node, num> w) {
 def dict<node, num> dijkstra (graph G, node source){
     dict<node, num> S, Q;
     
-    for node n in G:
+    for (n in G) {
         Q[n] = INF;
+    }
     Q[source] = 0;
     
-    while !isEmpty(Q) {
+    while (!isEmpty(Q)) {
         node u = min(Q);
         num w = Q[u];
         Q.remove(u);
@@ -30,7 +31,7 @@ def dict<node, num> dijkstra (graph G, node source){
     return S;
 }
 
-\* Graph set-up *\
+/* Graph set-up */
 node x("dc");
 node y("chicago");
 node z("philly");
