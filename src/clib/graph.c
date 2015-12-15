@@ -107,10 +107,25 @@ graph_t *subtract_graphs(graph_t *left, graph_t *right) {
     return left;
 }
 
-graph_t *copy(const graph_t *src) {
+graph_t *graph_copy(const graph_t *src) {
     graph_t *g = init_graph();
     nodelist_t *temp;
     for(temp = src->nodes; temp; temp = temp->next)
         add_node(g, temp->node);
     return g;
 }
+
+int graph_equals(const graph_t *a, const graph_t *b) {
+    const nodelist_t *temp_a = a->nodes;
+    const nodelist_t *temp_b = b->nodes;
+    while(temp_a && temp_b) {
+        if(temp_a->node != temp_b->node)
+            return 0;
+        temp_a = temp_a->next;
+        temp_b = temp_b->next;
+    }
+    if(temp_a || temp_b)
+        return 0;
+    return 1;
+}
+

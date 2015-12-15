@@ -28,6 +28,16 @@ static int hash_num(float key) {
     return (int) key % TABLE_SIZE;
 }
 
+static int hash_graph(graph_t *g) {
+    int ret = 0;
+    nodelist_t *temp;
+    for(temp = g->nodes; temp; temp = temp->next) {
+        ret += ((int) temp->node >> 3);
+    }
+    ret %= TABLE_SIZE;
+    return ret;
+}
+
 static int hash_other(void *key) {
     return ((int) key) % TABLE_SIZE;
 }
@@ -55,6 +65,9 @@ void *get_num(entry_t **table, float key) {
     }
     return 0;
 }
+
+//void *get_graph(entry_t **table, graph_t *g) {
+
 
 void *get_other(entry_t **table, void *key) {
     int k = hash_other(key);
@@ -153,3 +166,5 @@ void put_other(entry_t **table, void *key, void *value) {
         temp->next = NULL;
     }
 }
+
+//void dict_remove(entry_t *table

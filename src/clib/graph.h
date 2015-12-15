@@ -28,4 +28,6 @@ graph_t *plus_equals(graph_t *a, const graph_t *b);
 
 graph_t *subtract_graphs(graph_t *left, graph_t *right);
 
-graph_t *copy(const graph_t *src);
+graph_t *graph_copy(const graph_t *src);
+
+int graph_equals(const graph_t *a, const graph_t *b);

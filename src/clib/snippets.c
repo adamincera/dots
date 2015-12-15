@@ -180,3 +180,19 @@ int len = strlen(s1) + strlen(s2) + 1;
 char *s3 = (char *) calloc(len, sizeof(char));
 strncpy(s3, s1, strlen(s1));
 strncpy(s3, s2, strlen(s2));
+
+/** removals */
+/** dict - key1 **/
+int i;
+entry_t *temp;
+void *key;
+for(i = 0; i < TABLE_SIZE; i++) {
+    for(temp = d[i]; temp; temp = temp->next) {
+        key = temp->key;
+        if(/*key == key1*/) {
+            dict_remove(d[i], temp);
+            i = TABLE_SIZE;
+            temp = NULL;
+        }
+    }
+}
