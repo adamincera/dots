@@ -22,6 +22,9 @@ int main() {
     node_t *o = init_node((void *) c);
     graph_t *g = init_graph();
     graph_t *h = init_graph();
+    printf("%o\n", (int) a);
+    printf("%o\n", (int) b);
+    printf("%o\n", (int) c);
     
     add_node(g, n);
     add_node(g, m);
@@ -50,7 +53,11 @@ int main() {
     print_nodes(g);
     printf("print_nodes(h):\n");
     print_nodes(h);
-    graph_t *g_copy = copy(g);
+    graph_t *g_copy = graph_copy(g);
+    int x = graph_equals(g, g_copy);
+    printf("x = %d\n", x);
+    x = graph_equals(h, g_copy);
+    printf("x = %d\n", x);
     printf("print_nodes(copy):\n");
     print_nodes(g_copy);
 

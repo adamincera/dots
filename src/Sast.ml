@@ -57,4 +57,14 @@ s_funcs : s_fdecl list;
  *)
 type program = { s_cmds : s_stmt list } 
 
+let rec dt_to_str = function
+| Num -> "num"
+| String -> "string"
+| Bool -> "bool"
+| List(dt) -> "list<" ^ (dt_to_str dt) ^ ">"
+| Dict(dtk, dtv) -> "dict<" ^ (dt_to_str dtk) ^ ", " ^ (dt_to_str dtv) ^ ">"
+| Graph -> "graph"
+| Node -> "node"
+| Void -> "void"
+
 (* end Sast *)
