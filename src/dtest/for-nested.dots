@@ -2,6 +2,8 @@ list <num> l1;
 list <num> l2;
 
 for (n1 in l1) {
+    n1;
     for (n2 in l2) {
+        n2;
     }
 }

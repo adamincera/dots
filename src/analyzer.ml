@@ -228,8 +228,8 @@ let rec translate_stmt env = function
                     | hd :: tl -> 
                         let e_t = get_expr_type hd in
                         (match e_t with
-                          | Num | String | Node -> 
-                              print_builder (Expr(Call(Void, "f1", [translate_expr env hd])) :: elems) tl
+                          | Num | String | Bool | Node -> 
+                              print_builder (List.rev(Expr(Call(Void, "f1", [translate_expr env hd])) :: List.rev elems)) tl
                           | List(dt) -> 
                               let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.List(dt))) in
                               (* print_builder 
@@ -253,29 +253,29 @@ let rec translate_stmt env = function
             (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index map *)
             let index = "v" ^ string_of_int(find_var id env.var_inds) in
             (match dt with
-            | Num -> Vdecl(Float, index)
-            | String -> Vdecl(Cstring, index)
-            | Bool -> Vdecl(Int, index)
-            | Graph -> Block([Vdecl(Ptr(Graph), index);
-            Expr(Assign(index, Call(Void, "init_graph", [])))
-            ]) (* C: graph_t *g1 = init_graph(); *)
-            | Node -> Block([Vdecl(Ptr(Node), index); 
-            Expr(Assign(index, Call(Void, "init_node", [Literal(Cstring, "")])))
-            ]) (* C: node_t *x = init_node(""); *)
-            | List(dt) -> Vdecl(Ptr(List), index) (* C: list_t *x; *)
-            | Dict(dtk, dtv) -> Vdecl(Ptr(Ptr(Entry)), index) (* TODO *)
-            | Void -> raise (Failure ("should not be using Void as a datatype"))
+              | Num -> Vdecl(Float, index)
+              | String -> Vdecl(Cstring, index)
+              | Bool -> Vdecl(Int, index)
+              | Graph -> Block([Vdecl(Ptr(Graph), index);
+                                Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))
+                               ]) (* C: graph_t *g1 = init_graph(); *)
+              | Node -> Block([Vdecl(Ptr(Node), index); 
+                               Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])))
+                              ]) (* C: node_t *x = init_node(""); *)
+              | List(dt) -> Vdecl(Ptr(List), index) (* C: list_t *x; *)
+              | Dict(dtk, dtv) -> Vdecl(Ptr(Ptr(Entry)), index) (* TODO *)
+              | Void -> raise (Failure ("should not be using Void as a datatype"))
             )
-            | Sast.Assign(v, e, dt) ->
-                    let ce = translate_expr env e in
-                    let var_type = get_expr_type e in
-                    let index = "v" ^ string_of_int(find_var v env.var_inds) in
-                    (match var_type with
-                    | Num | String | Bool | Node | Void -> Expr(Assign(index, ce))
-                    | List(dt) -> Expr(Assign(index, ce)) (* TODO *)   
-                    | Dict(dtk, dtv) -> Expr(Assign(index, ce)) (* TODO *)
-                    | Graph -> Expr(Assign(index, Call(Graph, "copy", [ce])))
-                    )
+    | Sast.Assign(v, e, dt) ->
+            let ce = translate_expr env e in
+            let var_type = get_expr_type e in
+            let index = "v" ^ string_of_int(find_var v env.var_inds) in
+            (match var_type with
+            | Num | String | Bool | Node | Void -> Expr(Assign(Id((dt_to_ct var_type), index), ce))
+            | List(dt) -> Expr(Assign(Id((dt_to_ct var_type), index), ce)) (* TODO *)   
+            | Dict(dtk, dtv) -> Expr(Assign(Id((dt_to_ct var_type), index), ce)) (* TODO *)
+            | Graph -> Expr(Assign(Id((dt_to_ct var_type), index), Call(Graph, "copy", [ce])))
+            )
                     (*         if not( (find_var v env.var_types) = get_expr_type e)
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
@@ -285,48 +285,44 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-                    | Sast.Return(e, dt) -> Expr(Noexpr)                   (*TODO*)
-    | Sast.NodeDef (id, s, dt) -> Expr(Noexpr)          (*TODO*)
+    | Sast.Return(e, dt) -> Expr(Noexpr)                   (*TODO*)
+    | Sast.NodeDef (id, s, dt) ->
+        let index = "v" ^ string_of_int(find_var id env.var_inds) in
+        Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))
     | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
     | Sast.For (temp, iter, sl) ->
             let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
             let index = "v" ^ string_of_int (find_var iter env.var_inds) in
-            let dt = (find_var iter env.var_types) in
+            let iter_type = (find_var iter env.var_types) in
             let csl = List.map (translate_stmt env) sl in
-            (match dt with
+            (match iter_type with
             | List(dt) -> Block([Vdecl(Ptr(List), auto_var); 
-                For(Assign(auto_var, Id(Ptr(List), index)),
+                For(Assign(Id(dt_to_ct dt, auto_var), Id(Ptr(List), index)),
                 Id(Ptr(List), auto_var),
-                Assign(auto_var, Member(Ptr(List), auto_var, "next")),
+                Assign(Id(dt_to_ct dt, auto_var), Member(Ptr(List), auto_var, "next")),
                 csl
                 )
                                  ])
             | Dict(dtk, dtv) -> 
-                    (*let int_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
-                    let entry_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in
-                    let key_var = "a" ^ string_of_int((auto_cnt := !auto_cnt + 1); !auto_cnt) in *)
-                    (* let int_var = "a" ^ string_of_int(create_auto "") in
-                    let entry_var = "a" ^ string_of_int(create_auto "") in
-                    let key_var = "a" ^ string_of_int(create_auto "") in *)
                     let int_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
                     let entry_var = "v" ^ string_of_int(create_auto env "" (Sast.Dict(Void, Void))) in
                     let key_var = "v" ^ string_of_int(create_auto env "" (Sast.Void)) in
                     Block([Vdecl(Int, int_var); Vdecl(Ptr(Entry), entry_var);
                         Vdecl(Ptr(Void), key_var); 
-                        For(Assign(int_var, Literal(Int, "0")),
+                        For(Assign(Id(Int, int_var), Literal(Int, "0")),
                             Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
-                            Assign(int_var, 
+                            Assign(Id(Int, int_var), 
                                 Binop(Int, Id(Int, int_var), Ast.Add,
                                       Literal(Int, "1"))),
-                            [For(Assign(entry_var, Access(Entry, index, Id(Int, int_var))), 
+                            [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, index, Id(Int, int_var))), 
                                  Id(Entry, entry_var),
-                                 Assign(entry_var, Member(Entry, entry_var, "next")),
+                                 Assign(Id(Ptr(Entry), entry_var), Member(Entry, entry_var, "next")),
                                  List.map (translate_stmt env) sl
                             )]
                         )
                     ])
             | Node -> Block([Vdecl(Ptr(Node), auto_var); 
-            Expr(Assign(auto_var, Ref(Id(Ptr(Node), index))))] @ csl)
+                Expr(Assign(Id(Ptr(Node), auto_var), Ref(Id(Ptr(Node), index))))] @ csl)
 
             (* Block([Vdecl(Ptr(Node), auto_var); 
             For(Assign(auto_var, Ref(Id(Ptr(Node), index))),
@@ -336,11 +332,11 @@ let rec translate_stmt env = function
             )
             ]) *)
             | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
-            For(Assign(auto_var, Member(Ptr(Node), index, "nodes")),
-            Id(Ptr(Node), auto_var),
-            Assign(auto_var, Member(Ptr(Node), auto_var, "next")),
-            csl
-            )
+                              For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), index, "nodes")),
+                                Id(Ptr(Node), auto_var),
+                                Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_var, "next")),
+                                csl
+                                )
                              ])
             | _ -> raise (Failure(iter ^ " is not iterable"))
             )

@@ -1,8 +1,8 @@
-\* 
+/* 
  * Djikstra's algorithm: calculates shortest paths starting 
  * from the source node and returns a dict of the lowest cost
  * to destination nodes
- *\
+ */
 
 def dict<node, num> relax (node u, dict<node, num> w) {
         for node v in u.out {
@@ -45,7 +45,7 @@ graph g1 = {
     x --[8] y;
     y --[9] r;
 };
-\* end Graph set-up *\
+/* end Graph set-up */
 
-\* find the min costs from "philly" to all other cities: *\
+/* find the min costs from "philly" to all other cities: */
 dict<node, num> min_costs = dijkstra(g1, z);
