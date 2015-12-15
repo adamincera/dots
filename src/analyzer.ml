@@ -6,6 +6,44 @@ open Translate
 module StringMap = Map.Make(String)
 (* module DataTypeMap = Map.Make(dataType) *)
 
+type s_program = { s_gbls : s_stmt list; s_main: s_stmt list; s_funcs : s_fdecl list; } 
+(* read in Sast program creat list of glbs by skipping fdecls  
+program = { s_cmds : s_stmt list } 
+
+    Block of s_stmt list
+  | Expr of s_expr
+  | Vdecl of dataType * string
+  | NodeDef of string * s_expr * dataType (* (node id, type, item id) *)
+  | Assign of string * s_expr * dataType                     (* x = 5; *)
+  | Return of s_expr * dataType                         (* return x (dataType) *)
+  | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
+  | For of string * string * s_stmt list       (* temp var, iterable var, var decls, stmts *)
+  | While of s_expr * s_stmt list              (* condition, var decls, stmt list *)
+  | Fdecl of s_fdecl and 
+
+  *) 
+
+let prgm = List.rev program.s_cmds in
+
+let create_s_program s_program = function
+    [] -> []
+    | hd::tl -> 
+        (match hd with
+                  | Block
+                  | Expr
+                  | Vdecl
+                  | NodeDef
+                  | Assign
+                  | Return
+                  | If
+                  | For 
+                  | While
+                  | Fdecl -> s_fdecl 
+                  | _ -> raise (Failure ("failure: sast program object "))
+                 )
+        with
+          | Not_found -> raise (Failure ("failure: sast program object ")))
+
 type translation_env = {
             var_inds : int StringMap.t ref list;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
             var_types : Sast.dataType StringMap.t ref list;   (* maps a var name to its type  ex. x -> num *)
@@ -285,11 +323,13 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.Return(e, dt) -> Expr(Noexpr)                   (*TODO*)
-    | Sast.NodeDef (id, s, dt) ->
+    | Sast.Return(e, dt) -> Expr(Noexpr)                                         (*TODO*)
+    | Sast.NodeDef (id, s, dt) ->                                                (*TODO*)
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
         Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))
-    | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
+    | Sast.Return(e, dt) -> Expr(Noexpr)                                         (*TODO*)  
+    | Sast.While(cond, sl) -> Expr(Noexpr)                                       (*TODO*)
+    | Sast.If (cond, s1, s2) -> Expr(Noexpr)                                     (*TODO*)
     | Sast.For (temp, iter, sl) ->
             let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
             let index = "v" ^ string_of_int (find_var iter env.var_inds) in
