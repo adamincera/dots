@@ -88,7 +88,12 @@ let rec expr env = function
               DictLiteral(s_el, Sast.Dict(fst dt, snd dt))
   ) 
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
-| Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
+| Ast.Id(v) -> 
+    (try
+        Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
+     with
+     | Not_found -> raise (Failure ("undeclared variable: " ^ v))
+    )
 | Ast.Binop(e1, op, e2) -> 
     let s_e1 = expr env e1 in
     let s_e2 = expr env e2 in              
@@ -371,6 +376,35 @@ let rec expr env = function
       else 
         raise(Failure("range can only take 1 or 2 args"))
     )
+  else if f = "print" then Sast.Call(f, s_el, Sast.Void)
+  else if (f = "min" || f = "max") then    
+      (try                            
+        let s_el = List.map (expr env) el in
+        let data_type = get_expr_type (List.hd s_el) in
+        let len = List.length el in 
+          if (len = 1) then
+             (match data_type with 
+                Sast.List(dt) -> Sast.Call(f, s_el, dt)
+                | Sast.Dict(dtk, dtv) -> Sast.Call(f, s_el, dtk) 
+                | _ -> raise(Failure("member call failed")))
+          else 
+            raise(Failure("member call failed"))
+        with 
+          Not_found -> raise (Failure("undeclared variable: ")))
+  else if f = "len" then 
+        (try                            
+        let s_el = List.map (expr env) el in
+        let data_type = get_expr_type (List.hd s_el) in
+        let len = List.length el in 
+          if (len = 1) then
+             (match data_type with 
+                Sast.List(dt) -> Sast.Call(f, s_el, Sast.Num)
+                | Sast.Dict(dtk, dtv) -> Sast.Call(f, s_el, Sast.Num) 
+                | _ -> raise(Failure("member call failed")))
+          else 
+            raise(Failure("member call failed"))
+        with 
+          Not_found -> raise (Failure("undeclared variable: ")))
   else 
       let fdecl = find_var f env.func_obj in 
        ignore (formal_check fdecl.s_formals s_el);
@@ -433,8 +467,42 @@ let rec expr env = function
           )
      with
      | Not_found -> raise (Failure("undeclared variable: "))
-    )     
-| Ast.MemberCall(v, m, el) -> Sast.MemberCall(v, m, List.map (fun e -> expr env e) el, Sast.String) (* TODO: figure out the return type and use that *)
+    );     
+| Ast.MemberCall(v, m, el) -> 
+    (try 
+          let v_e = find_var v env.var_types in
+          let len = List.length el in
+          if (len = 1) then
+              let s_el = List.map (expr env) el in 
+              let data_type = get_expr_type (List.hd s_el) in
+              let mem_r_type = StringMap.find m mem_vars in
+              (match v_e with
+                  | Sast.List(dt) ->  
+                          if (mem_r_type = data_type) then
+                            (match m with
+                              | "enqueue" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
+                              | "dequeue" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
+                              | "remove" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
+                              | _ -> raise (Failure("undeclared variable: "))
+                            )
+                           else 
+                             raise (Failure("stupid "))     
+                  | Sast.Dict(dtk, dtv) ->  
+                      let mem_r_type = StringMap.find m mem_vars in
+                      if (mem_r_type = Sast.Graph) then 
+                        (match m with
+                           | "remove" -> Sast.MemberCall(v,m, s_el, Sast.List(Sast.Node))
+                           | _ -> raise (Failure("undeclared variable: "))
+                        )
+                      else 
+                          raise (Failure("dict can't be member vared like that "))
+                  | _ ->  raise (Failure("must use Node or Graph ya bish"))
+              )
+          else 
+              raise (Failure("more than 1 argument"))
+      with
+        | Not_found -> raise (Failure("not a member function for graphs"))
+      );
 | Ast.Undir(v1, v2) -> 
     (*check if v1 and v2 exist *)
     (try                                (*sees if variable defined*)
@@ -607,7 +675,37 @@ let rec stmt env = function
         raise (Failure ("if issue"))
     with 
      Not_found -> raise (Failure ("return issue")))
-| Ast.For(v1, v2, sl) -> Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
+| Ast.For(v1, v2, sl) -> 
+  (* iterable var must have already been declared *)
+  (try 
+    ignore(find_var v2 env.var_inds)
+   with
+   | Not_found -> raise (Failure ("'" ^ v2 ^ "' has not been declared"))
+  );
+  (* temp var must NOT have already been declared *)
+  (try 
+    ignore(find_var v1 env.var_inds);
+    ignore(raise (Failure ("'" ^ v1 ^ "' has already been declared")))
+   with
+   | Not_found -> ignore()
+   | Failure(f) -> raise (Failure f)
+  );
+  (* find the type of the temp var *)
+  let tmp_type = (try 
+                 (match find_var v2 env.var_types with
+                  | List(dt) -> dt
+                  | Dict(dtk, dtv) -> dtk
+                  | Graph | Node -> Node
+                  | x -> raise (Failure ("for loop error: " ^ (dt_to_str x) ^ " not an iterable type"))
+                 )
+               with
+               | Not_found -> raise (Failure ("failure: " ^ v2)))
+  in
+  (* add the temp var to the symbol table *)
+  (List.hd env.var_types) := StringMap.add v1 tmp_type !(List.hd env.var_types); (* add type map *)
+  (List.hd env.var_inds) := StringMap.add v1 (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+  Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
+     
   (* temp var, iterable var, var decls, stmts *)  
 | Ast.While(cond, sl) -> 
     (try 

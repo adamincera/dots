@@ -1,2 +1,2 @@
-node x;
+node x("chicago");
 print(x);

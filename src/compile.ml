@@ -8,7 +8,18 @@ open Analyzer
 (* translate version *)
 let _ =
   let lexbuf = Lexing.from_channel stdin in
-  let ast_prg = (Parser.program Scanner.token lexbuf) in (* outputs the Ast from parsing and scanning *)
+  let ast_prg =
+    (try
+         (Parser.program Scanner.token lexbuf) (* outputs the Ast from parsing and scanning *)
+    with exn -> 
+          let curr = lexbuf.Lexing.lex_curr_p in
+          let line = curr.Lexing.pos_lnum in
+          let cnum = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
+          let tok = Lexing.lexeme lexbuf in
+          raise (Failure ("line " ^ string_of_int(line) ^ ", char " ^ string_of_int(cnum) ^ ", token " ^ tok))
+    )
+    in
+
       let print_decl = {
           s_fname = "print";
           s_rtype = Sast.Void;

@@ -132,8 +132,8 @@ prim_type:
 
 data_type:
 | prim_type { $1 }
-| DICT  { "dict" }
-| LIST  { "list" }
+| DICT LT data_type COMMA data_type GT  { "dict" }
+| LIST LT data_type GT  { "list" }
 | NODE  { "node" }
 | GRAPH { "graph" }
 
@@ -158,6 +158,8 @@ node_decl_prefix:
 graph_decl_prefix:
 | GRAPH ID { Vdecl("graph", $2) }                                                       /*  graph g;    */
 /*| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { Block([Vdecl("graph", $2); AssignList($2, $5)]) } */                    /*  graph g = { x --[5] y; y -->[3] z; }  */
+| GRAPH ID ASSIGN LBRACE edge_op_list RBRACE { Block([Vdecl("graph", $2)]) } /* TODO */    /*  graph g = { x --[5] y; y -->[3] z; }  */
+
 
 list_decl_prefix:
 | LIST LT data_type GT ID { ListDecl($3, $5) }                                                              /*  list<node> min; */ 

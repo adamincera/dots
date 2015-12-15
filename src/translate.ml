@@ -17,7 +17,7 @@ type cexpr =
 | Literal of ctype * string
 | Id of ctype * string                   (* ids are ints ex. Id(2) -> v2 *)
 | Binop of ctype * cexpr * Ast.op * cexpr
-| Assign of string * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
+| Assign of cexpr * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
 | Access of ctype * string * cexpr               (* array access: id[cexpr] *)
 | Member of ctype * string * string (* id, member *)
@@ -140,31 +140,25 @@ let rec translate_expr = function
 
 | Id(dt, id) -> id
 | Binop(dt, e1, op, e2) -> translate_expr e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_expr e2
-| Assign(id, e) -> id ^ " = " ^  translate_expr e
+| Assign(target, e) -> (translate_expr target) ^ " = " ^  translate_expr e
 | Call(dt, id, el) -> 
     (match id with
         | "f1" -> 
             (* fmt is all the format types so far: ex. %s%f%f *)
             (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
-(*             let rec build_str fmt vals = function
-            | [] -> (fmt, vals)
-            | hd :: tl -> build_str (fmt ^ (fmt_str(get_expr_type hd))) (vals ^ "," ^ (translate_expr hd)) tl
-            in
-            let result = build_str "" "" el *)
             (* takes expr to translate, data type of expr *)
             let get_fmt_val expr = 
                 let expr_type = get_expr_type expr in
                 (match expr_type with
-                  | Float -> [("%f", translate_expr expr)]
+                  | Float -> [("%.3f", translate_expr expr)]
                   | Int -> [("%d", translate_expr expr)]
                   | Long -> [("%l", translate_expr expr)]
                   | Cstring -> [("%s", translate_expr expr)]
                   | Node -> 
                       let addr = translate_expr(Cast(Long, expr)) in
                       let expr_val = translate_expr(Member(Cstring, translate_expr expr, "data")) in
-                      [("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
-                  | Entry -> raise (Failure "can't print this type yet")
-                  | List | Graph -> raise (Failure "type requires iterable print handling")
+                      [("%s", "\"N-\""); ("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
+                  | List | Entry | Graph -> raise (Failure "type requires iterable print handling")
                   | Array(dt) -> raise (Failure "type requires iterable print handling")
                   | Void -> raise (Failure "can't directly print Void")
                   | Ptr(dt) -> raise (Failure "can't directly print pointer")
