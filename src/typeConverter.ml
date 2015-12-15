@@ -88,7 +88,12 @@ let rec expr env = function
               DictLiteral(s_el, Sast.Dict(fst dt, snd dt))
   ) 
 | Ast.Boolean(b) -> Sast.Boolean(b, Sast.Bool)
-| Ast.Id(v) -> Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
+| Ast.Id(v) -> 
+    (try
+        Sast.Id(v, find_var v env.var_types) (* uses find_var to determine the type of id *)
+     with
+     | Not_found -> raise (Failure ("undeclared variable: " ^ v))
+    )
 | Ast.Binop(e1, op, e2) -> 
     let s_e1 = expr env e1 in
     let s_e2 = expr env e2 in              
@@ -670,7 +675,37 @@ let rec stmt env = function
         raise (Failure ("if issue"))
     with 
      Not_found -> raise (Failure ("return issue")))
-| Ast.For(v1, v2, sl) -> Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
+| Ast.For(v1, v2, sl) -> 
+  (* iterable var must have already been declared *)
+  (try 
+    ignore(find_var v2 env.var_inds)
+   with
+   | Not_found -> raise (Failure ("'" ^ v2 ^ "' has not been declared"))
+  );
+  (* temp var must NOT have already been declared *)
+  (try 
+    ignore(find_var v1 env.var_inds);
+    ignore(raise (Failure ("'" ^ v1 ^ "' has already been declared")))
+   with
+   | Not_found -> ignore()
+   | Failure(f) -> raise (Failure f)
+  );
+  (* find the type of the temp var *)
+  let tmp_type = (try 
+                 (match find_var v2 env.var_types with
+                  | List(dt) -> dt
+                  | Dict(dtk, dtv) -> dtk
+                  | Graph | Node -> Node
+                  | x -> raise (Failure ("for loop error: " ^ (dt_to_str x) ^ " not an iterable type"))
+                 )
+               with
+               | Not_found -> raise (Failure ("failure: " ^ v2)))
+  in
+  (* add the temp var to the symbol table *)
+  (List.hd env.var_types) := StringMap.add v1 tmp_type !(List.hd env.var_types); (* add type map *)
+  (List.hd env.var_inds) := StringMap.add v1 (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+  Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
+     
   (* temp var, iterable var, var decls, stmts *)  
 | Ast.While(cond, sl) -> 
     (try 

@@ -146,16 +146,11 @@ let rec translate_expr = function
         | "f1" -> 
             (* fmt is all the format types so far: ex. %s%f%f *)
             (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
-(*             let rec build_str fmt vals = function
-            | [] -> (fmt, vals)
-            | hd :: tl -> build_str (fmt ^ (fmt_str(get_expr_type hd))) (vals ^ "," ^ (translate_expr hd)) tl
-            in
-            let result = build_str "" "" el *)
             (* takes expr to translate, data type of expr *)
             let get_fmt_val expr = 
                 let expr_type = get_expr_type expr in
                 (match expr_type with
-                  | Float -> [("%f", translate_expr expr)]
+                  | Float -> [("%.3f", translate_expr expr)]
                   | Int -> [("%d", translate_expr expr)]
                   | Long -> [("%l", translate_expr expr)]
                   | Cstring -> [("%s", translate_expr expr)]
@@ -163,8 +158,7 @@ let rec translate_expr = function
                       let addr = translate_expr(Cast(Long, expr)) in
                       let expr_val = translate_expr(Member(Cstring, translate_expr expr, "data")) in
                       [("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
-                  | Entry -> raise (Failure "can't print this type yet")
-                  | List | Graph -> raise (Failure "type requires iterable print handling")
+                  | List | Entry | Graph -> raise (Failure "type requires iterable print handling")
                   | Array(dt) -> raise (Failure "type requires iterable print handling")
                   | Void -> raise (Failure "can't directly print Void")
                   | Ptr(dt) -> raise (Failure "can't directly print pointer")
