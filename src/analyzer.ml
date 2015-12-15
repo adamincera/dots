@@ -160,8 +160,8 @@ in
 let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
-    | Sast.ListLiteral(el, dt) -> Noexpr (* TODO *)
-    | Sast.DictLiteral(kvl, dt) -> Noexpr (* TODO *)
+    | Sast.ListLiteral(el, dt) -> Nostmt (* TODO *)
+    | Sast.DictLiteral(kvl, dt) -> Nostmt (* TODO *)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
             let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
@@ -196,58 +196,55 @@ let rec translate_expr env = function
         | LogOr -> Binop(cdt, ce1, op, ce2) (* TODO *)
         )
     | Sast.Call(func_name, el, dt) -> 
-            let cel = List.map (translate_expr env) el in
-            let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
-            Call(dt_to_ct dt, index, cel)
+        (
+            match func_name with
+            | "print" ->
+                let rec print_builder elems = function
+                | [] -> elems
+                | hd :: tl -> 
+                    let e_t = get_expr_type hd in
+                    (match e_t with
+                      | Num | String | Bool | Node -> 
+                          print_builder (List.rev(Expr(Call(Void, "f1", [translate_expr env hd])) :: List.rev elems)) tl
+                      | List(dt) -> 
+                          let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.List(dt))) in
+                          (* print_builder 
+                          ( For()
+                            :: elems
+                          ) 
+                          tl *) 
+                         [Nostmt](*TODO*)
+                      | Dict(dtk, dtv) -> print_builder (Nostmt :: elems) tl (*TODO*)
+                      | Graph -> print_builder (Nostmt :: elems) tl (*TODO*)
+                      | Void -> raise (Failure "stop trying to print Void -- it's not gonna happen")
+                    )
+                in
+                Block( print_builder [] el (* TODO *) )
+            | _ -> 
+                let cel = List.map (translate_expr env) el in
+                let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
+                Call(dt_to_ct dt, index, cel)
+        )
+            
     | Sast.Access(v, e, dt) -> 
             let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
             Access(dt_to_ct dt, index, ce)
-    | Sast.MemberVar(v, m, dt) -> Noexpr (* TODO *)
-    | Sast.MemberCall(v, f, el, dt) -> Noexpr (* TODO *)
-    | Sast.Undir(v1, v2, dt) -> Noexpr (* TODO *)
-    | Sast.Dir(v1, v2, dt) -> Noexpr (* TODO *)
-    | Sast.UndirVal(v1, v2, w, dt) -> Noexpr (* TODO *)
-    | Sast.DirVal(v1, v2, w, dt) -> Noexpr (* TODO *)
-    | Sast.BidirVal(w1, v1, v2, w2, dt) -> Noexpr (* TODO *)
-    | Sast.NoOp(s, dt) -> Noexpr (* TODO *)
-    | Sast.Noexpr -> Noexpr
+    | Sast.MemberVar(v, m, dt) -> Nostmt (* TODO *)
+    | Sast.MemberCall(v, f, el, dt) -> Nostmt (* TODO *)
+    | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
+    | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
+    | Sast.UndirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
+    | Sast.DirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
+    | Sast.BidirVal(w1, v1, v2, w2, dt) -> Nostmt (* TODO *)
+    | Sast.NoOp(s, dt) -> Nostmt (* TODO *)
+    | Sast.Noexpr -> Nostmt
             in
 let rec translate_stmt env = function 
     | Sast.Block(sl) -> 
             let csl = List.map (translate_stmt env) sl in
             Block(csl)
-    | Sast.Expr(e) -> 
-        (match e with
-          | Call(fname, sel, dt) ->
-              (
-                match fname with
-                | "print" ->
-                    let rec print_builder elems = function
-                    | [] -> elems
-                    | hd :: tl -> 
-                        let e_t = get_expr_type hd in
-                        (match e_t with
-                          | Num | String | Bool | Node -> 
-                              print_builder (List.rev(Expr(Call(Void, "f1", [translate_expr env hd])) :: List.rev elems)) tl
-                          | List(dt) -> 
-                              let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.List(dt))) in
-                              (* print_builder 
-                              ( For()
-                                :: elems
-                              ) 
-                              tl *) 
-                             [Expr(Noexpr)](*TODO*)
-                          | Dict(dtk, dtv) -> print_builder (Expr(Noexpr) :: elems) tl (*TODO*)
-                          | Graph -> print_builder (Expr(Noexpr) :: elems) tl (*TODO*)
-                          | Void -> raise (Failure "stop trying to print Void -- it's not gonna happen")
-                        )
-                    in
-                    Block( print_builder [] sel (* TODO *) )
-                | _ -> Expr(translate_expr env e)
-              )
-          | _ -> Expr(translate_expr env e)
-        ) 
+    | Sast.Expr(e) -> Expr(translate_expr env e)
     | Sast.Vdecl(dt, id) ->
             (List.hd env.var_types) := StringMap.add id dt !(List.hd env.var_types); (* add type map *)
             (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index map *)
@@ -285,11 +282,11 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.Return(e, dt) -> Expr(Noexpr)                   (*TODO*)
+    | Sast.Return(e, dt) -> Nostmt                  (*TODO*)
     | Sast.NodeDef (id, s, dt) ->
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
         Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))
-    | Sast.If (cond, s1, s2) -> Expr(Noexpr)           (*TODO*)
+    | Sast.If (cond, s1, s2) -> Nostmt           (*TODO*)
     | Sast.For (temp, iter, sl) ->
             let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
             let index = "v" ^ string_of_int (find_var iter env.var_inds) in
@@ -321,16 +318,9 @@ let rec translate_stmt env = function
                             )]
                         )
                     ])
-            | Node -> Block([Vdecl(Ptr(Node), auto_var); 
+            | Node -> 
+                Block([Vdecl(Ptr(Node), auto_var); 
                 Expr(Assign(Id(Ptr(Node), auto_var), Ref(Id(Ptr(Node), index))))] @ csl)
-
-            (* Block([Vdecl(Ptr(Node), auto_var); 
-            For(Assign(auto_var, Ref(Id(Ptr(Node), index))),
-            Id(Ptr(Node), auto_var),
-            Assign(auto_var, Literal(Void, "NULL")),
-            csl
-            )
-            ]) *)
             | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
                               For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), index, "nodes")),
                                 Id(Ptr(Node), auto_var),
@@ -344,7 +334,7 @@ let rec translate_stmt env = function
                     let c_cond = translate_expr env cond in
                     let csl = List.map (translate_stmt env) sl in
                     While(c_cond, csl)
-            | Sast.Fdecl (func) -> Expr(Noexpr) 
+            | Sast.Fdecl (func) -> Nostmt
                     in
 
                     let main_func = { crtype = "int";

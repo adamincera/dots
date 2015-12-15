@@ -12,7 +12,7 @@ type ctype = | Float | Int | Long | Cstring
              | Ptr of ctype (* pointer to a data type *)
              | Void
              | Entry
-
+(*
 type cexpr = 
 | Literal of ctype * string
 | Id of ctype * string                   (* ids are ints ex. Id(2) -> v2 *)
@@ -25,15 +25,26 @@ type cexpr =
 | Deref of cexpr (* ex. *var *)
 | Ref of cexpr (* ex. &var *)
 | Noexpr
+*)
 
 type cstmt =
+| Literal of ctype * string
+| Id of ctype * string                   (* ids are ints ex. Id(2) -> v2 *)
+| Binop of ctype * cstmt * Ast.op * cstmt
+| Assign of cstmt * cstmt               (* ex. Assign(2, 5) -> v2 = 5 *)
+| Call of ctype * string * cstmt list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
+| Access of ctype * string * cstmt               (* array access: id[cexpr] *)
+| Member of ctype * string * string (* id, member *)
+| Cast of ctype * cstmt               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
+| Deref of cstmt (* ex. *var *)
+| Ref of cstmt (* ex. &var *)
 | Block of cstmt list
-| Expr of cexpr
+| Expr of cstmt
 | Vdecl of  ctype * string (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
-| Return of cexpr
-| If of cexpr * cstmt list * cstmt list
-| For of cexpr * cexpr * cexpr * cstmt list (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
-| While of cexpr * cstmt list
+| Return of cstmt
+| If of cstmt * cstmt list * cstmt list
+| For of cstmt * cstmt * cstmt * cstmt list (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
+| While of cstmt * cstmt list
 | Nostmt
 
 type c_func = { crtype : string; (* c return type *)
@@ -109,7 +120,8 @@ let rec get_expr_type = function
 | Cast(dt, e) -> dt
 | Ref(e) -> Void
 | Deref(e) -> Void
-| Noexpr -> Void
+| _ -> Void
+(* | Noexpr -> Void *)
 
 let op_to_str = function
 | Ast.Add -> "+"
@@ -127,6 +139,7 @@ let op_to_str = function
 
 let cvar_cnt = ref 0
 
+(*
 let rec translate_expr = function
 | Literal(dt, v) ->
    (match dt with
@@ -185,23 +198,80 @@ let rec translate_expr = function
 | Ref(e) -> "&(" ^ translate_expr e ^ ")"
 | Deref(e) -> "*(" ^ translate_expr e ^ ")"
 | Noexpr -> ""
+*)
 
 let rec translate_stmt = function
+| Literal(dt, v) ->
+   (match dt with
+    | Float -> v
+    | Int -> v
+    | Cstring -> "\"" ^ v ^ "\""
+    | Array(adt) -> v
+    | Void -> if v = "NULL" then v else raise (Failure "Void lit should only be 'NULL'")
+    | _ -> raise (Failure "invalid C literal type")
+   )
+
+| Id(dt, id) -> id
+| Binop(dt, e1, op, e2) -> translate_stmt e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_stmt e2
+| Assign(target, e) -> (translate_stmt target) ^ " = " ^  translate_stmt e
+| Call(dt, id, el) -> 
+    (match id with
+        | "f1" -> 
+            (* fmt is all the format types so far: ex. %s%f%f *)
+            (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
+            (* takes expr to translate, data type of expr *)
+            let get_fmt_val expr = 
+                let expr_type = get_expr_type expr in
+                (match expr_type with
+                  | Float -> [("%.3f", translate_stmt expr)]
+                  | Int -> [("%d", translate_stmt expr)]
+                  | Long -> [("%l", translate_stmt expr)]
+                  | Cstring -> [("%s", translate_stmt expr)]
+                  | Node -> 
+                      let addr = translate_stmt(Cast(Long, expr)) in
+                      let expr_val = translate_stmt(Member(Cstring, translate_stmt expr, "data")) in
+                      [("%s", "\"N-\""); ("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
+                  | List | Entry | Graph -> raise (Failure "type requires iterable print handling")
+                  | Array(dt) -> raise (Failure "type requires iterable print handling")
+                  | Void -> raise (Failure "can't directly print Void")
+                  | Ptr(dt) -> raise (Failure "can't directly print pointer")
+                )
+            in
+
+            let rec build_str fmt_val_list = function
+            | [] -> fmt_val_list
+            | hd :: tl -> build_str ((get_fmt_val hd) @ fmt_val_list) tl
+            in
+
+            let fmts = build_str [] el
+            in
+
+            "printf(" ^  
+            "\"" ^ String.concat "" (List.map (fun t -> fst t) fmts) ^ "\", " ^ (* format string *)
+            String.concat ", " (List.map (fun t -> snd t) fmts) ^ (* comma separated inputs to fmt string *)
+            ")"
+        | _ -> id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
+    )
+| Access(dt, id, e) -> id ^ "[" ^ translate_stmt e ^ "]"
+| Member(dt, id, m) -> id ^ "->" ^ m
+| Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_stmt e ^ ")"
+| Ref(e) -> "&(" ^ translate_stmt e ^ ")"
+| Deref(e) -> "*(" ^ translate_stmt e ^ ")"
 | Block(sl) -> String.concat "\n" (List.map translate_stmt sl)
-| Expr(e) -> translate_expr e ^ ";"
+| Expr(e) -> translate_stmt e ^ ";"
 | Vdecl(dt, id) -> type_to_str dt ^ " " ^ id ^ ";"
-| Return(e) -> "return " ^ translate_expr e ^ ";"
-| If(cond, sl1, sl2) -> "if (" ^ translate_expr cond ^ ") {\n" ^
+| Return(e) -> "return " ^ translate_stmt e ^ ";"
+| If(cond, sl1, sl2) -> "if (" ^ translate_stmt cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl1) ^
     "} else {\n" ^
     String.concat "\n" (List.map translate_stmt sl2) ^
     "}"
-| For(init, cond, incr, sl) -> "for (" ^ translate_expr init ^ "; " ^
-    translate_expr cond ^ "; " ^
-    translate_expr incr ^ ") {\n" ^
+| For(init, cond, incr, sl) -> "for (" ^ translate_stmt init ^ "; " ^
+    translate_stmt cond ^ "; " ^
+    translate_stmt incr ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl) ^
     "\n}"
-| While(cond, sl) -> "while (" ^ translate_expr cond ^ ") {\n" ^
+| While(cond, sl) -> "while (" ^ translate_stmt cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl) ^
     "\n}"
 | Nostmt -> ""
@@ -234,5 +304,5 @@ let translate_c (globals, cfuncs) =
     (String.concat "\n" (List.map translate_stmt globals)) ^ 
     (String.concat "\n" (List.map translate_func cfuncs))
 
-   (* List.map print_endline (List.map translate_expr cfuncs.cbody) *)
+   (* List.map print_endline (List.map translate_stmt cfuncs.cbody) *)
 
