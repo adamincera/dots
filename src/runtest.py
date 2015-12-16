@@ -142,6 +142,7 @@ for test_name in sorted(summary_results):
     else:
         print('[ ] ' + test_name)
 
+
 print('\nTests that should fail:')
 for test_name in sorted(summary_results_n):
     if summary_results_n[test_name] == 'pass':
