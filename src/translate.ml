@@ -47,16 +47,17 @@ type cstmt =
 | While of cstmt * cstmt list
 | Nostmt
 
-type c_func = { crtype : string; (* c return type *)
+type c_func = { crtype : ctype; (* c return type *)
                 cfname : string; (* function name *)
-                cformals : (string * string) list; (* (data type, id) list *)
+                cformals : (ctype * string) list; (* (data type, id) list *)
                 cbody : cstmt list; (* yo this should be cstmt *)
               }
 
 type cprogram = {
-                    libs : string list; (* names of libraries for include statements *)
                     globals : cstmt list; (* global variables -- Note: should ONLY be Vdecl list *)
                     cfuncs : c_func list; 
+                    (*main : cstmt list*) (* names of libraries for include statements *)
+                    (*libs : string list;*) (* names of libraries for include statements *)
                 }
 
 (*
@@ -278,16 +279,16 @@ let rec translate_stmt = function
 
 
 let translate_func func = 
-    func.crtype ^ " " ^ func.cfname ^ " (" ^ 
-    String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) func.cformals) ^
+    (type_to_str func.crtype) ^ " " ^ func.cfname ^ " (" ^ 
+    String.concat ", " (List.map (fun f -> (type_to_str (fst f)) ^ " " ^ snd f) func.cformals) ^
     ")\n{\n" ^
     String.concat "\n" (List.map translate_stmt func.cbody) ^
     "\n}\n"
 
 (* eventually won't be used by analyzer.ml *)
 let string_of_cfunc func = 
-    func.crtype ^ " " ^ func.cfname ^ " (" ^ 
-    String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) func.cformals) ^
+    (type_to_str func.crtype) ^ " " ^ func.cfname ^ " (" ^ 
+    String.concat ", " (List.map (fun f -> (type_to_str (fst f)) ^ " " ^ snd f) func.cformals) ^
      ")\n{\n" ^
     (String.concat "\n" (List.map translate_stmt func.cbody)) ^
     "\n}\n"
@@ -302,7 +303,9 @@ let translate_c (globals, cfuncs) =
     (String.concat "\n" (List.map (fun f -> "#include " ^ f) libs)) ^ 
     "\n" ^
     (String.concat "\n" (List.map translate_stmt globals)) ^ 
+    "\n" ^
     (String.concat "\n" (List.map translate_func cfuncs))
+
 
    (* List.map print_endline (List.map translate_stmt cfuncs.cbody) *)
 

@@ -52,9 +52,13 @@ let _ =
                        return_type = Sast.Void} in
   (* let sast_prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in *)
   let sast_prg = convert_ast { cmds = List.rev ast_prg.cmds} sast_env  in
+  let sifted_prg = stmt_sifter {s_globals = []; s_main = []; s_funcs = []} sast_prg.s_cmds in
+  let sifted_prg = {s_globals = List.rev sifted_prg.s_globals; 
+                    s_main = List.rev sifted_prg.s_main; 
+                    s_funcs = List.rev sifted_prg.s_funcs} in
   (* comment out for real: *)  (* print_endline ("converted ast to sast");  *)
   let trans_env = (* set up default environ *)
-      let bf_names = [ "print"; "range";] in
+      let bf_names = [ "print"; "range"; "len"; "min"; "max"] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
       let bf_fdecl_map = ref (string_map_pairs StringMap.empty [(print_decl, "print"); (range_decl, "range")]) in
@@ -64,9 +68,10 @@ let _ =
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
  (* let main = translate (trans_env, sast_prg.s_funcs, sast_prg.s_cmds) in *)
- let main = translate (trans_env, sast_prg.s_cmds) in
+ (*let main = translate (trans_env, sast_prg.s_cmds) in*)
  (* let cprg = {libs = ["<stdio.h>"]; globals = [] ; cfuncs = [main]} in *)
- let cprg = {libs = ["<stdio.h>"]; globals = [] ; cfuncs = [main]} in
+ (* let cprg = {libs = ["<stdio.h>"]; globals = [] ; cfuncs = [main]} in *)
+ let cprg = translate(trans_env, sifted_prg) in
   print_endline (translate_c(cprg.globals, cprg.cfuncs))
 
   (* print_endline (String.concat "\n" (List.map string_of_stmt (List.rev prg.cmds))) *)

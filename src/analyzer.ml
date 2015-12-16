@@ -6,7 +6,8 @@ open Translate
 module StringMap = Map.Make(String)
 (* module DataTypeMap = Map.Make(dataType) *)
 
-type s_program = { s_gbls : s_stmt list; s_main: s_stmt list; s_funcs : s_fdecl list; } 
+type s_program = { s_globals : s_stmt list; s_main: s_stmt list; s_funcs : s_fdecl list; } 
+
 (* read in Sast program creat list of glbs by skipping fdecls  
 program = { s_cmds : s_stmt list } 
 
@@ -23,26 +24,59 @@ program = { s_cmds : s_stmt list }
 
   *) 
 
-let prgm = List.rev program.s_cmds in
+(* let prgm = List.rev program.s_cmds in *)
 
-let create_s_program s_program = function
-    [] -> []
-    | hd::tl -> 
-        (match hd with
-                  | Block
-                  | Expr
-                  | Vdecl
-                  | NodeDef
-                  | Assign
-                  | Return
-                  | If
-                  | For 
-                  | While
-                  | Fdecl -> s_fdecl 
-                  | _ -> raise (Failure ("failure: sast program object "))
-                 )
-        with
-          | Not_found -> raise (Failure ("failure: sast program object ")))
+(*
+  @param *implicit* := list of Sast.stmts to sort
+  @param sifted := a struct that contains the globals, 
+      regular stmts, and func decls that have been sorted so far
+ *)
+let rec stmt_sifter sifted = function
+| [] -> sifted
+| hd :: tl -> (match hd with
+               | Sast.Vdecl(dt, id) -> stmt_sifter {s_globals = hd :: sifted.s_globals; 
+                                               s_main = sifted.s_main; 
+                                               s_funcs = sifted.s_funcs} tl
+               | Sast.Expr(e) -> 
+                   stmt_sifter {s_globals = sifted.s_globals; 
+                   s_main = hd :: sifted.s_main; 
+                   s_funcs = sifted.s_funcs} tl
+               | Sast.NodeDef(id, e, dt) | Sast.Assign(id, e, dt) -> 
+                   stmt_sifter {s_globals = sifted.s_globals; 
+                   s_main = hd :: sifted.s_main; 
+                   s_funcs = sifted.s_funcs} tl
+               | Sast.Return(e, dt) -> 
+                   stmt_sifter {s_globals = sifted.s_globals; 
+                   s_main = hd :: sifted.s_main; 
+                   s_funcs = sifted.s_funcs} tl
+               | Sast.Block(sl) -> 
+                  let sifted_sl = stmt_sifter {s_globals = []; s_main = []; s_funcs = []} sl in
+                  stmt_sifter {s_globals = sifted_sl.s_globals @ sifted.s_globals; 
+                               s_main = Block(sifted_sl.s_main) :: sifted.s_main; 
+                               s_funcs = sifted_sl.s_funcs @ sifted.s_funcs} tl
+               | Sast.If(cond, s1, s2) -> 
+                   let sifted_s1 = stmt_sifter {s_globals = []; s_main = []; s_funcs = []} [s1] in
+                   let sifted_s2 = stmt_sifter {s_globals = []; s_main = []; s_funcs = []} [s2] in
+                   let tmp = {s_globals = sifted_s1.s_globals @ sifted.s_globals; 
+                              s_main = sifted_s1.s_main @ sifted.s_main;
+                              s_funcs = sifted_s1.s_funcs @ sifted.s_funcs} in
+                   stmt_sifter {s_globals = sifted_s2.s_globals @ tmp.s_globals; 
+                                s_main = sifted_s2.s_main @ tmp.s_main;
+                                s_funcs = sifted_s2.s_funcs @ sifted.s_funcs} tl
+               | Sast.For (tmp, iter, sl) ->
+                  let sifted_sl = stmt_sifter {s_globals = []; s_main = []; s_funcs = []} sl in
+                  stmt_sifter {s_globals = sifted_sl.s_globals @ sifted.s_globals; 
+                               s_main = For(tmp, iter, sifted_sl.s_main) :: sifted.s_main; 
+                               s_funcs = sifted_sl.s_funcs @ sifted.s_funcs} tl
+               | Sast.While (cond, sl) ->
+                  let sifted_sl = stmt_sifter {s_globals = []; s_main = []; s_funcs = []} sl in
+                  stmt_sifter {s_globals = sifted_sl.s_globals @ sifted.s_globals; 
+                               s_main = While(cond, sifted_sl.s_main) :: sifted.s_main; 
+                               s_funcs = sifted_sl.s_funcs @ sifted.s_funcs} tl
+               | Sast.Fdecl(f) -> {s_globals = sifted.s_globals; 
+                           s_main = sifted.s_main; 
+                           s_funcs = f :: sifted.s_funcs}
+              )
 
 type translation_env = {
             var_inds : int StringMap.t ref list;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
@@ -165,7 +199,7 @@ let dt_to_ct = function
 
     (* the meat of the compiler *)
     (* actually converts Sast objects into strings of C code *)
-let translate (env, cmds) =
+let translate (env, sast_prg) =
     
 
 (*  Automatic Variables *)
@@ -320,12 +354,12 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.Return(e, dt) -> Expr(Noexpr)                                         (*TODO*)
+    | Sast.Return(e, dt) -> Nostmt                                         (*TODO*)
     | Sast.NodeDef (id, s, dt) ->                                                (*TODO*)
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
         Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))
-    | Sast.While(cond, sl) -> Expr(Noexpr)                                       (*TODO*)
-    | Sast.If (cond, s1, s2) -> Expr(Noexpr)                                     (*TODO*)
+    | Sast.While(cond, sl) -> Nostmt                                      (*TODO*)
+    | Sast.If (cond, s1, s2) -> Nostmt                                    (*TODO*)
     | Sast.For (temp, iter, sl) ->
             let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
             let index = "v" ^ string_of_int (find_var iter env.var_inds) in
@@ -374,15 +408,30 @@ let rec translate_stmt env = function
                     let csl = List.map (translate_stmt env) sl in
                     While(c_cond, csl)
             | Sast.Fdecl (func) -> Nostmt
-                    in
-
-                    let main_func = { crtype = "int";
-                    cfname = "main";
-                    cformals = [("int", "argc"); ("char**", "argv")];
-                    cbody = List.map (fun s -> translate_stmt env s) cmds}
+                    
+                    (* ***** TODO *********)
+                    (*
+                    { crtype = Translate.Void;
+                    cfname = "empty";
+                    cformals = [(Int, "argc"); (Ptr(Cstring), "argv")];
+                    cbody = []}
+                  *)
+                  
+and
+translate_fdecl env func = 
+    {crtype = dt_to_ct func.s_rtype; 
+     cfname = func.s_fname; 
+     cformals = List.map (fun f -> (dt_to_ct (fst f), (snd f))) func.s_formals;
+     cbody = (List.map (fun f -> translate_stmt env f) func.s_body)}
 in
-main_func
-
+let global_vars = List.map (fun f -> translate_stmt env f) sast_prg.s_globals in 
+let main_func = {crtype = Translate.Int;
+                 cfname = "main";
+                 cformals = [(Int, "argc"); (Ptr(Cstring), "argv")];
+                 cbody = List.map (fun f -> translate_stmt env f) sast_prg.s_main}
+in
+let cfunc_list = List.map (fun f -> translate_fdecl env f) sast_prg.s_funcs in
+{globals = global_vars; cfuncs = List.rev (main_func :: List.rev cfunc_list)}
 
 let print_bindings m =
     let bindings = StringMap.bindings m in
