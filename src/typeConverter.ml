@@ -152,16 +152,7 @@ let rec expr env = function
             )
         |  _ -> raise (Failure("Expr using - has incompatible types"))
       )
-    | Mult -> 
-      (match e1_dt with
-        |  Num ->
-            (match e2_dt with
-              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Num)
-              | _ -> raise (Failure("wrong type: Num * ? "))
-            )
-        |  _ -> raise (Failure("Expr using * has incompatible types"))
-      )
-    | Div ->
+    | Mult | Div ->
       (match e1_dt with
         |  Num ->
             (match e2_dt with
