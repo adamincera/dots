@@ -402,7 +402,8 @@ let rec translate_stmt env = function
           Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))
         | _ -> 
           let index = "v" ^ string_of_int(find_var id env.var_inds) in
-          Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))          
+          Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))
+        )          
     | Sast.While(cond, sl) -> Nostmt                                      (*TODO*)
     | Sast.If (cond, s1, s2) -> Nostmt                                    (*TODO*)
     | Sast.For (temp, iter, sl) ->
