@@ -16,7 +16,7 @@ let _ =
           let line = curr.Lexing.pos_lnum in
           let cnum = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
           let tok = Lexing.lexeme lexbuf in
-          raise (Failure ("line " ^ string_of_int(line) ^ ", char " ^ string_of_int(cnum) ^ ", token " ^ tok))
+          raise (Failure ("Parsing error: line " ^ string_of_int(line) ^ ", char " ^ string_of_int(cnum) ^ ", token " ^ tok))
     )
     in
 
