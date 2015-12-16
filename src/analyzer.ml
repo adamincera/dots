@@ -355,9 +355,14 @@ let rec translate_stmt env = function
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
     | Sast.Return(e, dt) -> Nostmt                                         (*TODO*)
-    | Sast.NodeDef (id, s, dt) ->                                                (*TODO*)
-        let index = "v" ^ string_of_int(find_var id env.var_inds) in
-        Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))
+    | Sast.NodeDef (id, s, dt) -> 
+        (match s with
+        | Noexpr ->                                                 (*TODO*)
+          let index = "v" ^ string_of_int(find_var id env.var_inds) in
+          Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))
+        | _ -> 
+          let index = "v" ^ string_of_int(find_var id env.var_inds) in
+          Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))          
     | Sast.While(cond, sl) -> Nostmt                                      (*TODO*)
     | Sast.If (cond, s1, s2) -> Nostmt                                    (*TODO*)
     | Sast.For (temp, iter, sl) ->

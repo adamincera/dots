@@ -151,7 +151,7 @@ prim_decl_prefix:
 
 /* NODE INITIALIZERS */
 node_decl_prefix:
-| NODE ID { Vdecl("node", $2) }                                                        /* node x;    */
+| NODE ID { Block[Vdecl("node", $2); NodeDef($2, Noexpr)] }                                                        /* node x;    */
 | NODE ID LPAREN expr RPAREN { Block([Vdecl("node", $2); NodeDef($2, $4)]) }      /* node x("chicago") */                           /* node x("Chicago") */
 
 /* GRAPH INITIALIZERS */
