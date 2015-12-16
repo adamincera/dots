@@ -1,3 +1,0 @@
-dict <string,num> city_map = {"toronto":6, "nyc":0.5, "philly":8.9};
-city_map["vancouver"] = 100;
-print(city_map, "\n");

@@ -1,2 +1,0 @@
-list<num> num_list;
-num_list = [2, 3.5, 2.38];

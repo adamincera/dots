@@ -1,4 +1,0 @@
-num x;
-num y;
-num z;
-print(x, y, z);

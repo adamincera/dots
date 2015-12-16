@@ -1,8 +1,0 @@
-list <num> num_list; 
-num_list = [1, 3, 6.5, 9.8];
-list <string> str_list = ["hello", "world"];
-node x("foo");
-node y("3");
-list <node> node_list = [x, y];
-print(num_list,"\n");
-print(str_list,"\n");

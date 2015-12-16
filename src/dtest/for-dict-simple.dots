@@ -1,4 +1,0 @@
-dict<string, string> d;
-for (key in d) {
-    key;
-}

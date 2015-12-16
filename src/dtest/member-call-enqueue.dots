@@ -1,2 +1,0 @@
-list <num> x;
-x.enqueue(5);

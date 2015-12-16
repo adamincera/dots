@@ -1,2 +1,0 @@
-list<num> r;
-r = range(5);

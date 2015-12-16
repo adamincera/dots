@@ -1,2 +1,0 @@
-list <num> num_list = [3, 15.2, 2];
-print(num_list);

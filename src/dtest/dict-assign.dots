@@ -1,6 +1,0 @@
-dict <string,num> city_map = {"toronto":6, "nyc":0.5, "philly":8.9};
-node x("foo");
-node y(8);
-dict <num,node> my_nodes;
-my_nodes = {1:x, 2:y};
-print(city_map, "\n");

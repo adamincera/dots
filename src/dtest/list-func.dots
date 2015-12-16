@@ -1,5 +1,0 @@
-list <string> str_list = ["hello", "world"];
-str_list.enqueue("test");
-print(str_list[2], "\n");
-string x = str_list.dequeue();
-print(x, "\n");

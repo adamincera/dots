@@ -1,4 +1,0 @@
-list<num> l;
-for (x in l) {
-    x;
-}
