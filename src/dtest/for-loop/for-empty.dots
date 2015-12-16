@@ -1,0 +1,4 @@
+list<num> num_list;
+for (l in num_list) {
+
+}
