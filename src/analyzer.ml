@@ -239,24 +239,49 @@ let rec translate_expr env = function
             let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
             Id(dt_to_ct dt, index) 
     | Sast.Binop(e1, op, e2, dt) ->
-            let ce1 = translate_expr env e1 in
-            let ce2 = translate_expr env e2 in
-            let cdt = Translate.get_expr_type ce1 in
-            (*         (
-                match dt with
-                | Num -> Binop(Float, ce1, op, ce2) (* how can we tell if it's really an int? *)
-          | String -> Binop(Cstring, ce1, op, ce2)
-          | Bool -> Binop(Int, ce1, op, ce2)
-          | Graph -> Noexpr (* TODO *)
-          | Node -> Noexpr (* TODO *)
-          | List(dt) -> Noexpr (* TODO *)
-          | Dict(dtk, dtv) -> Noexpr (* TODO *)
-          | Void -> raise (Failure "why is there a void binop?")
-        )
-        ) *)
+        let ce1 = translate_expr env e1 in
+        let ce2 = translate_expr env e2 in
+        let cdt1 = Translate.get_expr_type ce1 in
+        let cdt2 = Translate.get_expr_type ce2 in 
         (match op with
-        | Add -> Binop(cdt, ce1, op, ce2) (* TODO *)
-        | Sub -> Binop(cdt, ce1, op, ce2) (* TODO *)
+        (* Binop(cdt1, ce1, op, ce2) (*TODO*) *)  
+        | Add -> 
+          (match cdt1 with
+            |  Float ->
+                (match cdt2 with
+                  | Float -> Translate.Binop(Float, ce1, op, ce2)
+                  | String -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
+                )
+            |  CString -> 
+                (match cdt2 with
+                  | Float -> Translate.Binop(cdt1, ce1, op, ce2) (* string concat *)
+                  | String -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
+                )
+            |  Graph -> 
+                (match cdt2 with
+                  | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                  | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                )
+            |  Node -> 
+                (match cdt2 with
+                  | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                  | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                )
+            |  List -> 
+                (match cdt2 with
+                  | List -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                )
+            |  _ -> raise (Failure("Invalid c type for + binop"))          )
+          )
+        | Sub -> 
+          (match cdt1 with
+            |  Float -> Translate.Binop(cdt1, ce1, op, ce2)
+            |  Graph -> 
+                (match cdt2 with
+                  | Node -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
+                  | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
+                )
+          )
         | Mult | Div -> Binop(Float, ce1, op, ce2)
         | Equal -> Binop(cdt, ce1, op, ce2) (* TODO *)
         | Neq -> Binop(cdt, ce1, op, ce2) (* TODO *)
