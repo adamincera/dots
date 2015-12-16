@@ -244,69 +244,77 @@ let rec translate_expr env = function
         let cdt1 = Translate.get_expr_type ce1 in
         let cdt2 = Translate.get_expr_type ce2 in 
         (match op with
-        (* Binop(cdt1, ce1, op, ce2) (*TODO*) *)  
-        | Add -> 
-          (match cdt1 with
-            |  Float ->
-                (match cdt2 with
-                  | Float -> Translate.Binop(Float, ce1, op, ce2)
-                  | CString -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
-                )
-            |  CString -> 
-                (match cdt2 with
-                  | Float -> Translate.Binop(cdt1, ce1, op, ce2) (* string concat *)
-                  | CString -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
-                )
-            |  Graph -> 
-                (match cdt2 with
-                  | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                  | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                )
-            |  Node -> 
-                (match cdt2 with
-                  | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                  | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                )
-            |  List -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-            |  _ -> raise (Failure("Invalid c type for + binop"))          )
-          )
-        | Sub -> 
-          (match cdt1 with
-            |  Float -> Translate.Binop(cdt1, ce1, op, ce2)
-            |  Graph -> 
-                (match cdt2 with
-                  | Node -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
-                  | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
-                )
-          )
-        | Mult | Div -> Binop(Float, ce1, op, ce2)
-        | Equal | Neq -> 
-        (* This one isn't complete, dict maps to what c type? confusion *)
-          (match cdt1 with
-            |  Float -> Translate.Binop(Float, ce1, op, ce2)
-            |  Int -> Translate.Binop(Int, ce1, op, ce2)
-            |  CString -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
-            |  Graph -> 
-                (match cdt2 with
-                  | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                  | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                )
-            |  Node -> 
-                (match cdt2 with
-                  | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                  | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                )
-            |  List -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-            |  Void -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-            |  _ -> raise (Failure("Invalid c type for ==/!= binop"))          )
-          )
-        | Less | Leq | Greater | Geq -> 
-          (match cdt1 with
-            |  Float -> Translate.Binop(Int,ce1,op,ce2)
-            |  Cstring -> Translate.Binop(Int,ce1,op,ce2)
-          )
-        | LogAnd | LogOr -> Translate.Binop(Int,ce1,op,ce2)
-      )
+          | Add -> 
+            (match cdt1 with
+              |  Float ->
+                  (match cdt2 with
+                    | Float -> Translate.Binop(Float, ce1, op, ce2)
+                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*)
+                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                  )
+              |  Cstring -> 
+                  (match cdt2 with
+                    | Float -> Translate.Binop(cdt1, ce1, op, ce2) (* string concat *)
+                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
+                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                  )
+              |  Graph -> 
+                  (match cdt2 with
+                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                  )
+              |  Node -> 
+                  (match cdt2 with
+                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                  )
+              |  List -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+              |  _ -> raise (Failure("Invalid c type for + binop"))          
+            )
+          | Sub -> 
+            (match cdt1 with
+              |  Float -> Translate.Binop(cdt1, ce1, op, ce2)
+              |  Graph -> 
+                  (match cdt2 with
+                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
+                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
+                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                  )
+              | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+            )
+          | Mult | Div -> Translate.Binop(Float, ce1, op, ce2)
+          | Equal | Neq -> 
+          (* This one isn't complete, dict maps to what c type? confusion *)
+            (match cdt1 with
+              |  Float -> Translate.Binop(Float, ce1, op, ce2)
+              |  Int -> Translate.Binop(Int, ce1, op, ce2)
+              |  Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
+              |  Graph -> 
+                  (match cdt2 with
+                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                  )
+              |  Node -> 
+                  (match cdt2 with
+                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                  )
+              |  List -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+              |  Void -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+              |  _ -> raise (Failure("Invalid c type for ==/!= binop"))     
+            )
+          | Less | Leq | Greater | Geq -> 
+            (match cdt1 with
+              |  Float -> Translate.Binop(Int,ce1,op,ce2)
+              |  Cstring -> Translate.Binop(Int,ce1,op,ce2)
+              | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+            )
+          | LogAnd | LogOr -> Translate.Binop(Int,ce1,op,ce2)
+        )
     | Sast.Call(func_name, el, dt) -> 
         (
             match func_name with
