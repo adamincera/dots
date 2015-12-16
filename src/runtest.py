@@ -37,14 +37,14 @@ for directory in os.walk(path):
     print ('\nRunning tests in "' + directory[0] + '" folder:')
     print ('*************************************************')
     for dir_entry in os.listdir(directory[0]):
-        filepath = os.path.join(path, directory[0], dir_entry)
+        filepath = os.path.join(directory[0], dir_entry)
         if os.path.isfile(filepath) and filepath[-5:] == '.dots':
             print('\nRunning tests: ' + dir_entry)
             print('================================')
 
             comp_success = False
             try:
-                return_code = call(['./gdc', filepath, os.path.join(path, directory[0], dir_entry[:-5] + '.exec')], 
+                return_code = call(['./gdc', filepath, os.path.join(directory[0], dir_entry[:-5] + '.exec')], 
                     timeout=30)
                 if return_code == 0:
                     print 'COMPILATION SUCCESSFUL'
@@ -57,16 +57,16 @@ for directory in os.walk(path):
                 continue;
 
             if (comp_success):
-                out_child = Popen('./' + os.path.join(path, directory[0], dir_entry[:-5]) + '.exec', 
+                out_child = Popen('./' + os.path.join(directory[0], dir_entry[:-5]) + '.exec', 
                     shell=True, stdout=PIPE)
                 output = out_child.communicate()[0]
                 
-                output_filepath = os.path.join(path, directory[0], dir_entry[:-5] + '.outgdc')
+                output_filepath = os.path.join(directory[0], dir_entry[:-5] + '.outgdc')
                 with open(output_filepath, 'w') as intermediate_output:
                     intermediate_output.write(output)
 
-                out_filepath = os.path.join(path, directory[0], dir_entry[:-5] + '.out')
-                output_filepath = os.path.join(path, directory[0], dir_entry[:-5] + '.outgdc')
+                out_filepath = os.path.join(directory[0], dir_entry[:-5] + '.out')
+                output_filepath = os.path.join(directory[0], dir_entry[:-5] + '.outgdc')
 
                 if (os.path.exists(out_filepath)):
                     diff_command = ['diff', '-bB', out_filepath, output_filepath]
@@ -79,24 +79,24 @@ for directory in os.walk(path):
                     else: 
                         print 'FAILED TEST....writing diff files'
                         summary_results[dir_entry[:-5]] = ('fail', directory[0])
-                        with open(os.path.join(path, dir_entry[:-5] + '.dif'), 'w') as output_diff:
+                        with open(os.path.join(directory[0], dir_entry[:-5] + '.dif'), 'w') as output_diff:
                             output_diff.write(diff_output.strip())
                 else:
                     print "FAIL: no .out file exists to check against"
 
 
-for directory in os.walk(path):
+for directory in os.walk(npath):
     print ('\nRunning tests in "' + directory[0] + '" folder:')
     print ('*************************************************')
     for dir_entry in os.listdir(directory[0]):
-        filepath = os.path.join(path, directory[0], dir_entry)
+        filepath = os.path.join(directory[0], dir_entry)
         if os.path.isfile(filepath) and filepath[-5:] == '.dots':
             print('\nRunning tests: ' + dir_entry)
             print('================================')
 
             comp_success = False
             try:
-                return_code = call(['./gdc', filepath, os.path.join(npath, directory[0], dir_entry[:-5] + '.exec')], 
+                return_code = call(['./gdc', filepath, os.path.join(directory[0], dir_entry[:-5] + '.exec')], 
                     timeout=30)
                 if return_code == 0:
                     print 'COMPILATION SUCCESSFUL'
@@ -109,16 +109,16 @@ for directory in os.walk(path):
                 continue;
 
             if (comp_success):
-                out_child = Popen('./' + os.path.join(npath, directory[0], dir_entry[:-5]) + '.exec', 
+                out_child = Popen('./' + os.path.join(directory[0], dir_entry[:-5]) + '.exec', 
                     shell=True, stdout=PIPE)
                 output = out_child.communicate()[0]
                 
-                output_filepath = os.path.join(npath, directory[0], dir_entry[:-5] + '.outgdc')
+                output_filepath = os.path.join(directory[0], dir_entry[:-5] + '.outgdc')
                 with open(output_filepath, 'w') as intermediate_output:
                     intermediate_output.write(output)
 
-                out_filepath = os.path.join(npath, directory[0], dir_entry[:-5] + '.out')
-                output_filepath = os.path.join(npath, directory[0], dir_entry[:-5] + '.outgdc')
+                out_filepath = os.path.join(directory[0], dir_entry[:-5] + '.out')
+                output_filepath = os.path.join(directory[0], dir_entry[:-5] + '.outgdc')
 
                 if (os.path.exists(out_filepath)):
                     diff_command = ['diff', '-bB', out_filepath, output_filepath]
@@ -131,7 +131,7 @@ for directory in os.walk(path):
                     else: 
                         print 'FAILED TEST....writing diff files'
                         summary_results_n[dir_entry[:-5]] = 'fail'
-                        with open(os.path.join(path, directory[0], dir_entry[:-5] + '.dif'), 'w') as output_diff:
+                        with open(os.path.join(directory[0], dir_entry[:-5] + '.dif'), 'w') as output_diff:
                             output_diff.write(diff_output.strip())
                 else:
                     print "FAIL: no .out file exists to check against"
@@ -166,9 +166,9 @@ if args.clean:
     file_exts = ['*.outgdc', '*.dif', '*.c', '*.exec']
     for ext in file_exts:
         for directory in os.walk(path):
-            for f in glob.glob(os.path.join(path, directory[0], ext)):
+            for f in glob.glob(directory[0], ext):
                 os.remove(f)
         for directory in os.walk(npath):
-            for f in glob.glob(os.path.join(path, directory[0], ext)):
+            for f in glob.glob(directory[0], ext):
                 os.remove(f)
 
