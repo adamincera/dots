@@ -376,9 +376,10 @@ let rec translate_stmt env = function
               | Graph -> Block([Vdecl(Ptr(Graph), index);
                                 Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))
                                ]) (* C: graph_t *g1 = init_graph(); *)
-              | Node -> Block([Vdecl(Ptr(Node), index); 
+              | Node -> (* Block([Vdecl(Ptr(Node), index); 
                                Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])))
-                              ]) (* C: node_t *x = init_node(""); *)
+                              ]) *) (* C: node_t *x = init_node(""); *)
+                        Block([Vdecl(Ptr(Node), index);])
               | List(dt) -> Vdecl(Ptr(List), index) (* C: list_t *x; *)
               | Dict(dtk, dtv) -> Vdecl(Ptr(Ptr(Entry)), index) (* TODO *)
               | Void -> raise (Failure ("should not be using Void as a datatype"))
@@ -405,12 +406,14 @@ let rec translate_stmt env = function
     | Sast.Return(e, dt) -> Nostmt                                         (*TODO*)
     | Sast.NodeDef (id, s, dt) -> 
         (match s with
-        | Noexpr ->                                                 (*TODO*)
+        | Sast.Noexpr ->                                                 (*TODO*)
           let index = "v" ^ string_of_int(find_var id env.var_inds) in
-          Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))
+          Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
+            Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
         | _ -> 
           let index = "v" ^ string_of_int(find_var id env.var_inds) in
-          Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))
+          Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
+            Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
         )          
     | Sast.While(cond, sl) -> Nostmt                                      (*TODO*)
     | Sast.If (cond, s1, s2) -> Nostmt                                    (*TODO*)
