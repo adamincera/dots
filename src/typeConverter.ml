@@ -152,57 +152,48 @@ let rec expr env = function
             )
         |  _ -> raise (Failure("Expr using - has incompatible types"))
       )
-    | Mult -> 
+    | Mult | Div ->
       (match e1_dt with
         |  Num ->
             (match e2_dt with
               | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Num)
-              | _ -> raise (Failure("wrong type: Num * ? "))
-            )
-        |  _ -> raise (Failure("Expr using * has incompatible types"))
-      )
-    | Div ->
-      (match e1_dt with
-        |  Num ->
-            (match e2_dt with
-              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Num)
-              | _ -> raise (Failure("wrong type: Num / ? "))
+              | _ -> raise (Failure("wrong type: Num * or / ? "))
             )
         |  _ -> raise (Failure("Expr using / has incompatible types"))
       )
-    | Equal ->
+    | Equal | Neq ->
       (match e1_dt with
         |  Num ->
             (match e2_dt with
               | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num == ? "))
+              | _ -> raise (Failure("wrong type: Num ==/!= ? "))
             )
         |  String -> 
             (match e2_dt with
               | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String == ? "))
+              | _ -> raise (Failure("wrong type: String ==/!= ? "))
             )
         |  Bool -> 
             (match e2_dt with
               | Bool -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Bool == ? "))
+              | _ -> raise (Failure("wrong type: Bool ==/!= ? "))
             )
         | Void -> 
             (match e2_dt with
               | Void -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Void == ? "))
+              | _ -> raise (Failure("wrong type: Void ==/!= ? "))
             )
         |  Graph -> 
             (match e2_dt with
               | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
               | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Graph == ? "))
+              | _ -> raise (Failure("wrong type: Graph ==/!= ? "))
             )
         |  Node -> 
             (match e2_dt with
               | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
               | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Node == ? "))
+              | _ -> raise (Failure("wrong type: Node ==/!= ? "))
             )
         |  List(dt) -> 
             (match e2_dt with
@@ -210,8 +201,8 @@ let rec expr env = function
                   if (e1_dt = e2_dt) then
                     Sast.Binop(s_e1,op,s_e2,Sast.Bool)
                   else 
-                    raise (Failure("wrong type: List == List<?> "))
-              | _ -> raise (Failure("wrong type: List == ? "))
+                    raise (Failure("wrong type: List ==/!= List<?> "))
+              | _ -> raise (Failure("wrong type: List ==/!= ? "))
             )
         |  Dict(dtk,dtv) -> 
             (match e2_dt with
@@ -219,138 +210,34 @@ let rec expr env = function
                   if (e1_dt = e2_dt) then
                     Sast.Binop(s_e1,op,s_e2,Sast.Bool)
                   else 
-                    raise (Failure("wrong type: Dict == Dict<?> "))
-              | _ -> raise (Failure("wrong type: Dict == ? "))
-            )
-      )
-    | Neq ->
-      (match e1_dt with
-        |  Num ->
-            (match e2_dt with
-              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num != ? "))
-            )
-        |  String -> 
-            (match e2_dt with
-              | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String != ? "))
-            )
-        |  Bool -> 
-            (match e2_dt with
-              | Bool -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Bool != ? "))
-            )
-        | Void -> 
-            (match e2_dt with
-              | Void -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Void != ? "))
-            )
-        |  Graph -> 
-            (match e2_dt with
-              | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Graph != ? "))
-            )
-        |  Node -> 
-            (match e2_dt with
-              | Node -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | Graph -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Node != ? "))
-            )
-        |  List(dt) -> 
-            (match e2_dt with
-              | List(dt) -> 
-                  if (e1_dt = e2_dt) then
-                    Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-                  else 
-                    raise (Failure("wrong type: List != List<?> "))
-              | _ -> raise (Failure("wrong type: List != ? "))
-            )
-        |  Dict(dtk,dtv) -> 
-            (match e2_dt with
-              | Dict(dtk,dtv) -> 
-                  if (e1_dt = e2_dt) then
-                    Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-                  else 
-                    raise (Failure("wrong type: Dict != Dict<?> "))
-              | _ -> raise (Failure("wrong type: Dict != ? "))
+                    raise (Failure("wrong type: Dict ==/!= Dict<?> "))
+              | _ -> raise (Failure("wrong type: Dict ==/!= ? "))
             )
       )
 
-    | Less ->
+    | Less | Leq | Greater | Geq ->
       (match e1_dt with
         |  Num ->
             (match e2_dt with
               | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num < ? "))
+              | _ -> raise (Failure("wrong type: Num </>/<=/>= ? "))
             )
         |  String -> 
             (match e2_dt with
               | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String < ? "))
+              | _ -> raise (Failure("wrong type: String </>/<=/>= ? "))
             )
-        |  _ -> raise (Failure("Expr using < has incompatible types"))
-      )
-    | Leq ->
-      (match e1_dt with
-        |  Num ->
-            (match e2_dt with
-              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num <= ? "))
-            )
-        |  String -> 
-            (match e2_dt with
-              | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String <= ? "))
-            )
-        |  _ -> raise (Failure("Expr using <= has incompatible types"))
-      )
-    | Greater ->
-      (match e1_dt with
-        |  Num ->
-            (match e2_dt with
-              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num > ? "))
-            )
-        |  String -> 
-            (match e2_dt with
-              | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String > ? "))
-            )
-        |  _ -> raise (Failure("Expr using > has incompatible types"))
+        |  _ -> raise (Failure("Expr using </>/<=/>= has incompatible types"))
       )
 
-    | Geq -> 
-      (match e1_dt with
-        |  Num ->
-            (match e2_dt with
-              | Num -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Num >= ? "))
-            )
-        |  String -> 
-            (match e2_dt with
-              | String -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: String >= ? "))
-            )
-        |  _ -> raise (Failure("Expr using >= has incompatible types")))
-
-    | LogAnd ->
+    | LogAnd | LogOr ->
       (match e1_dt with
         |  Bool ->
             (match e2_dt with
               | Bool -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Bool && ? "))
+              | _ -> raise (Failure("wrong type: Bool &&/|| ? "))
             )
-        |  _ -> raise (Failure("Expr using && has incompatible types"))
-      )
-    | LogOr -> 
-      (match e1_dt with
-        |  Bool ->
-            (match e2_dt with
-              | Bool -> Sast.Binop(s_e1,op,s_e2,Sast.Bool)
-              | _ -> raise (Failure("wrong type: Bool || ? "))
-            )
-        |  _ -> raise (Failure("Expr using || has incompatible types"))
+        |  _ -> raise (Failure("Expr using &&/|| has incompatible types"))
       )
   )
 | Ast.Call(f, el) ->

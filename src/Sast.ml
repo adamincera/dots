@@ -33,10 +33,8 @@ type s_stmt =
     Block of s_stmt list
   | Expr of s_expr
   | Vdecl of dataType * string
-  | NodeDef of string * s_expr * dataType (* (node id, type, item id) *)
+  | NodeDef of string * s_expr * dataType (* (node id, item id, datatype) *)
   | Assign of string * s_expr * dataType                     (* x = 5; *)
-   (* | AssignList of string * s_expr list           when a list of expressions is assigned to a variable 
-  | DictAssign of string * (s_expr * s_expr) list                (variable name, list of tuples of key value pairs) *)
   | Return of s_expr * dataType                         (* return x (dataType) *)
   | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
   | For of string * string * s_stmt list       (* temp var, iterable var, var decls, stmts *)
@@ -53,6 +51,8 @@ type s_stmt =
 
 (* program: ist of vars, function defs, commands not within a function
 s_funcs : s_fdecl list;
+   (* | AssignList of string * s_expr list           when a list of expressions is assigned to a variable 
+  | DictAssign of string * (s_expr * s_expr) list                (variable name, list of tuples of key value pairs) *)
                 s_cmds : s_stmt list
  *)
 type program = { s_cmds : s_stmt list } 
