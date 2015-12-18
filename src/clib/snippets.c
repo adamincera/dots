@@ -208,3 +208,9 @@ list_t *l2 = <type>_list_copy(l1);
 
 /* list l3 = l1 + l2 */
 list_t *l3 = <type>_list_concat(l1, l2);
+
+/* data = list.peek() */
+<type> *data = (<type> *) peek(list);
+
+/* data = list.pop() */
+<type> *data = (<type> *) pop(list);
