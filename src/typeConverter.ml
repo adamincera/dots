@@ -491,7 +491,7 @@ let rec stmt env = function
         raise (Failure ("variable already declared in local scope: " ^ id))
      with | Not_found -> (List.hd env.var_types) := StringMap.add id vtype !(List.hd env.var_types); (* add type map *)
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
-          | Failure(f) -> raise (Failure (f) ) 
+          | Failure(f) -> raise (Failure (f))
     );
     Sast.Vdecl(vtype, id)
 | Ast.DictDecl(dtk, dtv, id) -> (*Sast.DictDecl(str_to_type dtk, str_to_type dtv, v)*)
