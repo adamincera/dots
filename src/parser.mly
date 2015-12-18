@@ -213,8 +213,8 @@ expr:
   | INF              { NumLiteral("INF") }
   | TRUE             { Boolean(True) }
   | FALSE            { Boolean(False) }
-  | expr LBRACKET expr RBRACKET { Access($1, $3) }
   | ID               { Id($1) }
+  | LPAREN expr RPAREN { $2 }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -227,6 +227,7 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr LOGAND expr { Binop($1, LogAnd, $3) }
   | expr LOGOR expr  { Binop($1, LogOr, $3) }
+  | expr LBRACKET expr RBRACKET { Access($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | expr DOT ID %prec NOCALL { MemberVar($1, $3) }
   | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
