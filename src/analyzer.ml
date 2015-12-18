@@ -447,7 +447,7 @@ let rec translate_stmt env = function
               | String -> Vdecl(Cstring, index)
               | Bool -> Vdecl(Int, index)
               | Graph -> Block([Vdecl(Ptr(Graph), index);
-                                Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))
+                               (*  Expr(Assign(Id(Graph, index), Call(Void, "init_graph", []))) *)
                                ]) (* C: graph_t *g1 = init_graph(); *)
               | Node -> (* Block([Vdecl(Ptr(Node), index); 
                                Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])))
@@ -479,16 +479,19 @@ let rec translate_stmt env = function
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         (match s with
-        | Sast.Noexpr ->                                                 
-          let index = "v" ^ string_of_int(find_var id env.var_inds) in
-          Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
-            Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
-        | _ -> 
-          let index = "v" ^ string_of_int(find_var id env.var_inds) in
-          Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
-            Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
+          | Sast.Noexpr ->                                                 
+            let index = "v" ^ string_of_int(find_var id env.var_inds) in
+            Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
+              Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
+          | _ -> 
+            let index = "v" ^ string_of_int(find_var id env.var_inds) in
+            Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
+              Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
         )     
-    | Sast.GraphDef(v, el) -> Nostmt   
+    | Sast.GraphDef(id, sl) ->
+        let index = "v" ^ string_of_int(find_var id env.var_inds) in
+        let graph_shit = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in
+        Block(graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl)  
     | Sast.While (cond, sl) -> 
         let c_cond = translate_expr env cond in
         let csl = List.map (translate_stmt env) sl in
