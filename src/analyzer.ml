@@ -45,6 +45,10 @@ let rec stmt_sifter sifted = function
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
+               | Sast.GraphDef(id, el) -> 
+                   stmt_sifter {s_globals = sifted.s_globals; 
+                   s_main = hd :: sifted.s_main; 
+                   s_funcs = sifted.s_funcs} tl               
                | Sast.Return(e, dt) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
@@ -433,7 +437,8 @@ let rec translate_stmt env = function
           let index = "v" ^ string_of_int(find_var id env.var_inds) in
           Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
             Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
-        )          
+        )     
+    | Sast.GraphDef(v, el) -> Noexpr    
     | Sast.While (cond, sl) -> 
         let c_cond = translate_expr env cond in
         let csl = List.map (translate_stmt env) sl in
