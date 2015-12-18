@@ -36,6 +36,9 @@ int main() {
     printf("string_copy = ");
     print_strings(string_copy);
     printf("\n");
+
+    printf("l[0] = %s, l[1] = %s\n", list_access(l, 0), list_access(l, 1));
+
     free_list(l);
 
     entry_t **d = init_dict();
