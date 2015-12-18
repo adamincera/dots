@@ -297,9 +297,11 @@ let rec expr env = function
        ignore (formal_check fdecl.s_formals s_el);
        let rtype = fdecl.s_rtype in
        Sast.Call(f, s_el , rtype) (* TODO: figure out the return type and use that *)
-| Ast.Access(v, e) -> 
-    let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-    let e_dt = get_expr_type s_e in
+| Ast.Access(e1, e2) -> 
+    let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e1_dt = get_expr_type s_e1 in
+    let s_e2 = expr env e2 in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e2_dt = get_expr_type s_e2 in
     (try                                (*sees if variable defined*)
         let v_e = find_var v env.var_types in
          (match v_e with 

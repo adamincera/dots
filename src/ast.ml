@@ -13,10 +13,10 @@ type expr =
   | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
-  | Call of string * expr list
-  | Access of string * expr (* for dict and list element access *)
-  | MemberVar of string * string (* parent variable, the accessed member *)
-  | MemberCall of string * string * expr list (* parent variable, accessed funct, parameters *)
+  | Call of string * expr list 
+  | Access of expr * expr (* for dict and list element access, node.in[node2] *)
+  | MemberVar of expr * string (* expr that evaluates to parent variable, the accessed member *)
+  | MemberCall of expr * string * expr list (* expr that evaluates to parent variable, accessed funct, parameters *)
   | Undir of string * string (* id, id *)
   | Dir of string * string (* id, id *)
   | UndirVal of string * string * expr (* id, id, weight *)
