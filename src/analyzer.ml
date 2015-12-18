@@ -45,6 +45,10 @@ let rec stmt_sifter sifted = function
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
+               | Sast.AccessAssign(se1, se2, dt) -> 
+                   stmt_sifter {s_globals = sifted.s_globals; 
+                   s_main = hd :: sifted.s_main; 
+                   s_funcs = sifted.s_funcs} tl                
                | Sast.GraphDef(id, el) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
@@ -104,11 +108,6 @@ let rec enum stride n = function
   (* takes list of tuples (value, key) and adds them to the given map *)
 let string_map_pairs map pairs =
     List.fold_left (fun m (i, n) -> StringMap.add n i m) map pairs
-
-    (* 
-    for use with maps where the value is an int 
-    finds the max int value in the map
-    *)
 
 let find_max_index map = 
     let bindings = StringMap.bindings map in
@@ -233,6 +232,55 @@ let create_auto env key dt =
       ind
 in
 
+    (* 
+    for use with maps where the value is an int 
+    finds the max int value in the map
+    *)
+let string_of_stmt c_v = 
+  let cdt1 = Translate.get_expr_type c_v in
+  let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.String)) in
+  (match cdt1 with
+      | Int ->
+          (auto_var, Block([
+              Vdecl(Cstring, auto_var);
+              Assign(Id(Cstring, auto_var), 
+                     Call(Ptr(Void), 
+                          "malloc", 
+                         [Binop(Int, 
+                                Call(Int, "sizeof", [Id(Void, "char")]), 
+                                Mult,
+                                Literal(Int, "256"))
+                         ] )
+                    );
+              Call(Void,
+                   "itoa",
+                   [c_v;
+                    Id(Cstring, auto_var);
+                    Literal(Int,"10")
+                   ])
+          ]))
+      | Float -> 
+          (auto_var, Block([
+                     Call(Void, 
+                          "sprintf",
+                          [Id(Void, "string");
+                            Literal(Cstring,"%d.%02u");
+                            Cast(Int, c_v);
+                            Cast(Int, 
+                                (Binop(Float,
+                                      (Binop(Float, c_v, Sub, Cast(Int, c_v))),
+                                      Mult,
+                                      Literal(Int, "100"))
+                                ))
+                          ])
+                    ]))
+      | _ -> raise (Failure ("cannot convert type to cstring")))
+in
+                  
+(* char *snum = malloc(sizeof(char) * 256); 
+    sprintf (string,"%d.%02u", (int) number, (int) ((number - (int) number ) * precision) );
+*)
+
 let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
@@ -253,7 +301,13 @@ let rec translate_expr env = function
               |  Float ->
                   (match cdt2 with
                     | Float -> Translate.Binop(Float, ce1, op, ce2)
-                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | Cstring -> 
+                        let float_convert = string_of_stmt ce1 in 
+                        Block(
+                        [(snd float_convert) ;
+                         translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e2, String))
+                        ] 
+                        )
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Cstring -> 
@@ -426,6 +480,7 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
+    | Sast.AccessAssign(e1, e2, dt) -> Nostmt
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         (match s with

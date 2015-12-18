@@ -45,6 +45,7 @@ type stmt =
   | ListDecl of  string * string (* elem_type, id *)
   | DictDecl of string * string * string (* key_type, elem_type, id *)
   | Assign of string * expr
+  | AccessAssign of expr * expr (* a[5] = 10 where first expr is an access expr *)
   | NodeDef of string * expr (* (node id, what goes inside parens) of item *)
 (*   | AssignList of string * expr  *)(* when a list of expressions is assigned to a variable *)
   | GraphDef of string * expr list (* id EdgeOp list - in form of undir dir - *)
@@ -127,6 +128,7 @@ let rec string_of_stmt = function
   | ListDecl(dt, id) -> "list <" ^ dt ^ "> " ^ id ^ ";\n"
   | DictDecl(kdt, vdt, id) -> "dict <" ^ kdt ^ ", " ^ vdt ^ "> " ^ id ^ ";\n"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e ^ ";"
+  | AccessAssign(e1, e2) -> string_of_expr e1 ^ "=" ^ string_of_expr e2 ^ ";\n"
   | NodeDef(v, e) -> v ^ "(" ^ string_of_expr e ^ ")" (* (node id, what goes inside parens) of item *)
   | GraphDef(v, el) -> v ^ " = { " ^ String.concat "," (List.map string_of_expr el) ^ "};"
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
