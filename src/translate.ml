@@ -29,21 +29,21 @@ type cexpr =
 
 type cstmt =
 | Literal of ctype * string
-| Id of ctype * string                   (* ids are ints ex. Id(2) -> v2 *)
+| Id of ctype * string                           (* ids are ints ex. Id(2) -> v2 *)
 | Binop of ctype * cstmt * Ast.op * cstmt
-| Assign of cstmt * cstmt               (* ex. Assign(2, 5) -> v2 = 5 *)
+| Assign of cstmt * cstmt                        (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cstmt list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
 | Access of ctype * string * cstmt               (* array access: id[cexpr] *)
-| Member of ctype * string * string (* id, member *)
-| Cast of ctype * cstmt               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
-| Deref of cstmt (* ex. *var *)
-| Ref of cstmt (* ex. &var *)
+| Member of ctype * string * string              (* id, member *)
+| Cast of ctype * cstmt                          (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
+| Deref of cstmt                                 (* ex. *var *)
+| Ref of cstmt                                   (* ex. &var *)
 | Block of cstmt list
 | Expr of cstmt
-| Vdecl of  ctype * string (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
+| Vdecl of  ctype * string                       (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
 | Return of cstmt
 | If of cstmt * cstmt list * cstmt list
-| For of cstmt * cstmt * cstmt * cstmt list (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
+| For of cstmt * cstmt * cstmt * cstmt list      (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
 | While of cstmt * cstmt list
 | Nostmt
 
@@ -213,7 +213,11 @@ let rec translate_stmt = function
    )
 
 | Id(dt, id) -> id
-| Binop(dt, e1, op, e2) -> translate_stmt e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_stmt e2
+| Binop(dt, e1, op, e2) -> 
+    (* check if either e1 is a string or e2 is a string: 
+      different operation: concatenation 
+    *)
+  translate_stmt e1  ^ " " ^ op_to_str(op) ^ " " ^ translate_stmt e2
 | Assign(target, e) -> (translate_stmt target) ^ " = " ^  translate_stmt e
 | Call(dt, id, el) -> 
     (match id with

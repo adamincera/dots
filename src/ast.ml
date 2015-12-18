@@ -113,9 +113,9 @@ let rec string_of_expr = function
   | NoOp (s) -> s
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-  | Access (s, e1) -> s ^ "[" ^ string_of_expr e1 ^ "]"
-  | MemberVar (s1, s2) -> s1 ^ "." ^ s2
-  | MemberCall (s1, s2, el) -> s1 ^ "." ^ s2 ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | Access (e, e1) -> string_of_expr e ^ "[" ^ string_of_expr e1 ^ "]"
+  | MemberVar (e1, s2) -> string_of_expr e1 ^ "." ^ s2
+  | MemberCall (e1, s2, el) -> string_of_expr e1 ^ "." ^ s2 ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
 
 let rec string_of_stmt = function

@@ -249,13 +249,13 @@ let rec translate_expr env = function
               |  Float ->
                   (match cdt2 with
                     | Float -> Translate.Binop(Float, ce1, op, ce2)
-                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*)
+                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Cstring -> 
                   (match cdt2 with
                     | Float -> Translate.Binop(cdt1, ce1, op, ce2) (* string concat *)
-                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
+                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*) 
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Graph -> 
@@ -346,10 +346,10 @@ let rec translate_expr env = function
                 Call(dt_to_ct dt, index, cel)
         )
             
-    | Sast.Access(v, e, dt) -> 
-            let index = "v" ^ string_of_int(find_var v env.var_inds) in
+    | Sast.Access(v, e, dt) -> Nostmt
+        (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
-            Access(dt_to_ct dt, index, ce)
+            Access(dt_to_ct dt, index, ce) *)
     | Sast.MemberVar(v, m, dt) -> Nostmt (* TODO *)
     | Sast.MemberCall(v, f, el, dt) -> Nostmt (* TODO *)
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
@@ -403,10 +403,10 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.Return(e, dt) -> Nostmt                                         (*TODO*)
+    | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         (match s with
-        | Sast.Noexpr ->                                                 (*TODO*)
+        | Sast.Noexpr ->                                                 
           let index = "v" ^ string_of_int(find_var id env.var_inds) in
           Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
             Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
@@ -415,8 +415,15 @@ let rec translate_stmt env = function
           Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
             Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
         )          
-    | Sast.While(cond, sl) -> Nostmt                                      (*TODO*)
-    | Sast.If (cond, s1, s2) -> Nostmt                                    (*TODO*)
+    | Sast.While (cond, sl) -> 
+        let c_cond = translate_expr env cond in
+        let csl = List.map (translate_stmt env) sl in
+        While(c_cond, csl)                                    
+    | Sast.If (cond, s1, s2) ->
+        let c_cond = translate_expr env cond in 
+        let c_s1 =  translate_stmt env s1 in
+        let c_s2 =  translate_stmt env s2 in 
+        If (c_cond, [c_s1], [c_s2])
     | Sast.For (temp, iter, sl) ->
             let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
             let index = "v" ^ string_of_int (find_var iter env.var_inds) in
@@ -460,11 +467,8 @@ let rec translate_stmt env = function
                              ])
             | _ -> raise (Failure(iter ^ " is not iterable"))
             )
-            | Sast.While (cond, sl) -> 
-                    let c_cond = translate_expr env cond in
-                    let csl = List.map (translate_stmt env) sl in
-                    While(c_cond, csl)
-            | Sast.Fdecl (func) -> Nostmt
+
+    | Sast.Fdecl (func) -> Nostmt
                     
                     (* ***** TODO *********)
                     (*
