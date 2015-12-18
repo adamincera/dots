@@ -522,11 +522,24 @@ let rec stmt env = function
     Sast.Vdecl(vtype, id)
 (*| _ -> failwith "Unknown") *)
 | Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
-      let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-      let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
-      if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
-      then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-      else Sast.Assign(v, s_e, e_dt)
+    let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
+    if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
+    then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
+    else Sast.Assign(v, s_e, Sast.Void)
+| Ast.AccessAssign(e1, e2) -> 
+    let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let s_e2 = expr env e2 in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e2_dt = get_expr_type s_e2 in
+    ( match s_e1 with 
+      | Sast.Access(v, s_e, dt) -> (* this should be checked already*) 
+          if (dt = e2_dt) then 
+            Sast.AccessAssign(s_e1, s_e2, Sast.Void) 
+          else
+            raise(Failure("AccessAssign: trying to set list/dict element to non-matching type."))
+      | _ -> raise(Failure ("AccessAssign's first arg isn't an access expr"))
+    )
+
 | Ast.NodeDef(v, e) -> (* (node id, what goes inside parens) of item *)
     (try 
       let v_e = (find_var v env.var_types) in 

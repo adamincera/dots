@@ -36,6 +36,7 @@ type s_stmt =
   | NodeDef of string * s_expr * dataType (* (node id, item id, datatype) *)
   | GraphDef of string * s_expr list
   | Assign of string * s_expr * dataType                     (* x = 5; *)
+  | AccessAssign of s_expr * s_expr * dataType (* a[5] = 10  where first thing is an access expr *)
   | Return of s_expr * dataType                         (* return x (dataType) *)
   | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
   | For of string * string * s_stmt list       (* temp var, iterable var, var decls, stmts *)

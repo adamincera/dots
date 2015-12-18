@@ -373,6 +373,7 @@ let rec translate_expr env = function
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
             Access(dt_to_ct dt, index, ce) *)
+    | Sast.AccessAssign(e1, e2, dt) -> Nostmt
     | Sast.MemberVar(v, m, dt) -> Nostmt (* TODO *)
     | Sast.MemberCall(v, f, el, dt) -> Nostmt (* TODO *)
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
