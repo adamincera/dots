@@ -36,9 +36,25 @@ let rec check_list env v_e = function
        raise (Failure ("list element not of type: " ^ type_to_str ( v_e )) )
     else 
       check_list env v_e tl
-
+let rec check_graph_list env = function
+ | [] -> ""
+ | hd::tl -> 
+      (match hd with 
+        | Sast.Id(v, dt) ->  
+          let e_dt = get_expr_type hd in
+          (if not (e_dt = Sast.Node || e_dt = Sast.Graph) then
+            raise (Failure ("you can not have a graph def with type other than Node or Graph")) 
+          else 
+            check_graph_list env tl)
+        | Sast.Undir(v1,v2,dt) | Sast.Dir(v1,v2,dt) -> 
+            check_graph_list env tl 
+        | Sast.UndirVal(v1,v2,e1,dt) | Sast.DirVal(v1,v2,e1,dt) -> 
+           check_graph_list env tl 
+        | Sast.BidirVal(e1,v1,v2,e2,dt) ->
+            check_graph_list env tl 
+        | _ -> raise (Failure ("type not expected in Graph Def")))
 (* v_e = (k_dt, v_dt) *)
- let rec check_dict env v_e = function
+let rec check_dict env v_e = function
  | [] -> ""
  | hd::tl -> 
     if not((fst v_e = get_expr_type (fst hd)) && (snd v_e = get_expr_type (snd hd))) then
@@ -521,6 +537,15 @@ let rec stmt env = function
       else raise (Failure ("Node Def failure"))
     with 
       | Not_found -> raise (Failure("Node Def failure")))
+|  Ast.GraphDef(v, el) ->
+    (try
+      let v_e = (find_var v env.var_types) in
+      let s_el = List.map (expr env) el in
+      ignore(check_graph_list env s_el);
+      Sast.GraphDef(v, s_el)
+    with 
+     Not_found -> raise (Failure ("GraphDef issue")))
+
 (* | Ast.AssignList(v, el) -> 
       (*insert a recursive function*) 
       (try                                (*sees if variable defined*)

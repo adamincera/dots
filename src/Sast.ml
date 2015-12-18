@@ -34,6 +34,7 @@ type s_stmt =
   | Expr of s_expr
   | Vdecl of dataType * string
   | NodeDef of string * s_expr * dataType (* (node id, item id, datatype) *)
+  | GraphDef of string * s_expr list
   | Assign of string * s_expr * dataType                     (* x = 5; *)
   | Return of s_expr * dataType                         (* return x (dataType) *)
   | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
