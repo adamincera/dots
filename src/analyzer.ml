@@ -438,7 +438,8 @@ let rec translate_stmt env = function
             Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
               Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
         )     
-    | Sast.GraphDef(v, sl) ->
+    | Sast.GraphDef(id, sl) ->
+        let index = "v" ^ string_of_int(find_var id env.var_inds) in
         let graph_shit = Block([Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))]) in
         graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl 
     | Sast.While (cond, sl) -> 
