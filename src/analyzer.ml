@@ -345,7 +345,7 @@ let rec translate_expr env = function
                                For(Assign(Id(elem_type, auto_var), translate_expr env hd),
                                    Id(Ptr(List(elem_type)), auto_var),
                                    Assign(Id(elem_type, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
-                                   [Call(Void, "f1", [Deref(elem_type, Id(List(elem_type), auto_var))])]
+                                   [Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))])]
                                );
                                Vdecl(Ptr(List(dt_to_ct dt)), auto_var)
                               ]
