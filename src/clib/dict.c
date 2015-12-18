@@ -16,7 +16,7 @@ int float_equals(float a, float b) {
 }
 
 static int hash_string(char *key) {
-    int h = 0;
+    unsigned int h = 0;
     int i = 0;
     while(key[i])
         h += key[i++];
@@ -25,21 +25,21 @@ static int hash_string(char *key) {
 }
 
 static int hash_num(float key) {
-    return (int) key % TABLE_SIZE;
+    return (unsigned int) key % TABLE_SIZE;
 }
 
 static int hash_graph(graph_t *g) {
     int ret = 0;
     nodelist_t *temp;
     for(temp = g->nodes; temp; temp = temp->next) {
-        ret += ((int) temp->node >> 3);
+        ret += ((unsigned int) temp->node >> 3);
     }
     ret %= TABLE_SIZE;
     return ret;
 }
 
 static int hash_other(void *key) {
-    return ((int) key) % TABLE_SIZE;
+    return ((unsigned int) key) % TABLE_SIZE;
 }
 
 void *get_string(entry_t **table, char *key) {
@@ -66,8 +66,21 @@ void *get_num(entry_t **table, float key) {
     return 0;
 }
 
-//void *get_graph(entry_t **table, graph_t *g) {
+void *get_graph(entry_t **table, graph_t *key) {
+    int k = hash_graph(key);
+    entry_t *temp = table[k];
+    while(temp) {
+        if(graph_equals((graph_t *) temp->key, key)) {
+            return temp->value;
+        }
+        temp = temp->next;
+    }
+    return 0;
+}
 
+void *get_node(entry_t **table, node_t *n) {
+    return get_other(table, (void *) n);
+}
 
 void *get_other(entry_t **table, void *key) {
     int k = hash_other(key);
@@ -139,6 +152,36 @@ void put_num(entry_t **table, float key, void *value) {
     }
 }
 
+void put_graph(entry_t **table, graph_t *key, void *value) {
+    int k = hash_graph(key);
+    entry_t *temp = table[k];
+    if(!temp) {
+    printf("here. temp = %o = table[%d]\n", temp, k);
+        table[k] = (entry_t *) malloc(sizeof(entry_t));
+        table[k]->next = NULL;
+        table[k]->value = value;
+        table[k]->key = graph_copy(key);
+    } else {
+    printf("here. temp = %o = table[%d]\n", temp, k);
+        while(temp->next) {
+            if(graph_equals((graph_t *) temp->key, key)) {
+                temp->value = value;
+                return;
+            }
+            temp = temp->next;
+        }
+        if(graph_equals((graph_t *) temp->key, key)) {
+            temp->value = value;
+            return;
+        }
+        temp->next = (entry_t *) malloc(sizeof(entry_t));
+        temp = temp->next;
+        temp->key = graph_copy(key);
+        temp->value = value;
+        temp->next = NULL;
+    }
+}
+
 void put_other(entry_t **table, void *key, void *value) {
     int k = hash_other(key);
     entry_t *temp = table[k];
@@ -167,4 +210,13 @@ void put_other(entry_t **table, void *key, void *value) {
     }
 }
 
-//void dict_remove(entry_t *table
+void dict_remove(entry_t *table, entry_t *target) {
+    while(table) {
+        if(table->next == target) {
+            table->next = target->next;
+            free(target);
+            return;
+        }
+        table = table->next;
+    }
+}

@@ -1,5 +1,5 @@
 #include "graph.h"
-#define TABLE_SIZE 1024
+#define TABLE_SIZE 256
 
 struct entry {
     void *key;
@@ -32,3 +32,5 @@ int float_equals(float a, float b);
 //void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b));
 
 void dict_remove(entry_t *table, entry_t *target);
+
+entry_t **dict_copy(entry_t **table);
