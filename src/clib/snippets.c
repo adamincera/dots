@@ -1,6 +1,8 @@
 /* for node in graph */
+nodelist_t *temp;
 node_t *node;
-for(node = graph->nodes; node; node = node->next) {
+for(temp = graph->nodes; temp; temp = temp->next) {
+    node = temp->node;
     /* loop body */
 }
 
