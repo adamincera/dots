@@ -9,7 +9,7 @@ type expr =
     NumLiteral of string
   | StrLiteral of string
   | ListLiteral of expr list (* ex. [1, 3, 42.33] *)
-  | DictLiteral of (expr * expr) list (* ex. [(key, value)] *)
+  | DictLiteral of (expr * expr) list (* ex. [(key, value)] *) 
   | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
@@ -47,6 +47,7 @@ type stmt =
   | Assign of string * expr
   | NodeDef of string * expr (* (node id, what goes inside parens) of item *)
 (*   | AssignList of string * expr  *)(* when a list of expressions is assigned to a variable *)
+  | GraphDef of string * expr list (* id EdgeOp list - in form of undir dir - *)
   | Return of expr
   | If of expr * stmt * stmt
   | For of string * string * stmt list (* temp var, iterable var, var decls, stmts *)
@@ -127,6 +128,7 @@ let rec string_of_stmt = function
   | DictDecl(kdt, vdt, id) -> "dict <" ^ kdt ^ ", " ^ vdt ^ "> " ^ id ^ ";\n"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e ^ ";"
   | NodeDef(v, e) -> v ^ "(" ^ string_of_expr e ^ ")" (* (node id, what goes inside parens) of item *)
+  | GraphDef(v, el) -> v ^ " = { " ^ String.concat "," (List.map string_of_expr el) ^ "};"
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
