@@ -128,6 +128,7 @@ let rec string_of_stmt = function
   | ListDecl(dt, id) -> "list <" ^ dt ^ "> " ^ id ^ ";\n"
   | DictDecl(kdt, vdt, id) -> "dict <" ^ kdt ^ ", " ^ vdt ^ "> " ^ id ^ ";\n"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e ^ ";"
+  | AccessAssign(e1, e2) -> string_of_expr e1 ^ "=" ^ string_of_expr e2 ^ ";\n"
   | NodeDef(v, e) -> v ^ "(" ^ string_of_expr e ^ ")" (* (node id, what goes inside parens) of item *)
   | GraphDef(v, el) -> v ^ " = { " ^ String.concat "," (List.map string_of_expr el) ^ "};"
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
