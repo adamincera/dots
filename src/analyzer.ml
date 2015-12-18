@@ -86,7 +86,7 @@ type translation_env = {
             return_type : Sast.dataType;                       (* what should the return type be of the current scope *)
     }
 
-let mappings = [("in", Sast.Node); ("out", Sast.Node); ("value", Sast.Node); ("nodes", Sast.Graph)] 
+let mappings = [("ine", Sast.Node); ("oute", Sast.Node); ("value", Sast.Node); ("nodes", Sast.Graph)] 
 let mem_vars =  List.fold_left (fun m (k, v) -> StringMap.add k v m) StringMap.empty mappings
 
 (* val enum : int -> 'a list -> (int * 'a) list *)
