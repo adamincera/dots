@@ -26,7 +26,7 @@ node_t *x = init_node(string);
 graph_t *g1 = init_graph();
 
 /* graph g2 = g1; */
-graph_t *g2 = copy(g1);
+graph_t *g2 = graph_copy(g1);
 
 /* graph g3 = {
        x
@@ -196,3 +196,21 @@ for(i = 0; i < TABLE_SIZE; i++) {
         }
     }
 }
+
+/* list.enqueue(data) */
+<type>_add_back(list, data);
+
+/* list.push(data) */
+<type>_add_front(list, data);
+
+/* list l2 = l1 */
+list_t *l2 = <type>_list_copy(l1);
+
+/* list l3 = l1 + l2 */
+list_t *l3 = <type>_list_concat(l1, l2);
+
+/* data = list.peek() */
+<type> *data = (<type> *) peek(list);
+
+/* data = list.pop() */
+<type> *data = (<type> *) pop(list);
