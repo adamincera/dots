@@ -207,32 +207,35 @@ alt_stmt:
 assign_expr:
   | ID ASSIGN expr   { Assign($1, $3) }
 */
-
-expr:
-  | literal          { $1 }
-  | INF              { NumLiteral("INF") }
-  | TRUE             { Boolean(True) }
-  | FALSE            { Boolean(False) }
-  | ID               { Id($1) }
-  | LPAREN expr RPAREN { $2 }
-  | expr PLUS   expr { Binop($1, Add,   $3) }
-  | expr MINUS  expr { Binop($1, Sub,   $3) }
-  | expr TIMES  expr { Binop($1, Mult,  $3) }
-  | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr EQ     expr { Binop($1, Equal, $3) }
-  | expr NEQ    expr { Binop($1, Neq,   $3) }
-  | expr LT     expr { Binop($1, Less,  $3) }
-  | expr LEQ    expr { Binop($1, Leq,   $3) }
-  | expr GT     expr { Binop($1, Greater,  $3) }
-  | expr GEQ    expr { Binop($1, Geq,   $3) }
-  | expr LOGAND expr { Binop($1, LogAnd, $3) }
-  | expr LOGOR expr  { Binop($1, LogOr, $3) }
-  | expr LBRACKET expr RBRACKET { Access($1, $3) }
+expr: 
+   expr LBRACKET expr RBRACKET { Access($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | expr DOT ID %prec NOCALL { MemberVar($1, $3) }
   | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
+  | term               { $1 }
 
+term : 
+   term PLUS   atom { Binop($1, Add,   $3) }
+  | term MINUS  atom { Binop($1, Sub,   $3) }
+  | term TIMES  atom { Binop($1, Mult,  $3) }
+  | term DIVIDE atom { Binop($1, Div,   $3) }
+  | term EQ     atom { Binop($1, Equal, $3) }
+  | term NEQ    atom { Binop($1, Neq,   $3) }
+  | term LT     atom { Binop($1, Less,  $3) }
+  | term LEQ    atom { Binop($1, Leq,   $3) }
+  | term GT     atom { Binop($1, Greater,  $3) }
+  | term GEQ    atom { Binop($1, Geq,   $3) }
+  | term LOGAND atom { Binop($1, LogAnd, $3) }
+  | term LOGOR atom  { Binop($1, LogOr, $3) }
+  | atom             { $1 }
+
+atom:
+  literal          { $1 }
+  | INF              { NumLiteral("INF") }
+  | TRUE             { Boolean(True) }
+  | FALSE            { Boolean(False) }
+  | ID               { Id($1) }
 /*
 expr_opt:
     * nothing * { Noexpr }
