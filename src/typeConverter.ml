@@ -36,9 +36,25 @@ let rec check_list env v_e = function
        raise (Failure ("list element not of type: " ^ type_to_str ( v_e )) )
     else 
       check_list env v_e tl
-
+let rec check_graph_list env = function
+ | [] -> ""
+ | hd::tl -> 
+      (match hd with 
+        | Sast.Id(v, dt) ->  
+          let e_dt = get_expr_type hd in
+          (if not (e_dt = Sast.Node || e_dt = Sast.Graph) then
+            raise (Failure ("you can not have a graph def with type other than Node or Graph")) 
+          else 
+            check_graph_list env tl)
+        | Sast.Undir(v1,v2,dt) | Sast.Dir(v1,v2,dt) -> 
+            check_graph_list env tl 
+        | Sast.UndirVal(v1,v2,e1,dt) | Sast.DirVal(v1,v2,e1,dt) -> 
+           check_graph_list env tl 
+        | Sast.BidirVal(e1,v1,v2,e2,dt) ->
+            check_graph_list env tl 
+        | _ -> raise (Failure ("type not expected in Graph Def")))
 (* v_e = (k_dt, v_dt) *)
- let rec check_dict env v_e = function
+let rec check_dict env v_e = function
  | [] -> ""
  | hd::tl -> 
     if not((fst v_e = get_expr_type (fst hd)) && (snd v_e = get_expr_type (snd hd))) then
@@ -297,20 +313,21 @@ let rec expr env = function
        ignore (formal_check fdecl.s_formals s_el);
        let rtype = fdecl.s_rtype in
        Sast.Call(f, s_el , rtype) (* TODO: figure out the return type and use that *)
-| Ast.Access(v, e) -> 
-    let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-    let e_dt = get_expr_type s_e in
+| Ast.Access(e1, e2) -> 
+    let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e1_dt = get_expr_type s_e1 in
+    let s_e2 = expr env e2 in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e2_dt = get_expr_type s_e2 in
     (try                                (*sees if variable defined*)
-        let v_e = find_var v env.var_types in
-         (match v_e with 
+         (match e1_dt with 
            List(dt) -> 
-              (match e_dt with 
-                 | Sast.Num -> Sast.Access(v, s_e, dt)
+              (match e2_dt with 
+                 | Sast.Num -> Sast.Access(s_e1, s_e2, dt)
                  | _ -> raise (Failure "expr to access list should be Num") 
               )
           | Dict(dk,dv) ->  
-            if (e_dt = dk) then
-                Sast.Access(v, s_e, dv)
+            if (e2_dt = dk) then
+                Sast.Access(s_e1, s_e2, dv)
             else 
                 raise (Failure("wrong type: Dict != Dict<?> "))
           | _ -> raise (Failure("must use Dict or List with access!"))
@@ -318,18 +335,19 @@ let rec expr env = function
      with
      | Not_found -> raise (Failure("undeclared variable: "))
     );                                  
-| Ast.MemberVar(v, m) -> 
+| Ast.MemberVar(e, m) -> 
     (try                                (*sees if variable defined*)
-        let v_e = find_var v env.var_types in
-         (match v_e with
+        let s_e1 = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
+        let e1_dt = get_expr_type s_e1 in
+         (match e1_dt with
           | Sast.Node -> 
               (try 
                 let mem_r_type = StringMap.find m mem_vars in
                 if (mem_r_type = Sast.Node) then
                   (match m with
-                    | "in" -> Sast.MemberVar(v,m, Sast.List(Sast.Node))
-                    | "out" -> Sast.MemberVar(v,m, Sast.List(Sast.Node))
-                    | "values" -> Sast.MemberVar(v,m, (Sast.String))
+                    | "in" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
+                    | "out" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
+                    | "values" -> Sast.MemberVar(s_e1,m, (Sast.String))
                     | _ -> raise (Failure("undeclared variable: "))
                   )
                 else 
@@ -342,7 +360,7 @@ let rec expr env = function
               let mem_r_type = StringMap.find m mem_vars in
               if (mem_r_type = Sast.Graph) then 
                 (match m with
-                  | "nodes" -> Sast.MemberVar(v, m, Sast.List(Sast.Node)) 
+                  | "nodes" -> Sast.MemberVar(s_e1, m, Sast.List(Sast.Node)) 
                   | _ -> raise (Failure("undeclared variable: "))
                 )
               else 
@@ -355,21 +373,22 @@ let rec expr env = function
      with
      | Not_found -> raise (Failure("undeclared variable: "))
     );     
-| Ast.MemberCall(v, m, el) -> 
+| Ast.MemberCall(e, m, el) -> 
     (try 
-          let v_e = find_var v env.var_types in
+          let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
+          let e1_dt = get_expr_type s_e in
           let len = List.length el in
           if (len = 1) then
               let s_el = List.map (expr env) el in 
               let data_type = get_expr_type (List.hd s_el) in
               let mem_r_type = StringMap.find m mem_vars in
-              (match v_e with
+              (match e1_dt with
                   | Sast.List(dt) ->  
                           if (mem_r_type = data_type) then
                             (match m with
-                              | "enqueue" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
-                              | "dequeue" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
-                              | "remove" -> Sast.MemberCall(v, m, s_el, Sast.List(data_type))
+                              | "enqueue" -> Sast.MemberCall(s_e, m, s_el, Sast.List(data_type))
+                              | "dequeue" -> Sast.MemberCall(s_e, m, s_el, Sast.List(data_type))
+                              | "remove" -> Sast.MemberCall(s_e, m, s_el, Sast.List(data_type))
                               | _ -> raise (Failure("undeclared variable: "))
                             )
                            else 
@@ -378,7 +397,7 @@ let rec expr env = function
                       let mem_r_type = StringMap.find m mem_vars in
                       if (mem_r_type = Sast.Graph) then 
                         (match m with
-                           | "remove" -> Sast.MemberCall(v,m, s_el, Sast.List(Sast.Node))
+                           | "remove" -> Sast.MemberCall(s_e,m, s_el, Sast.List(Sast.Node))
                            | _ -> raise (Failure("undeclared variable: "))
                         )
                       else 
@@ -488,7 +507,7 @@ let rec stmt env = function
         raise (Failure ("variable already declared in local scope: " ^ id))
      with | Not_found -> (List.hd env.var_types) := StringMap.add id vtype !(List.hd env.var_types); (* add type map *)
                 (List.hd env.var_inds) := StringMap.add id (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
-          | Failure(f) -> raise (Failure (f) ) 
+          | Failure(f) -> raise (Failure (f))
     );
     Sast.Vdecl(vtype, id)
 | Ast.DictDecl(dtk, dtv, id) -> (*Sast.DictDecl(str_to_type dtk, str_to_type dtv, v)*)
@@ -518,6 +537,15 @@ let rec stmt env = function
       else raise (Failure ("Node Def failure"))
     with 
       | Not_found -> raise (Failure("Node Def failure")))
+|  Ast.GraphDef(v, el) ->
+    (try
+      let v_e = (find_var v env.var_types) in
+      let s_el = List.map (expr env) el in
+      ignore(check_graph_list env s_el);
+      Sast.GraphDef(v, s_el)
+    with 
+     Not_found -> raise (Failure ("GraphDef issue")))
+
 (* | Ast.AssignList(v, el) -> 
       (*insert a recursive function*) 
       (try                                (*sees if variable defined*)

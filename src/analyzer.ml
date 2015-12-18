@@ -45,6 +45,10 @@ let rec stmt_sifter sifted = function
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
+               | Sast.GraphDef(id, el) -> 
+                   stmt_sifter {s_globals = sifted.s_globals; 
+                   s_main = hd :: sifted.s_main; 
+                   s_funcs = sifted.s_funcs} tl               
                | Sast.Return(e, dt) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
@@ -86,7 +90,7 @@ type translation_env = {
             return_type : Sast.dataType;                       (* what should the return type be of the current scope *)
     }
 
-let mappings = [("in", Sast.Node); ("out", Sast.Node); ("value", Sast.Node); ("nodes", Sast.Graph)] 
+let mappings = [("ine", Sast.Node); ("oute", Sast.Node); ("value", Sast.Node); ("nodes", Sast.Graph)] 
 let mem_vars =  List.fold_left (fun m (k, v) -> StringMap.add k v m) StringMap.empty mappings
 
 (* val enum : int -> 'a list -> (int * 'a) list *)
@@ -187,13 +191,13 @@ let num_type num_str =
     in
     if Str.string_match numregex num_str 0 then Int else Float
 
-let dt_to_ct = function
+let rec dt_to_ct = function
     | Sast.Num -> Float
     | Sast.String -> Cstring
     | Sast.Bool -> Int
     | Sast.Graph -> Void (* TODO *)
     | Sast.Node -> Node (* TODO *)
-    | Sast.List(dt) -> Void (* TODO *)
+    | Sast.List(dt) -> List(dt_to_ct dt) (* TODO *)
     | Sast.Dict(dtk, dtv) -> Void (* TODO *)
     | Sast.Void -> Void
 
@@ -232,7 +236,7 @@ in
 let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
-    | Sast.ListLiteral(el, dt) -> Nostmt (* TODO *)
+    | Sast.ListLiteral(el, dt) -> ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *)
     | Sast.DictLiteral(kvl, dt) -> Nostmt (* TODO *)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
@@ -249,13 +253,13 @@ let rec translate_expr env = function
               |  Float ->
                   (match cdt2 with
                     | Float -> Translate.Binop(Float, ce1, op, ce2)
-                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*)
+                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Cstring -> 
                   (match cdt2 with
                     | Float -> Translate.Binop(cdt1, ce1, op, ce2) (* string concat *)
-                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
+                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*) 
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Graph -> 
@@ -270,7 +274,7 @@ let rec translate_expr env = function
                     | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
-              |  List -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+              |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
               |  _ -> raise (Failure("Invalid c type for + binop"))          
             )
           | Sub -> 
@@ -303,7 +307,7 @@ let rec translate_expr env = function
                     | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
-              |  List -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+              |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
               |  Void -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
               |  _ -> raise (Failure("Invalid c type for ==/!= binop"))     
             )
@@ -320,20 +324,39 @@ let rec translate_expr env = function
             match func_name with
             | "print" ->
                 let rec print_builder elems = function
-                | [] -> elems
+                | [] -> List.rev elems
                 | hd :: tl -> 
                     let e_t = get_expr_type hd in
                     (match e_t with
                       | Num | String | Bool | Node -> 
-                          print_builder (List.rev(Expr(Call(Void, "f1", [translate_expr env hd])) :: List.rev elems)) tl
+                          print_builder (Expr(Call(Void, "f1", [translate_expr env hd])) :: elems) tl
                       | List(dt) -> 
+                          let elem_type = dt_to_ct dt in
                           let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.List(dt))) in
-                          (* print_builder 
-                          ( For()
-                            :: elems
-                          ) 
-                          tl *) 
-                         [Nostmt](*TODO*)
+                          print_builder 
+                          (
+                              (* b/c of building the list up backwards,
+                                 this list must be declared in reverse order
+
+                                  // c translation:
+                                  // print(num_list)
+                                  list_t* auto;
+                                  for (auto = num_list; auto; auto = auto->next) {
+                                    print( *auto );
+                                  } 
+                                *)
+                              [
+                               For(Assign(Id(elem_type, auto_var), translate_expr env hd),
+                                   Id(Ptr(List(elem_type)), auto_var),
+                                   Assign(Id(elem_type, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
+                                   [Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))])]
+                               );
+                               Vdecl(Ptr(List(dt_to_ct dt)), auto_var)
+                              ]
+                             @ elems
+                          )
+                          tl
+                         (*[Nostmt]*)(*TODO*)
                       | Dict(dtk, dtv) -> print_builder (Nostmt :: elems) tl (*TODO*)
                       | Graph -> print_builder (Nostmt :: elems) tl (*TODO*)
                       | Void -> raise (Failure "stop trying to print Void -- it's not gonna happen")
@@ -346,10 +369,10 @@ let rec translate_expr env = function
                 Call(dt_to_ct dt, index, cel)
         )
             
-    | Sast.Access(v, e, dt) -> 
-            let index = "v" ^ string_of_int(find_var v env.var_inds) in
+    | Sast.Access(v, e, dt) -> Nostmt
+        (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
-            Access(dt_to_ct dt, index, ce)
+            Access(dt_to_ct dt, index, ce) *)
     | Sast.MemberVar(v, m, dt) -> Nostmt (* TODO *)
     | Sast.MemberCall(v, f, el, dt) -> Nostmt (* TODO *)
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
@@ -374,13 +397,13 @@ let rec translate_stmt env = function
               | String -> Vdecl(Cstring, index)
               | Bool -> Vdecl(Int, index)
               | Graph -> Block([Vdecl(Ptr(Graph), index);
-                                Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))
+                               (*  Expr(Assign(Id(Graph, index), Call(Void, "init_graph", []))) *)
                                ]) (* C: graph_t *g1 = init_graph(); *)
               | Node -> (* Block([Vdecl(Ptr(Node), index); 
                                Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])))
                               ]) *) (* C: node_t *x = init_node(""); *)
                         Block([Vdecl(Ptr(Node), index);])
-              | List(dt) -> Vdecl(Ptr(List), index) (* C: list_t *x; *)
+              | List(dt) -> Vdecl(Ptr(List(dt_to_ct dt)), index) (* C: list_t *x; *)
               | Dict(dtk, dtv) -> Vdecl(Ptr(Ptr(Entry)), index) (* TODO *)
               | Void -> raise (Failure ("should not be using Void as a datatype"))
             )
@@ -403,30 +426,41 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.Return(e, dt) -> Nostmt                                         (*TODO*)
+    | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         (match s with
-        | Sast.Noexpr ->                                                 (*TODO*)
-          let index = "v" ^ string_of_int(find_var id env.var_inds) in
-          Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
-            Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
-        | _ -> 
-          let index = "v" ^ string_of_int(find_var id env.var_inds) in
-          Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
-            Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
-        )          
-    | Sast.While(cond, sl) -> Nostmt                                      (*TODO*)
-    | Sast.If (cond, s1, s2) -> Nostmt                                    (*TODO*)
+          | Sast.Noexpr ->                                                 
+            let index = "v" ^ string_of_int(find_var id env.var_inds) in
+            Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
+              Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
+          | _ -> 
+            let index = "v" ^ string_of_int(find_var id env.var_inds) in
+            Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
+              Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
+        )     
+    | Sast.GraphDef(id, sl) ->
+        let index = "v" ^ string_of_int(find_var id env.var_inds) in
+        let graph_shit = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in
+        Block(graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl)  
+    | Sast.While (cond, sl) -> 
+        let c_cond = translate_expr env cond in
+        let csl = List.map (translate_stmt env) sl in
+        While(c_cond, csl)                                    
+    | Sast.If (cond, s1, s2) ->
+        let c_cond = translate_expr env cond in 
+        let c_s1 =  translate_stmt env s1 in
+        let c_s2 =  translate_stmt env s2 in 
+        If (c_cond, [c_s1], [c_s2])
     | Sast.For (temp, iter, sl) ->
             let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
             let index = "v" ^ string_of_int (find_var iter env.var_inds) in
             let iter_type = (find_var iter env.var_types) in
             let csl = List.map (translate_stmt env) sl in
             (match iter_type with
-            | List(dt) -> Block([Vdecl(Ptr(List), auto_var); 
-                For(Assign(Id(dt_to_ct dt, auto_var), Id(Ptr(List), index)),
-                Id(Ptr(List), auto_var),
-                Assign(Id(dt_to_ct dt, auto_var), Member(Ptr(List), auto_var, "next")),
+            | List(dt) -> Block([Vdecl(Ptr(List(dt_to_ct dt)), auto_var); 
+                For(Assign(Id(dt_to_ct dt, auto_var), Id(Ptr(List(dt_to_ct dt)), index)),
+                Id(Ptr(List(dt_to_ct dt)), auto_var),
+                Assign(Id(dt_to_ct dt, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
                 csl
                 )
                                  ])
@@ -450,7 +484,7 @@ let rec translate_stmt env = function
                     ])
             | Node -> 
                 Block([Vdecl(Ptr(Node), auto_var); 
-                Expr(Assign(Id(Ptr(Node), auto_var), Ref(Id(Ptr(Node), index))))] @ csl)
+                Expr(Assign(Id(Ptr(Node), auto_var), Ref(Node, Id(Ptr(Node), index))))] @ csl)
             | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
                               For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), index, "nodes")),
                                 Id(Ptr(Node), auto_var),
@@ -460,11 +494,8 @@ let rec translate_stmt env = function
                              ])
             | _ -> raise (Failure(iter ^ " is not iterable"))
             )
-            | Sast.While (cond, sl) -> 
-                    let c_cond = translate_expr env cond in
-                    let csl = List.map (translate_stmt env) sl in
-                    While(c_cond, csl)
-            | Sast.Fdecl (func) -> Nostmt
+
+    | Sast.Fdecl (func) -> Nostmt
                     
                     (* ***** TODO *********)
                     (*

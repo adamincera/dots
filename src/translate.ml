@@ -6,7 +6,7 @@ module StringMap = Map.Make(String)
 
 type ctype = | Float | Int | Long | Cstring 
              | Array of ctype 
-             | List
+             | List of ctype
              | Graph
              | Node
              | Ptr of ctype (* pointer to a data type *)
@@ -29,21 +29,22 @@ type cexpr =
 
 type cstmt =
 | Literal of ctype * string
-| Id of ctype * string                   (* ids are ints ex. Id(2) -> v2 *)
+| ListLiteral of ctype * cstmt list
+| Id of ctype * string                           (* ids are ints ex. Id(2) -> v2 *)
 | Binop of ctype * cstmt * Ast.op * cstmt
-| Assign of cstmt * cstmt               (* ex. Assign(2, 5) -> v2 = 5 *)
+| Assign of cstmt * cstmt                        (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cstmt list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
 | Access of ctype * string * cstmt               (* array access: id[cexpr] *)
-| Member of ctype * string * string (* id, member *)
-| Cast of ctype * cstmt               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
-| Deref of cstmt (* ex. *var *)
-| Ref of cstmt (* ex. &var *)
+| Member of ctype * string * string              (* id, member *)
+| Cast of ctype * cstmt                          (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
+| Deref of ctype * cstmt                                 (* ex. *var *)
+| Ref of ctype * cstmt                                   (* ex. &var *)
 | Block of cstmt list
 | Expr of cstmt
-| Vdecl of  ctype * string (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
+| Vdecl of  ctype * string                       (* (type, id) ex. Vdecl(Int, 2) -> int v2; *)
 | Return of cstmt
 | If of cstmt * cstmt list * cstmt list
-| For of cstmt * cstmt * cstmt * cstmt list (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
+| For of cstmt * cstmt * cstmt * cstmt list      (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
 | While of cstmt * cstmt list
 | Nostmt
 
@@ -97,7 +98,7 @@ let rec type_to_str = function
 | Long -> "long"
 | Cstring -> "char *"
 | Array(dt) -> type_to_str dt ^ "[]"
-| List -> "list_t"
+| List(dt) -> "list_t"
 | Node -> "node_t"
 | Graph -> "graph_t"
 | Ptr(dt) -> type_to_str dt ^ "*"
@@ -112,6 +113,7 @@ let fmt_str = function
 
 let rec get_expr_type = function
 | Literal(dt, str) -> dt
+| ListLiteral(dt, el) -> dt
 | Id(dt, id) -> dt
 | Binop(dt, e1, op, e2) -> dt
 | Assign(id, e1) -> Void
@@ -119,10 +121,31 @@ let rec get_expr_type = function
 | Access(dt, id, e) -> dt
 | Member(dt, id, m) -> dt
 | Cast(dt, e) -> dt
-| Ref(e) -> Void
-| Deref(e) -> Void
+| Ref(dt, e) -> dt
+| Deref(dt, e) -> dt
 | _ -> Void
 (* | Noexpr -> Void *)
+
+let rec stmt_type_to_str = function
+| Literal(dt, str) -> "Literal<" ^ type_to_str dt ^ ">"
+| ListLiteral(dt, el) -> "ListLiteral<" ^ type_to_str dt ^ ">"
+| Id(dt, id) -> "Id<" ^ type_to_str dt ^ ">"
+| Binop(dt, e1, op, e2) -> "Binop<" ^ type_to_str dt ^ ">"
+| Assign(id, e1) -> "Assign<" ^ stmt_type_to_str id ^ ">"
+| Call(dt, id, el) -> "Call<" ^ type_to_str dt ^ ">"
+| Access(dt, id, e) -> "Access<" ^ type_to_str dt ^ ">"
+| Member(dt, id, m) -> "Member<" ^ type_to_str dt ^ ">"
+| Cast(dt, e) -> "Cast<" ^ type_to_str dt ^ ">"
+| Ref(dt, e) -> "Ref<" ^ type_to_str dt ^ ">"
+| Deref(dt, e) -> "Deref<" ^ type_to_str dt ^ ">"
+| Block(sl) -> "Block"
+| Expr(e) -> "Expr:" ^ stmt_type_to_str e
+| Vdecl(dt, id) -> "Vdecl<" ^ type_to_str dt ^ ">"
+| Return(e) -> "Return:" ^ stmt_type_to_str e
+| If(cond, el1, el2) -> "If-then-Else"
+| For(assign, cond, incr, sl) -> "For"
+| While(cond, sl) -> "While"
+| Nostmt -> "Nostmt"
 
 let op_to_str = function
 | Ast.Add -> "+"
@@ -211,9 +234,13 @@ let rec translate_stmt = function
     | Void -> if v = "NULL" then v else raise (Failure "Void lit should only be 'NULL'")
     | _ -> raise (Failure "invalid C literal type")
    )
-
+| ListLiteral(dt, el) -> translate_stmt (Literal(Cstring, "TODO: list literal"))
 | Id(dt, id) -> id
-| Binop(dt, e1, op, e2) -> translate_stmt e1 ^ " " ^ op_to_str(op) ^ " " ^ translate_stmt e2
+| Binop(dt, e1, op, e2) -> 
+    (* check if either e1 is a string or e2 is a string: 
+      different operation: concatenation 
+    *)
+  translate_stmt e1  ^ " " ^ op_to_str(op) ^ " " ^ translate_stmt e2
 | Assign(target, e) -> (translate_stmt target) ^ " = " ^  translate_stmt e
 | Call(dt, id, el) -> 
     (match id with
@@ -232,9 +259,9 @@ let rec translate_stmt = function
                       let addr = translate_stmt(Cast(Long, expr)) in
                       let expr_val = translate_stmt(Member(Cstring, translate_stmt expr, "data")) in
                       [("%s", "\"N-\""); ("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
-                  | List | Entry | Graph -> raise (Failure "type requires iterable print handling")
-                  | Array(dt) -> raise (Failure "type requires iterable print handling")
-                  | Void -> raise (Failure "can't directly print Void")
+                  | Entry | Graph -> raise (Failure "type requires iterable print handling")
+                  | List(dt) | Array(dt) -> raise (Failure "type requires iterable print handling")
+                  | Void -> raise (Failure ("can't directly print Void (expr type: " ^ (stmt_type_to_str expr)))
                   | Ptr(dt) -> raise (Failure "can't directly print pointer")
                 )
             in
@@ -247,17 +274,19 @@ let rec translate_stmt = function
             let fmts = build_str [] el
             in
 
-            "printf(" ^  
-            "\"" ^ String.concat "" (List.map (fun t -> fst t) fmts) ^ "\", " ^ (* format string *)
-            String.concat ", " (List.map (fun t -> snd t) fmts) ^ (* comma separated inputs to fmt string *)
-            ")"
+            if fmts = [] then ""
+            else 
+              "printf(" ^  
+              "\"" ^ String.concat "" (List.map (fun t -> fst t) fmts) ^ "\", " ^ (* format string *)
+              String.concat ", " (List.map (fun t -> snd t) fmts) ^ (* comma separated inputs to fmt string *)
+              ")"
         | _ -> id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
     )
 | Access(dt, id, e) -> id ^ "[" ^ translate_stmt e ^ "]"
 | Member(dt, id, m) -> id ^ "->" ^ m
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_stmt e ^ ")"
-| Ref(e) -> "&(" ^ translate_stmt e ^ ")"
-| Deref(e) -> "*(" ^ translate_stmt e ^ ")"
+| Ref(dt, e) -> "&(" ^ translate_stmt e ^ ")"
+| Deref(dt, e) -> "*(" ^ translate_stmt e ^ ")"
 | Block(sl) -> String.concat "\n" (List.map translate_stmt sl)
 | Expr(e) -> translate_stmt e ^ ";"
 | Vdecl(dt, id) -> type_to_str dt ^ " " ^ id ^ ";"

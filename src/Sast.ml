@@ -18,9 +18,9 @@ type s_expr =
   | Id of string * dataType                                  (* x *)
   | Binop of s_expr * Ast.op * s_expr * dataType             (* x + y *)
   | Call of string * s_expr list * dataType
-  | Access of string * s_expr  * dataType                    (* for dict and list element access *)
-  | MemberVar of string * string  * dataType                (* parent variable, the accessed member *)
-  | MemberCall of string * string * s_expr list * dataType   (* parent variable, accessed funct, parameters *)
+  | Access of s_expr * s_expr  * dataType                    (* for dict and list element access *)
+  | MemberVar of s_expr * string  * dataType                (* parent variable, the accessed member *)
+  | MemberCall of s_expr * string * s_expr list * dataType   (* parent variable, accessed funct, parameters *)
   | Undir of string * string  * dataType                     (* id, id *)
   | Dir of string * string  * dataType                       (* id, id *)
   | UndirVal of string * string * s_expr * dataType          (* id, id, weight *)
@@ -34,6 +34,7 @@ type s_stmt =
   | Expr of s_expr
   | Vdecl of dataType * string
   | NodeDef of string * s_expr * dataType (* (node id, item id, datatype) *)
+  | GraphDef of string * s_expr list
   | Assign of string * s_expr * dataType                     (* x = 5; *)
   | Return of s_expr * dataType                         (* return x (dataType) *)
   | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)

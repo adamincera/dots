@@ -9,14 +9,14 @@ type expr =
     NumLiteral of string
   | StrLiteral of string
   | ListLiteral of expr list (* ex. [1, 3, 42.33] *)
-  | DictLiteral of (expr * expr) list (* ex. [(key, value)] *)
+  | DictLiteral of (expr * expr) list (* ex. [(key, value)] *) 
   | Boolean of bool
   | Id of string
   | Binop of expr * op * expr
-  | Call of string * expr list
-  | Access of string * expr (* for dict and list element access *)
-  | MemberVar of string * string (* parent variable, the accessed member *)
-  | MemberCall of string * string * expr list (* parent variable, accessed funct, parameters *)
+  | Call of string * expr list 
+  | Access of expr * expr (* for dict and list element access, node.in[node2] *)
+  | MemberVar of expr * string (* expr that evaluates to parent variable, the accessed member *)
+  | MemberCall of expr * string * expr list (* expr that evaluates to parent variable, accessed funct, parameters *)
   | Undir of string * string (* id, id *)
   | Dir of string * string (* id, id *)
   | UndirVal of string * string * expr (* id, id, weight *)
@@ -47,6 +47,7 @@ type stmt =
   | Assign of string * expr
   | NodeDef of string * expr (* (node id, what goes inside parens) of item *)
 (*   | AssignList of string * expr  *)(* when a list of expressions is assigned to a variable *)
+  | GraphDef of string * expr list (* id EdgeOp list - in form of undir dir - *)
   | Return of expr
   | If of expr * stmt * stmt
   | For of string * string * stmt list (* temp var, iterable var, var decls, stmts *)
@@ -113,9 +114,9 @@ let rec string_of_expr = function
   | NoOp (s) -> s
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-  | Access (s, e1) -> s ^ "[" ^ string_of_expr e1 ^ "]"
-  | MemberVar (s1, s2) -> s1 ^ "." ^ s2
-  | MemberCall (s1, s2, el) -> s1 ^ "." ^ s2 ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | Access (e, e1) -> string_of_expr e ^ "[" ^ string_of_expr e1 ^ "]"
+  | MemberVar (e1, s2) -> string_of_expr e1 ^ "." ^ s2
+  | MemberCall (e1, s2, el) -> string_of_expr e1 ^ "." ^ s2 ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -127,6 +128,7 @@ let rec string_of_stmt = function
   | DictDecl(kdt, vdt, id) -> "dict <" ^ kdt ^ ", " ^ vdt ^ "> " ^ id ^ ";\n"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e ^ ";"
   | NodeDef(v, e) -> v ^ "(" ^ string_of_expr e ^ ")" (* (node id, what goes inside parens) of item *)
+  | GraphDef(v, el) -> v ^ " = { " ^ String.concat "," (List.map string_of_expr el) ^ "};"
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
