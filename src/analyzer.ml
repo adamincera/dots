@@ -440,8 +440,8 @@ let rec translate_stmt env = function
         )     
     | Sast.GraphDef(id, sl) ->
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
-        let graph_shit = Block([Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))]) in
-        graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl 
+        let graph_shit = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in
+        Block(graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl)  
     | Sast.While (cond, sl) -> 
         let c_cond = translate_expr env cond in
         let csl = List.map (translate_stmt env) sl in
