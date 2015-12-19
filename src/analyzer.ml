@@ -168,6 +168,24 @@ let rec type_to_str = function
     | Sast.List(dt) -> "list <" ^ type_to_str dt ^ ">"
     | Sast.Void -> "void"
 
+let rec expr_type_str  = function
+    | Sast.NumLiteral(v, dt) -> "NumLiteral"
+    | Sast.StrLiteral(v, dt) -> "StrLiteral"
+    | Sast.ListLiteral(el, dt) -> "ListLiteral"
+    | Sast.DictLiteral(kvl, dt) -> "DictLiteral"
+    | Sast.Boolean(v, dt) -> "Boolean"
+    | Sast.Id(v, dt) -> "Id"
+    | Sast.Binop(e1, op, e2, dt) -> "Binop"
+    | Sast.Call(v, el, dt) -> "Call"
+    | Sast.Access(v, e, dt) -> "Access"
+    | Sast.MemberCall(v, m, el, dt) -> "MemberCall"
+    | Sast.Undir(v1, v2, dt) -> "Undir"
+    | Sast.Dir(v1, v2, dt) -> "Dir"
+    | Sast.UndirVal(v1, v2, w, dt) -> "UndirVal"
+    | Sast.DirVal(v1, v2, w, dt) -> "DirVal"
+    | Sast.BidirVal(w1, v1, v2, w2, dt) -> "BidirVal"
+    | Sast.NoOp(v, dt) -> "NoOp"
+    | Sast.Noexpr -> "Noexpr"
     (* returns the datatype of an Sast expressions *)
 let get_expr_type = function
     | Sast.NumLiteral(v, dt) -> dt
@@ -638,24 +656,24 @@ let rec translate_expr env = function
         let cel = List.map (translate_expr env) el in 
        (*) let cdt = Translate.get_expr_type ce in *)
         let e_dt = get_expr_type e in 
-        let e_list = (get_list_type e_dt) in
-        let c_e_list_type = dt_to_ct e_list in
-        (match e_list with
-          | List(dt) -> 
-              (match f with
-              | "enqueue" -> 
+        let e_list_type = (get_list_type e_dt) in
+        let c_e_list_type = dt_to_ct e_list_type in
+        (match f with
+              | "enqueue" | "push" -> 
+                  let suffix = (if f = "enqueue" then "back" else "front") in
                   let func_name = 
-                    (match dt with
-                    | Num -> "num_add_back"
-                    | String -> "string_add_back"
-                    | Node -> "node_add_back"
-                    | Graph -> "graph_add_back"
+                    (match e_list_type with
+                    | Num -> "num_add_" ^ suffix
+                    | String -> "string_add_" ^ suffix
+                    | Node -> "node_add_" ^ suffix
+                    | Graph -> "graph_add_" ^ suffix
                     | _ -> raise (Failure("can not enqueue this datatype"))) in
                     (match e with 
                       | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> Block([Expr(Assign(ce, Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
                       | _ -> raise (Failure("TODO")))
-              | _ -> raise (Failure("temp")))
-          ) 
+      
+          | _ -> raise (Failure("not enqueue")))
+          
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.UndirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
