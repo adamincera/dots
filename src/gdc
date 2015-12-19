@@ -1,4 +1,6 @@
 #!/bin/bash
+# 1st arg = .dots file
+# 2nd arg = output executable
 
 set -e 
 ./dotc < $1 > $1.c

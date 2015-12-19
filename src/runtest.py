@@ -166,9 +166,10 @@ if args.clean:
     file_exts = ['*.outgdc', '*.dif', '*.c', '*.exec']
     for ext in file_exts:
         for directory in os.walk(path):
-            for f in glob.glob(directory[0], ext):
+            for f in glob.glob(os.path.join(directory[0], ext)):
+                print(directory[0])
                 os.remove(f)
         for directory in os.walk(npath):
-            for f in glob.glob(directory[0], ext):
+            for f in glob.glob(os.path.join(directory[0], ext)):
                 os.remove(f)
 

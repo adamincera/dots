@@ -51,7 +51,7 @@ type stmt =
   | GraphDef of string * expr list (* id EdgeOp list - in form of undir dir - *)
   | Return of expr
   | If of expr * stmt * stmt
-  | For of string * string * stmt list (* temp var, iterable var, var decls, stmts *)
+  | For of string * expr * stmt list (* temp var, iterable var, var decls, stmts *)
   | While of expr * stmt list (* condition, var decls, stmt list *)
   | Fdecl of func_decl and
 
@@ -136,7 +136,7 @@ let rec string_of_stmt = function
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
   | For(e1, e2, sl) ->
-      "for (" ^ e1  ^ " in " ^ e2 
+      "for (" ^ e1  ^ " in " ^ string_of_expr e2 
       ^ ") { " ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
   | While(e, sl) -> "while (" ^ string_of_expr e ^ ") {" ^ String.concat "\n" (List.map string_of_stmt sl) ^ " }"
   | Fdecl(f) ->  string_of_fdecl f and 

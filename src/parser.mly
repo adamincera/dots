@@ -190,7 +190,7 @@ stmt:
   /* | LBRACE stmt_list RBRACE { Block(List.rev $2) } */
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
-  | FOR LPAREN ID IN ID RPAREN LBRACE stmt_list RBRACE
+  | FOR LPAREN ID IN expr RPAREN LBRACE stmt_list RBRACE
      { For($3, $5, $8) }
   | WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
   | vdecl { $1 }

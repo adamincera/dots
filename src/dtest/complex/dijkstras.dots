@@ -21,7 +21,7 @@ def dict<node, num> dijkstra (graph G, node source){
     }
     Q[source] = 0;
     
-    while (!isEmpty(Q)) {
+    while (len(Q) != 0) {
         node u = min(Q);
         num w = Q[u];
         Q.remove(u);
