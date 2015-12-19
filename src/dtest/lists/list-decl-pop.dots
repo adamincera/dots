@@ -1,0 +1,8 @@
+list <num> num_list;
+list <string> str_list;
+#list <node> node_list;
+#list <graph> graph_list;
+num_list.enqueue(5);
+num_list.dequeue();
+print(num_list);
+print("\n");

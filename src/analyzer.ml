@@ -669,9 +669,22 @@ let rec translate_expr env = function
                     | Graph -> "graph_add_" ^ suffix
                     | _ -> raise (Failure("can not enqueue this datatype"))) in
                     (match e with 
-                      | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> Block([Expr(Assign(ce, Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
-                      | _ -> raise (Failure("not enqueue"))
-                           (*let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                      | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
+                            Block([Expr(Assign(ce, Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
+                      | _ -> raise (Failure("not enqueue")))
+              | "dequeue" | "pop" -> 
+                 let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                        
+                 (*  data = list.peek()  <type> *data = (<type> * peek(list);
+                           data = list.pop() 
+                          <type> *data = (<type> * pop(list); *)
+                    (match e with 
+                      | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
+                            Block([Expr(Assign(Id((dt_to_ct e_dt), auto_var), 
+                                              Call(dt_to_ct e_dt, "pop", [])))])
+                      | _ -> raise (Failure("not dequeue")))
+                           
+                          (* let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
                           Block([ce;
                                 (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) *)
                                  Expr(Assign(Id(Ptr(List(c_e_list_type)),auto_var), Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
