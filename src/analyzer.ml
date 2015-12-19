@@ -820,47 +820,49 @@ let rec translate_stmt env = function
 
             let csl = List.map (translate_stmt env) sl in
             Block(
-            [Expr(Vdecl(Ptr(dt_to_ct iter_type), auto_index); Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter)))]
+            [Vdecl(Ptr(dt_to_ct iter_type), auto_index); 
+             Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter))
+            ]
             @
             [
-            (match iter_type with
-            | List(dt) -> Block([Vdecl(Ptr(List(dt_to_ct dt)), auto_var); 
-                For(Assign(Id(dt_to_ct dt, auto_var), Id(Ptr(List(dt_to_ct dt)), auto_index)),
-                Id(Ptr(List(dt_to_ct dt)), auto_var),
-                Assign(Id(dt_to_ct dt, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
-                csl
+                (match iter_type with
+                  | List(dt) -> Block([Vdecl(Ptr(List(dt_to_ct dt)), auto_var); 
+                      For(Assign(Id(dt_to_ct dt, auto_var), Id(Ptr(List(dt_to_ct dt)), auto_index)),
+                      Id(Ptr(List(dt_to_ct dt)), auto_var),
+                      Assign(Id(dt_to_ct dt, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
+                      csl
+                      )
+                                       ])
+                  | Dict(dtk, dtv) -> 
+                          let int_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
+                          let entry_var = "v" ^ string_of_int(create_auto env "" (Sast.Dict(Void, Void))) in
+                          let key_var = "v" ^ string_of_int(create_auto env "" (Sast.Void)) in
+                          Block([Vdecl(Int, int_var); Vdecl(Ptr(Entry), entry_var);
+                              Vdecl(Ptr(Void), key_var); 
+                              For(Assign(Id(Int, int_var), Literal(Int, "0")),
+                                  Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
+                                  Assign(Id(Int, int_var), 
+                                      Binop(Int, Id(Int, int_var), Ast.Add,
+                                            Literal(Int, "1"))),
+                                  [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, Id(Ptr(Entry), auto_index), Id(Int, int_var))), 
+                                       Id(Entry, entry_var),
+                                       Assign(Id(Ptr(Entry), entry_var), Member(Entry, entry_var, "next")),
+                                       List.map (translate_stmt env) sl
+                                  )]
+                              )
+                          ])
+                  | Node -> 
+                      Block([Vdecl(Ptr(Node), auto_var); 
+                      Expr(Assign(Id(Ptr(Node), auto_var), Ref(Node, Id(Ptr(Node), auto_index))))] @ csl)
+                  | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
+                                    For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_index, "nodes")),
+                                      Id(Ptr(Node), auto_var),
+                                      Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_var, "next")),
+                                      csl
+                                      )
+                                   ])
+                  | _ -> raise (Failure("for loop iter is not iterable"))
                 )
-                                 ])
-            | Dict(dtk, dtv) -> 
-                    let int_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
-                    let entry_var = "v" ^ string_of_int(create_auto env "" (Sast.Dict(Void, Void))) in
-                    let key_var = "v" ^ string_of_int(create_auto env "" (Sast.Void)) in
-                    Block([Vdecl(Int, int_var); Vdecl(Ptr(Entry), entry_var);
-                        Vdecl(Ptr(Void), key_var); 
-                        For(Assign(Id(Int, int_var), Literal(Int, "0")),
-                            Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
-                            Assign(Id(Int, int_var), 
-                                Binop(Int, Id(Int, int_var), Ast.Add,
-                                      Literal(Int, "1"))),
-                            [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, Id(Ptr(Entry), auto_index), Id(Int, int_var))), 
-                                 Id(Entry, entry_var),
-                                 Assign(Id(Ptr(Entry), entry_var), Member(Entry, entry_var, "next")),
-                                 List.map (translate_stmt env) sl
-                            )]
-                        )
-                    ])
-            | Node -> 
-                Block([Vdecl(Ptr(Node), auto_var); 
-                Expr(Assign(Id(Ptr(Node), auto_var), Ref(Node, Id(Ptr(Node), auto_index))))] @ csl)
-            | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
-                              For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_index, "nodes")),
-                                Id(Ptr(Node), auto_var),
-                                Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_var, "next")),
-                                csl
-                                )
-                             ])
-            | _ -> raise (Failure("for loop iter is not iterable"))
-            )
             ])
 
     | Sast.Fdecl (func) -> Nostmt
