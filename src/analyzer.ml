@@ -673,13 +673,21 @@ let rec translate_stmt env = function
         let c_s2 =  translate_stmt env s2 in 
         If (c_cond, [c_s1], [c_s2])
     | Sast.For (temp, iter, sl) ->
+            let iter_type = get_expr_type iter in
+            let auto_index = "v" ^ string_of_int(create_auto env temp iter_type) in
             let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
-            let index = "v" ^ string_of_int (find_var iter env.var_inds) in
-            let iter_type = (find_var iter env.var_types) in
+            (*let index = "v" ^ string_of_int (find_var iter env.var_inds) in*)
+            
+            (*let iter_type = (find_var iter env.var_types) in*)
+
             let csl = List.map (translate_stmt env) sl in
+            Block(
+            [Vdecl(Ptr(dt_to_ct iter_type), auto_index); Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter))]
+            @
+            [
             (match iter_type with
             | List(dt) -> Block([Vdecl(Ptr(List(dt_to_ct dt)), auto_var); 
-                For(Assign(Id(dt_to_ct dt, auto_var), Id(Ptr(List(dt_to_ct dt)), index)),
+                For(Assign(Id(dt_to_ct dt, auto_var), Id(Ptr(List(dt_to_ct dt)), auto_index)),
                 Id(Ptr(List(dt_to_ct dt)), auto_var),
                 Assign(Id(dt_to_ct dt, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
                 csl
@@ -696,7 +704,7 @@ let rec translate_stmt env = function
                             Assign(Id(Int, int_var), 
                                 Binop(Int, Id(Int, int_var), Ast.Add,
                                       Literal(Int, "1"))),
-                            [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, Id(Ptr(Entry), index), Id(Int, int_var))), 
+                            [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, Id(Ptr(Entry), auto_index), Id(Int, int_var))), 
                                  Id(Entry, entry_var),
                                  Assign(Id(Ptr(Entry), entry_var), Member(Entry, entry_var, "next")),
                                  List.map (translate_stmt env) sl
@@ -705,16 +713,17 @@ let rec translate_stmt env = function
                     ])
             | Node -> 
                 Block([Vdecl(Ptr(Node), auto_var); 
-                Expr(Assign(Id(Ptr(Node), auto_var), Ref(Node, Id(Ptr(Node), index))))] @ csl)
+                Expr(Assign(Id(Ptr(Node), auto_var), Ref(Node, Id(Ptr(Node), auto_index))))] @ csl)
             | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
-                              For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), index, "nodes")),
+                              For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_index, "nodes")),
                                 Id(Ptr(Node), auto_var),
                                 Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_var, "next")),
                                 csl
                                 )
                              ])
-            | _ -> raise (Failure(iter ^ " is not iterable"))
+            | _ -> raise (Failure("for loop iter is not iterable"))
             )
+            ])
 
     | Sast.Fdecl (func) -> Nostmt
                     
