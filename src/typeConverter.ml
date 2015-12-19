@@ -603,17 +603,53 @@ let rec stmt env = function
         raise (Failure ("if issue"))
     with 
      Not_found -> raise (Failure ("return issue")))
-| Ast.For(v1, v2, sl) -> 
-  (* iterable var must have already been declared *)
-  (try 
-    ignore(find_var v2 env.var_inds)
-   with
-   | Not_found -> raise (Failure ("'" ^ v2 ^ "' has not been declared"))
-  );
+| Ast.For(v, e, sl) -> 
+  (* iterable expr must have var which already has been been declared *)
+  let s_e = expr env e in 
+  let e_dt = get_expr_type in 
+  (match e_dt with 
+    | List(dt) ->
+      (try 
+        ignore(find_var v env.var_inds);
+        ignore(raise (Failure ("'" ^ v ^ "' has already been declared")))
+       with
+       | Not_found -> ignore()
+       | Failure(f) -> raise (Failure f)
+      );
+      (* add the temp var to the symbol table *)
+      (List.hd env.var_types) := StringMap.add v dt !(List.hd env.var_types); (* add type map *)
+      (List.hd env.var_inds) := StringMap.add v (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+      Sast.For(v, s_e, List.map (fun s -> stmt env s) sl)    
+    | Dict(dtk, dtv) ->
+      (try 
+        ignore(find_var v env.var_inds);
+        ignore(raise (Failure ("'" ^ v ^ "' has already been declared")))
+       with
+       | Not_found -> ignore()
+       | Failure(f) -> raise (Failure f)
+      );
+      (* add the temp var to the symbol table *)
+      (List.hd env.var_types) := StringMap.add v dtk !(List.hd env.var_types); (* add type map *)
+      (List.hd env.var_inds) := StringMap.add v (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+      Sast.For(v, s_e, List.map (fun s -> stmt env s) sl)    
+    | Graph -> 
+      (try 
+        ignore(find_var v env.var_inds);
+        ignore(raise (Failure ("'" ^ v ^ "' has already been declared")))
+       with
+       | Not_found -> ignore()
+       | Failure(f) -> raise (Failure f)
+      );
+      (* add the temp var to the symbol table *)
+      (List.hd env.var_types) := StringMap.add v Sast.Node !(List.hd env.var_types); (* add type map *)
+      (List.hd env.var_inds) := StringMap.add v (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+      Sast.For(v, s_e, List.map (fun s -> stmt env s) sl)
+    | _ -> raise(Failure("Trying to for loop an expr that doesnt return an iterable"))
+  )
   (* temp var must NOT have already been declared *)
-  (try 
-    ignore(find_var v1 env.var_inds);
-    ignore(raise (Failure ("'" ^ v1 ^ "' has already been declared")))
+(*   (try 
+    ignore(find_var v env.var_inds);
+    ignore(raise (Failure ("'" ^ v ^ "' has already been declared")))
    with
    | Not_found -> ignore()
    | Failure(f) -> raise (Failure f)
@@ -630,9 +666,9 @@ let rec stmt env = function
                | Not_found -> raise (Failure ("failure: " ^ v2)))
   in
   (* add the temp var to the symbol table *)
-  (List.hd env.var_types) := StringMap.add v1 tmp_type !(List.hd env.var_types); (* add type map *)
-  (List.hd env.var_inds) := StringMap.add v1 (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
-  Sast.For(v1, v2, List.map (fun s -> stmt env s) sl)
+  (List.hd env.var_types) := StringMap.add v tmp_type !(List.hd env.var_types); (* add type map *)
+  (List.hd env.var_inds) := StringMap.add v (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
+  Sast.For(v, s_e, List.map (fun s -> stmt env s) sl) *)
      
   (* temp var, iterable var, var decls, stmts *)  
 | Ast.While(cond, sl) -> 

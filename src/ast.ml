@@ -51,7 +51,7 @@ type stmt =
   | GraphDef of string * expr list (* id EdgeOp list - in form of undir dir - *)
   | Return of expr
   | If of expr * stmt * stmt
-  | For of string * string * stmt list (* temp var, iterable var, var decls, stmts *)
+  | For of string * expr * stmt list (* temp var, iterable var, var decls, stmts *)
   | While of expr * stmt list (* condition, var decls, stmt list *)
   | Fdecl of func_decl and
 
