@@ -241,13 +241,12 @@ in
     *)
 let string_len c_v = 
   let cdt1 = Translate.get_expr_type c_v in
-  let s_dt  = Translate.type_to_str cdt1 in 
   if cdt1 = Cstring then
       let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
        (auto_var, Block([
               Vdecl(Int, auto_var);
-              Assign(Id(Int, auto_var), 
-                     Call(Int, "strlen", [c_v]))]))
+              Expr(Assign(Id(Int, auto_var), 
+                     Call(Int, "strlen", [c_v])))]))
   else 
     raise (Failure("only possible with string "))
   in
@@ -255,32 +254,31 @@ let string_len c_v =
 let string_concat c_v1 c_v2 = 
   let cdt2 = Translate.get_expr_type c_v2 in
 
-  let len_c1 = (fst (string_len c_v1)) in 
-  let len_c2 = (fst (string_len c_v2)) in 
-  let len_new =  Assoc(Binop(Int, Id(Int,len_c1), Add, Id(Int,len_c2))) in
+  let len_c1 = ((string_len c_v1)) in 
+  let len_c2 = ((string_len c_v2)) in 
+  let len_new =  Assoc(Binop(Int, Id(Int, (fst len_c1)), Add, Id(Int,(fst len_c2)))) in
 
   let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.String)) in
     if cdt2 = Cstring then
    (auto_var, 
     Block([
+      (snd len_c1);
+      (snd len_c2);
       Vdecl(Cstring, auto_var);
-      Assign(Id(Cstring, auto_var), 
+      Expr(Assign(
+             Id(Cstring, auto_var), 
              Call(Ptr(Void), 
                   "malloc", 
-                 [Binop(Int, 
-                        Call(Int, "sizeof", [Id(Void, "int")]), 
-                        Mult,
-                        len_new)
-                 ])
-            );
-      Call(Void,
+                 [Binop(Int, Call(Int, "sizeof", [Id(Void, "int")]),  Mult, len_new)])
+            ));
+      Expr(Call(Void,
            "strcpy",
            [Id(Cstring, auto_var);
-            c_v1]);
-      Call(Void,
+            c_v2]));
+      Expr(Call(Void,
            "strcat",
            [Id(Cstring, auto_var);
-            c_v2])
+            c_v1]))
       ]))
  else 
     raise (Failure("only accesible for strings"))
@@ -295,7 +293,7 @@ let string_of_stmt c_v =
       | Int ->
           (auto_var, Block([
               Vdecl(Cstring, auto_var);
-              Assign(Id(Cstring, auto_var), 
+              Expr(Assign(Id(Cstring, auto_var), 
                      Call(Ptr(Void), 
                           "malloc", 
                          [Binop(Int, 
@@ -303,7 +301,7 @@ let string_of_stmt c_v =
                                 Mult,
                                 Literal(Int, "400"))
                          ] )
-                    );
+                    ));
               Call(Void,
                    "itoa",
                    [c_v;
@@ -314,7 +312,7 @@ let string_of_stmt c_v =
       | Float -> 
           (auto_var, Block([
                   Vdecl(Cstring, auto_var);
-                    Assign(Id(Cstring, auto_var), 
+                    Expr(Assign(Id(Cstring, auto_var), 
                            Call(Ptr(Void), 
                                 "malloc", 
                                [Binop(Int, 
@@ -322,8 +320,8 @@ let string_of_stmt c_v =
                                       Mult,
                                       Literal(Int, "400"))
                                ] )
-                          );
-                     Call(Void, 
+                          ));
+                     Expr(Call(Void, 
                           "sprintf",
                           [Id(Void, auto_var);
                             Literal(Cstring,"%d.%02u");
@@ -334,7 +332,7 @@ let string_of_stmt c_v =
                                       Mult,
                                       Literal(Int, "100"))
                                 ))
-                          ])
+                          ]))
                     ]))
       | _ -> raise (Failure ("cannot convert type to cstring: " ^  s_dt)))
 in
@@ -344,11 +342,16 @@ in
 *)
 
 let rec translate_expr env = function 
-    | Sast.NumLiteral(l, dt) -> Literal(Float, l)
-    | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
-    | Sast.ListLiteral(el, dt) -> ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *)
-    | Sast.DictLiteral(kvl, dt) ->  DictLiteral(dt_to_ct dt, List.map (fun f -> (translate_expr env (fst f), translate_expr env (snd f))) kvl)(* TODO *)
-    | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
+    | Sast.NumLiteral(l, dt) -> 
+        Literal(Float, l)
+    | Sast.StrLiteral(l, dt) -> 
+        Literal(Cstring, l)
+    | Sast.ListLiteral(el, dt) -> 
+        ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *)
+    | Sast.DictLiteral(kvl, dt) ->  
+        DictLiteral(dt_to_ct dt, List.map (fun f -> (translate_expr env (fst f), translate_expr env (snd f))) kvl)(* TODO *)
+    | Sast.Boolean(b, dt) -> 
+        if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
             let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
             Id(dt_to_ct dt, index) 
@@ -387,8 +390,25 @@ let rec translate_expr env = function
                   )
               |  Graph -> 
                   (match cdt2 with
-                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | Node -> 
+                        let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
+                        let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
+                        Vdecl(Ptr(Graph), index);
+
+                        Block([Vdecl(Ptr(Graph), index);
+                               Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])));
+                               Expr(Call(Void, "add_node", [Id(Graph, index); ce2]));
+                               Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
+
+                        ])
+                    | Graph -> 
+                        (* g1 = plus(g2, g3); *)
+                        let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
+                        let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
+                        Block([Vdecl(Ptr(Graph), index);
+                               Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
+
+                             ])
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Node -> 
@@ -427,7 +447,10 @@ let rec translate_expr env = function
             (match cdt1 with
               |  Float -> Translate.Binop(Float, ce1, op, ce2)
               |  Int -> Translate.Binop(Int, ce1, op, ce2)
-              |  Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*todo*) 
+              |  Cstring -> 
+                    (* (strcmp(check,input) = 0) *)
+                    let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in 
+                     Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
               |  Graph -> 
                   (match cdt2 with
                     | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
@@ -446,8 +469,12 @@ let rec translate_expr env = function
             )
           | Less | Leq | Greater | Geq -> 
             (match cdt1 with
-              |  Float -> Translate.Binop(Int,ce1,op,ce2)
-              |  Cstring -> Translate.Binop(Int,ce1,op,ce2)
+              | Float -> Translate.Binop(Float,ce1,op,ce2)
+              | Int -> Translate.Binop(Int,ce1,op,ce2)
+              | Long -> Translate.Binop(Long,ce1,op,ce2)
+              |  Cstring -> 
+                  let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in 
+                     Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
               | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
             )
           | LogAnd | LogOr -> Translate.Binop(Int,ce1,op,ce2)
@@ -629,12 +656,28 @@ let rec translate_stmt env = function
             let ce = translate_expr env e in
             let var_type = get_expr_type e in
             let index = "v" ^ string_of_int(find_var v env.var_inds) in
-            (match var_type with
+            let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            (*(match var_type with
+              figure out what the expr actually is if
+              its a binop then we get the automatic variable it returns and set that equal to your 
+              current variable. Var find Max index which will the last automatic variable
+              (find_max_index !(List.hd env.var_inds)+1)
+            e --> block (Binop --> translate --> find max -> index =  autovar )
+            Expr(Assign(
+                     Id(Int, auto_var), 
+                     Id(Int, auto_var))
             | Num | String | Bool | Node | Void -> Expr(Assign(Id((dt_to_ct var_type), index), ce))
             | List(dt) -> Expr(Assign(Id((dt_to_ct var_type), index), ce)) (* TODO *)   
             | Dict(dtk, dtv) -> Expr(Assign(Id((dt_to_ct var_type), index), ce)) (* TODO *)
-            | Graph -> Expr(Assign(Id((dt_to_ct var_type), index), Call(Graph, "copy", [ce])))
-            )
+            | Graph -> Expr(Assign(Id((dt_to_ct var_type), index), Call(Graph, "copy", [ce]))) 
+            ) *)
+            ( match e with 
+              | Binop(e1, op, e2, dt) -> Block([ce;
+                                Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))])
+              | StrLiteral(s1, dt) | NumLiteral(s1, dt) -> Expr(Assign(Id((dt_to_ct var_type), index), ce))
+              | _ -> raise (Failure("Assign don't work like that ")))
+
+            
                     (*         if not( (find_var v env.var_types) = get_expr_type e)
         then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
         else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
