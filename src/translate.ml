@@ -15,7 +15,7 @@ type ctype = | Float | Int | Long | Cstring
 
 type cstmt =
 | Literal of ctype * string
-| ListLiteral of ctype * cstmt list
+| ListLiteral of ctype * cstmt list              (* [2.5, 3, x] *)
 | DictLiteral of ctype * (cstmt * cstmt) list
 | Id of ctype * string                           (* ids are ints ex. Id(2) -> v2 *)
 | Binop of ctype * cstmt * Ast.op * cstmt
