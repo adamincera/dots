@@ -670,7 +670,12 @@ let rec translate_expr env = function
                     | _ -> raise (Failure("can not enqueue this datatype"))) in
                     (match e with 
                       | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> Block([Expr(Assign(ce, Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
-                      | _ -> raise (Failure("TODO")))
+                      | _ -> 
+                          let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                          Block([ce;
+                                (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) *)
+                                 Expr(Assign(Id(Ptr(List(c_e_list_type)),auto_var), Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
+                           )
       
           | _ -> raise (Failure("not enqueue")))
           
