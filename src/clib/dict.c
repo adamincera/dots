@@ -217,13 +217,73 @@ void put_other(entry_t **table, void *key, void *value) {
     }
 }
 
-void dict_remove(entry_t *table, entry_t *target) {
-    while(table) {
-        if(table->next == target) {
-            table->next = target->next;
-            free(target);
+static void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b)) {
+    entry_t *row = *table;
+
+    if(!table || !row)
+        return;
+
+    if(comp) {
+        if(comp(key, row->key)) {
+            *table = row->next;;
+            free(row);
             return;
         }
-        table = table->next;
+    } else {
+        if(key == row->key) {
+            *table = row->next;;
+            free(row);
+            return;
+        }
     }
+
+
+    for(; row->next; row = row->next) {
+        if(comp) {
+            if(comp(key, row->next->key)) {
+                row->next = row->next->next;
+                free(row->next);
+                return;
+            }
+        } else {
+            if(key == row->next->key) {
+                row->next = row->next->next;
+                free(row->next);
+                return;
+            }
+        }
+
+    }
+}
+
+static int void_float_equals(void *a, void *b) {
+    return float_equals(*(float *) a, *(float *) b);
+}
+
+void num_dict_remove(entry_t **table, float key) {
+    int k = hash_num(key);
+    dict_remove(table + k, (void *) &key, void_float_equals);
+}
+
+static int str_equals(void *a, void *b) {
+    return !strcmp((char *) a, (char *) b);
+}
+
+void string_dict_remove(entry_t **table, char *key) {
+    int k = hash_string(key);
+    dict_remove(table + k, (void *) key, str_equals);
+}
+
+void node_dict_remove(entry_t **table, node_t *key) {
+    int k = hash_other(key);
+    dict_remove(table + k, (void *) key, NULL);
+}
+
+static int void_graph_equals(void *a, void *b) {
+    return graph_equals((graph_t *) a, (graph_t *) b);
+}
+
+void graph_dict_remove(entry_t **table, graph_t *key) {
+    int k = hash_graph(key);
+    dict_remove(table + k, (void *) key, void_graph_equals);
 }

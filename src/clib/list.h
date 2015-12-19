@@ -52,13 +52,13 @@ list_t *other_add_back(list_t *l, void *data);
 
 */
 /* concatenation */
-void string_list_concat(list_t *target, list_t *src);
+list_t *string_list_concat(const list_t *target, const list_t *src);
 
 list_t *num_list_concat(const list_t *target, const list_t *src);
 
-void graph_list_concat(list_t *target, const list_t *src);
+list_t *graph_list_concat(const list_t *target, const list_t *src);
 
-void node_list_concat(list_t *target, const list_t *src);
+list_t *node_list_concat(const list_t *target, const list_t *src);
 
 /*
 void dict_list_concat(list_t *target, const list_t *src);

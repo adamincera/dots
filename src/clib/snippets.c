@@ -225,3 +225,14 @@ graph_t *g1 = minus(g2, g3);
 
 /* list list_1 = list_2 + list_3 */
 list_t *list_1 = <type>_list_concat(list_2, list_3);
+
+/** graph = node + node **/
+/* graph g2 = n1 + n2 */
+graph_t *g2 = node_plus_node(n1, n2);
+
+/** graph = graph + node **/
+/* graph g2 = g1 + n2 */
+graph_t *g2 = graph_plus_node(g1, n2);
+
+/** dict.remove(key) **/
+<type>_dict_remove(dict, key);

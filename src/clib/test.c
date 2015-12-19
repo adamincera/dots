@@ -65,6 +65,10 @@ int main() {
     printf("got %s\n", got);
     got = (char *)get_num(nums, 1.24);
     printf("got %s\n", got);
+    printf("removed 1.23:\n");
+    num_dict_remove(nums, 1.23);
+    got = (char *)get_num(nums, 1.23);
+    printf("got %s\n", got);
 
     node_t *n = init_node("this is a node!");
     node_t *n2 = init_node("this is a node's value!");
