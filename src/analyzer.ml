@@ -45,6 +45,10 @@ let rec stmt_sifter sifted = function
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
+               | Sast.AccessAssign(se1, se2, dt) -> 
+                   stmt_sifter {s_globals = sifted.s_globals; 
+                   s_main = hd :: sifted.s_main; 
+                   s_funcs = sifted.s_funcs} tl                
                | Sast.GraphDef(id, el) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
@@ -503,6 +507,7 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
+    | Sast.AccessAssign(e1, e2, dt) -> Nostmt
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         (match s with
