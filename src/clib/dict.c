@@ -40,9 +40,9 @@ static int hash_num(float key) {
 
 static int hash_graph(graph_t *g) {
     int ret = 0;
-    nodelist_t *temp;
+    list_t *temp;
     for(temp = g->nodes; temp; temp = temp->next) {
-        ret += ((unsigned int) temp->node >> 3);
+        ret += ((unsigned int) temp->data >> 3);
     }
     ret %= TABLE_SIZE;
     return ret;

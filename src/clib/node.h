@@ -1,7 +1,5 @@
 struct node;
-struct edgelist;
 typedef struct node node_t;
-typedef struct edgelist edgelist_t;
 typedef struct entry entry_t;
 
 struct node {
@@ -9,15 +7,6 @@ struct node {
     entry_t **in;
     entry_t **out;
 };
-
-/*
-struct edgelist {
-    node_t *node;
-    float weight;
-    edgelist_t *next;
-    edgelist_t *previous;
-};
-*/
 
 struct entry {
     void *key;

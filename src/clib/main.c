@@ -4,9 +4,9 @@
 #include "dict.h"
 
 void print_nodes(graph_t *g) {
-    nodelist_t *n;
+    list_t *n;
     for(n = g->nodes; n; n=n->next)
-        printf("%s\n", (char *)n->node->data);
+        printf("%s\n", (char *)((node_t *) n->data)->data);
 }
 
 int main() {
