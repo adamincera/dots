@@ -65,6 +65,7 @@ void *get_string(entry_t **table, char *key) {
 }
 
 void *get_num(entry_t **table, float key) {
+
     int k = hash_num(key);
     entry_t *temp = table[k];
     while(temp) {
@@ -218,6 +219,10 @@ void put_other(entry_t **table, void *key, void *value) {
     }
 }
 
+void put_node(entry_t **table, node_t *key, void *value) {
+    put_other(table, (void *) key, value); 
+}
+
 static void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b)) {
     entry_t *row = *table;
 
@@ -355,3 +360,12 @@ void *string_dict_max(entry_t **table) {
     return ret;
 }
 
+int len(entry_t **table) {
+    int i;
+    entry_t *temp;
+    int len = 0;
+    for(i = 0; i < TABLE_SIZE; i++)
+        for(temp = table[i]; temp; temp = temp->next)
+            len++;
+    return len;
+}

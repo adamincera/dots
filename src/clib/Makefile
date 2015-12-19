@@ -10,7 +10,7 @@ main.o: main.c graph.h node.h
 
 graph.o: graph.h node.h graph.c
 
-node.o: node.h node.c
+node.o: node.h node.c dict.o
 
 test: test.o list.o dict.o graph.o node.o
 

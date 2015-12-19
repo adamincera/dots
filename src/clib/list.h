@@ -131,3 +131,4 @@ char *string_list_min(list_t *l);
 
 char *string_list_max(list_t *l);
 
+int list_len(list_t *l);

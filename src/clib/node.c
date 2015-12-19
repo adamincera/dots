@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "node.h"
+#include "dict.h"
 
 /* initialize a new node that contains *data */
 node_t *init_node(char *data) {
     node_t *n = (node_t *) malloc(sizeof(node_t));
     n->data = data;
-    n->in = NULL;
-    n->out = NULL;
+    n->in = init_dict();
+    n->out = init_dict();
     return n;
 }
 
@@ -47,7 +47,15 @@ void connect_dir(node_t *src, node_t *dst) {
 /* create weighted directed edge */
 void connect_dir_weighted(node_t *src, node_t *dst, float weight) {
 
+    void *a = malloc(sizeof(float));
+    *(float *)a = weight;
     /* add dst to src->out */
+    put_node(src->out, dst, a);
+
+    /* add src to dst->in */
+    put_node(dst->in, src, a);
+
+    /*
     edgelist_t *e = (edgelist_t *) malloc(sizeof(edgelist_t));
     e->node = dst;
     e->weight = weight;
@@ -57,7 +65,7 @@ void connect_dir_weighted(node_t *src, node_t *dst, float weight) {
         src->out->previous = e;
     src->out = e;
 
-    /* add src to dst->in */
+     add src to dst->in 
     edgelist_t *f = (edgelist_t *) malloc(sizeof(edgelist_t));
     f->node = src;
     f->weight = weight;
@@ -66,10 +74,12 @@ void connect_dir_weighted(node_t *src, node_t *dst, float weight) {
     if(dst->in != NULL)
         dst->in->previous = f;
     dst->in = f;
+    */
 }
 
 /* remove directed edge from src to dst */
 void remove_dir_edge(node_t *src, node_t *dst) {
+    /*
     edgelist_t *e = src->out;
     while(e && e->node != dst)
         e = e->next;
@@ -100,26 +110,6 @@ void remove_dir_edge(node_t *src, node_t *dst) {
         e->next->previous = e->previous;
     if(!(e->next || e->previous))
         src->out = 0;
-    free(e);
-    e = NULL;
-
-    /*
-    e = src->out;
-    f = e->node->in;
-    while(f && f->node != src)
-        f = f->next;
-    if(!f)
-        printf("f is NULL\n");
-    else {
-        if(f->previous)
-            f->previous->next = f->next;
-        if(f->next)
-            f->next->previous = f->previous;
-        if(!f->next && !f->previous) {
-            e->node->out = 0;
-        }
-        free(f);
-    }
     free(e);
     e = NULL;
     */

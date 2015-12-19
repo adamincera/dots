@@ -39,7 +39,10 @@ int main() {
     printf("print_nodes(sum):\n");
     print_nodes(sum);
 
-    connect_undir(m, n);
+    connect_dir_weighted(m, n, 0.4);
+    connect_dir_weighted(n, m, 0.8);
+    printf("m --[%g]-- n\n", *(float *) get_node(m->out, n));
+    printf("n --[%g]-- m\n", *(float *) get_node(n->out, m));
 
     /*
        printf("%s -> %s\n", (char *)m->data, (char *)m->out->node->data);
