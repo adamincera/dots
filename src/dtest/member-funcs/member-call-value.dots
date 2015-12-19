@@ -1,0 +1,2 @@
+Node x("dc");
+x.value();

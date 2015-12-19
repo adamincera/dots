@@ -243,3 +243,5 @@ graph_t *g2 = graph_plus_node(g1, n2);
 
 /* list.max() */
 <type>_list_max(list);
+
+char * value(n);

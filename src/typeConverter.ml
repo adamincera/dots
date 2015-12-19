@@ -366,8 +366,8 @@ let rec expr env = function
     | "oute" | "ine" -> 
         if num_args != 0 then raise (Failure ("oute/ine requires 0 args"))
         else Sast.MemberCall(s_e, m, s_el, Dict(Node, Num))
-    | "value" ->
-        if num_args != 0 then raise (Failure ("value requires 0 args"))
+    | "val" ->
+        if num_args != 0 then raise (Failure ("val requires 0 args"))
         else Sast.MemberCall(s_e, m, s_el, String)
     | _ -> raise (Failure ("no member function: " ^ m))
 )

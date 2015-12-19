@@ -495,7 +495,8 @@ let rec translate_expr env = function
           | Less | Leq | Greater | Geq -> 
             (match cdt1 with
               | Float -> Translate.Binop(Float,ce1,op,ce2)
-              | Int -> Translate.Binop(Int,ce1,op,ce2)
+              | Int -> 
+                  Translate.Binop(Int,ce1,op,ce2)
               | Long -> Translate.Binop(Long,ce1,op,ce2)
               |  Cstring -> 
                   let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in 
@@ -674,10 +675,6 @@ let rec translate_expr env = function
                       | _ -> raise (Failure("not enqueue")))
               | "dequeue" | "pop" -> 
                  let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
-                        
-                 (*  data = list.peek()  <type> *data = (<type> * peek(list);
-                           data = list.pop() 
-                          <type> *data = (<type> * pop(list); *)
                     (match e with 
                       | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
                             Block([Expr(Assign(Id((dt_to_ct e_dt), auto_var), 
@@ -689,7 +686,34 @@ let rec translate_expr env = function
                                 (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) *)
                                  Expr(Assign(Id(Ptr(List(c_e_list_type)),auto_var), Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
                            ) *)
-      
+    (*ine return is dict<Node, Num> no paramters called on a Node
+      Node *n 
+      Dict<Node, Num> temp = n.ine()
+      *)
+              | "ine" ->  
+                  let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                  (match e with
+                  | Id(s, dt) -> Block([ce;
+                                (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) where ce is the Node *)
+                                 Expr(Assign(Id(Ptr(Entry),auto_var), Call(Ptr(Entry), "ine", [ce])))])
+                  | Access(dt, c1, c2) -> Nostmt
+                  | _ -> raise (Failure("can't use ine without node")))
+              | "oute" -> 
+                 let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                 (match e with
+                  | Id(s, dt) -> Block([ce;
+                                (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) where ce is the Node *)
+                                 Expr(Assign(Id(Ptr(Entry),auto_var), Call(Ptr(Ptr(Entry)), "oute", [ce])))])
+                  | _ -> raise (Failure("can't use ine without node")))
+(* Node * n; returns value  snippet n= n.val() datamember of *t Node->data  *)
+              | "val" -> 
+                  (match e with
+                    | Id(s, dt) ->
+                      let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                      let index = get
+                      Block([ce; Expr(Assign(Id(Cstring,auto_var), Member(Ptr(Void), index, "data")))])
+                    | Access(dt, c1, c2) ->  Nostmt
+                    | _ -> raise (Failure("can't use ine without node")))
           | _ -> raise (Failure("not enqueue")))
           
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)

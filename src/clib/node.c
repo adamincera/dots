@@ -130,3 +130,7 @@ void remove_undir_edge(node_t *a, node_t *b) {
     remove_dir_edge(a, b);
     remove_dir_edge(b, a);
 }
+
+char * value(node_t *n) {   
+    return (n->data);
+}
