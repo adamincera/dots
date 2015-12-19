@@ -3,9 +3,9 @@ open Ast
 open Sast
 open Translate
 
+
 module StringMap = Map.Make(String)
 (* module DataTypeMap = Map.Make(dataType) *)
-
 type s_program = { s_globals : s_stmt list; s_main: s_stmt list; s_funcs : s_fdecl list; } 
 
 (* read in Sast program creat list of glbs by skipping fdecls  
@@ -31,6 +31,10 @@ program = { s_cmds : s_stmt list }
   @param sifted := a struct that contains the globals, 
       regular stmts, and func decls that have been sorted so far
  *)
+let get_list_type = function
+ | Sast.List(dt) ->  dt
+ | _ -> raise (Failure("wrong type: not a list")) 
+
 let rec stmt_sifter sifted = function
 | [] -> sifted
 | hd :: tl -> (match hd with
@@ -619,9 +623,36 @@ let rec translate_expr env = function
     | Sast.Access(v, e, dt) -> Nostmt
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
-            Access(dt_to_ct dt, index, ce) *)
+            Access(dt_to_ct dt, index, ce)
+            list_t *l3; //
+            g2[1];
+
+            l3 = (num_add_back(l3, 1.24));
+             *)
     | Sast.MemberVar(v, m, dt) -> Nostmt (* TODO *)
-    | Sast.MemberCall(v, f, el, dt) -> Nostmt (* TODO *)
+    | Sast.MemberCall(e, f, el, dt) -> 
+        let ce = translate_expr env e in
+        let cel = List.map (translate_expr env) el in 
+       (*) let cdt = Translate.get_expr_type ce in *)
+        let e_dt = get_expr_type e in 
+        let e_list = (get_list_type e_dt) in
+        let c_e_list_type = dt_to_ct e_list in
+        (match e_list with
+          | List(dt) -> 
+              (match f with
+              | "enqueue" -> 
+                  let func_name = 
+                    (match dt with
+                    | Num -> "num_add_back"
+                    | String -> "string_add_back"
+                    | Node -> "node_add_back"
+                    | Graph -> "graph_add_back"
+                    | _ -> raise (Failure("can not enqueue this datatype"))) in
+                    (match e with 
+                      | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> Block([Expr(Assign(ce, Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
+                      | _ -> raise (Failure("TODO")))
+              | _ -> raise (Failure("temp")))
+          ) 
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.UndirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
@@ -692,13 +723,12 @@ let rec translate_stmt env = function
     | Sast.AccessAssign(e1, e2, dt) -> Nostmt
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
+        let index = "v" ^ string_of_int(find_var id env.var_inds) in
         (match s with
           | Sast.Noexpr ->                                                 
-            let index = "v" ^ string_of_int(find_var id env.var_inds) in
             Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
               Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
           | _ -> 
-            let index = "v" ^ string_of_int(find_var id env.var_inds) in
             Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
               Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
         )     
