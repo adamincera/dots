@@ -21,7 +21,7 @@ type cstmt =
 | Binop of ctype * cstmt * Ast.op * cstmt
 | Assign of cstmt * cstmt                        (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cstmt list            (* return type of the function, function name, arguments *) (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
-| Access of ctype * string * cstmt               (* array access: id[cexpr] *)
+| Access of ctype * cstmt * cstmt               (* array access: id[cexpr] *)
 | Member of ctype * string * string              (* id, member *)
 | Cast of ctype * cstmt                          (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
 | Deref of ctype * cstmt                                 (* ex. *var *)
@@ -244,7 +244,7 @@ let rec translate_stmt = function
               ")"
         | _ -> id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
     )
-| Access(dt, id, e) -> (translate_stmt id) ^ "[" ^ translate_stmt e ^ "]"
+| Access(dt, id, e) -> (translate_stmt id) ^ "[" ^ (translate_stmt e) ^ "]"
 | Member(dt, id, m) -> id ^ "->" ^ m
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_stmt e ^ ")"
 | Ref(dt, e) -> "&(" ^ translate_stmt e ^ ")"
