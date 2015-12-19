@@ -37,6 +37,8 @@ int main() {
     print_strings(string_copy);
     printf("\n");
 
+    
+
     printf("l[0] = %s, l[1] = %s\n", list_access(l, 0), list_access(l, 1));
 
     free_list(l);

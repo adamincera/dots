@@ -113,3 +113,11 @@ void print_strings(list_t *r);
 
 void free_list(list_t *r);
 
+void num_index_insert(list_t *l, int i, float *a);
+
+void string_index_insert(list_t *l, int i, char *a);
+
+void node_index_insert(list_t *l, int i, node_t *a);
+
+void graph_index_insert(list_t *l, int i, graph_t *a);
+

@@ -314,3 +314,39 @@ int other_list_equals(const list_t *a, const list_t *b, int (*comp)(void *a, voi
     return 1;
 }
 
+static void index_insert(list_t *l, int i, void *data, void *(*copy)(void *src)) {
+    int j = 0;
+    while(j < i) {
+        j++;
+        if(l->next)
+            l = l->next;
+        else
+            break;
+    }
+    if(l->next) {
+        if(copy)
+            l->data = copy(data);
+        else
+            l->data = data;
+    } else if(j == i) {
+        l->next = (list_t *) malloc(sizeof(list_t));
+        l->next->next = NULL;
+        l->next->previous = l;
+        if(copy)
+            l->next->data = copy(data);
+        else
+            l->next->data = data;
+    }
+}
+
+void num_index_insert(list_t *l, int i, float *a) {
+    index_insert(l, i, a, float_copy);
+}
+
+void string_index_insert(list_t *l, int i, char *a) {
+    index_insert(l, i, a, void_strcpy);
+}
+
+void node_index_insert(list_t *l, int i, node_t *a);
+
+void graph_index_insert(list_t *l, int i, graph_t *a);

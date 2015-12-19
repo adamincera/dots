@@ -4,7 +4,7 @@ CFLAGS = -Wall
 
 CFILES= graph.c node.c list.c dict.c
 
-main: main.o graph.o node.o
+main: main.o graph.o node.o dict.o
 
 main.o: main.c graph.h node.h
 
