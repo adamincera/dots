@@ -85,9 +85,9 @@ let rec stmt_sifter sifted = function
                   stmt_sifter {s_globals = sifted_sl.s_globals @ sifted.s_globals; 
                                s_main = While(cond, sifted_sl.s_main) :: sifted.s_main; 
                                s_funcs = sifted_sl.s_funcs @ sifted.s_funcs} tl
-               | Sast.Fdecl(f) -> {s_globals = sifted.s_globals; 
+               | Sast.Fdecl(f) -> stmt_sifter {s_globals = sifted.s_globals; 
                            s_main = sifted.s_main; 
-                           s_funcs = f :: sifted.s_funcs}
+                           s_funcs = f :: sifted.s_funcs} tl
               )
 
 type translation_env = {
@@ -681,8 +681,9 @@ let rec translate_stmt env = function
                   Block([ce;
                          (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) *)
                          Expr(Assign(cv, Id((dt_to_ct var_type), auto_var)))])
-              | StrLiteral(s1, dt) | NumLiteral(s1, dt) -> (* Expr(Assign(Id((dt_to_ct var_type), index), ce)) *)
+              | StrLiteral(s1, dt) | NumLiteral(s1, dt) | Id(s1, dt) -> (* Expr(Assign(Id((dt_to_ct var_type), index), ce)) *)
                   Expr(Assign(cv, ce))
+              | DictLiteral(tl, dt) -> Expr(Assign(cv, Id(Void, "NULL"))) (* TODO *)
               | _ -> raise (Failure("Assign don't work like that ")))
 
             
@@ -785,12 +786,34 @@ let rec translate_stmt env = function
                   *)
                   
 and
-translate_fdecl env func = 
+translate_fdecl env func = (
+    (* add the parameter names to the env *)
+    let formals = func.s_formals in
+    let rtype = func.s_rtype in
+
+    (* add formal variables to local scope variable maps *)
+    let map_builder fmls m = (List.map (fun f -> m := (StringMap.add (snd f) (fst f) !m); "") formals) in
+    let types_map = ref StringMap.empty in
+      ignore (map_builder formals types_map);
+    let fml_inds = enum 1 1 (List.map (fun f -> (snd f)) formals) in
+    let inds_map = ref (string_map_pairs StringMap.empty fml_inds) in
+
+    let func_env = {
+      var_inds = inds_map :: env.var_inds;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
+      var_types =  types_map :: env.var_types;   (* maps a var name to its type  ex. x -> num *)
+      func_inds =   ref StringMap.empty :: env.func_inds;            (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
+      func_obj = ref StringMap.empty :: env.func_obj;
+      return_type = rtype;                       (* what should the return type be of the current scope *)
+    }  in
+
     {crtype = dt_to_ct func.s_rtype; 
-     cfname = func.s_fname; 
-     cformals = List.map (fun f -> (dt_to_ct (fst f), (snd f))) func.s_formals;
-     cbody = (List.map (fun f -> translate_stmt env f) func.s_body)}
+     cfname = "f" ^ string_of_int(find_var func.s_fname env.func_inds); 
+     cformals = List.map (fun f -> (dt_to_ct (fst f), "v" ^ string_of_int(find_var (snd f) func_env.var_inds))) func.s_formals;
+     cbody = (List.map (fun f -> translate_stmt func_env f) func.s_body)}
+)
 in
+
+(* convert the sast_prg to cast_prg *)
 let global_vars = List.map (fun f -> translate_stmt env f) sast_prg.s_globals in 
 let main_func = {crtype = Translate.Int;
                  cfname = "main";

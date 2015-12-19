@@ -12,22 +12,9 @@ let get_list_type = function
  | Sast.List(dt) ->  dt
  | _ -> raise (Failure("wrong type: not a list"))
 
-(*       let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-      let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
-      (try                                (*sees if variable defined*)
-          (find_var v env.var_inds)
-       with
-       | Not_found -> raise (Failure("undeclared variable: "))
-      );
-      if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
-      then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-      else Sast.Assign(v, s_e, e_dt)
-
-      let get_dict_type = function
+let get_dict_type = function
  | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
  | _ -> raise (Failure("wrong type: not a dict "))
-*)
-
 
 let rec check_list env v_e = function
  | [] -> ""
@@ -309,10 +296,12 @@ let rec expr env = function
         with 
           Not_found -> raise (Failure("undeclared variable: ")))
   else 
+    (
       let fdecl = find_var f env.func_obj in 
        ignore (formal_check fdecl.s_formals s_el);
        let rtype = fdecl.s_rtype in
-       Sast.Call(f, s_el , rtype) (* TODO: figure out the return type and use that *)
+       Sast.Call(f, s_el , rtype)
+    )
 | Ast.Access(e1, e2) -> 
     let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
     let e1_dt = get_expr_type s_e1 in
@@ -698,31 +687,59 @@ let rec stmt env = function
      Not_found -> raise (Failure ("while issue")))
 | Ast.Fdecl(func) ->  (*Fdecl of func_decl and *)
    (try
+    let fname = func.fname in
     let formals = List.map (fun (dt, v) -> (str_to_type dt, v)) func.formals in
     let rtype = str_to_type func.rtype in
 
     (* add formal variables to local scope variable maps *)
+    (*
     let map_builder fmls m = (List.map (fun f -> m := (StringMap.add (snd f) (fst f) !m); "") formals) in
     let types_map = ref StringMap.empty in
       ignore (map_builder formals types_map);
     let fml_inds = enum 1 1 (List.map (fun f -> (snd f)) formals) in
     let inds_map = ref (string_map_pairs StringMap.empty fml_inds) in
+    *)
 
-    let func_env = {
-            var_inds = inds_map :: env.var_inds;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
-            var_types =  types_map :: env.var_types;   (* maps a var name to its type  ex. x -> num *)
-            func_inds =   ref StringMap.empty :: env.func_inds;            (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
-            func_obj = ref StringMap.empty :: env.func_obj;
-            return_type = rtype;                       (* what should the return type be of the current scope *)
-    }  
-  in Sast.Fdecl({
-                  Sast.s_fname = func.fname;
-                  Sast.s_rtype = rtype;
-                  Sast.s_formals = formals;
-                  Sast.s_body = List.map (fun s -> stmt func_env s) func.body 
-               })
+  (* add this function to symbol table *)
+  let dummy_func_obj = {
+                        Sast.s_fname = fname;
+                        Sast.s_rtype = rtype;
+                        Sast.s_formals = [];
+                        Sast.s_body = [] 
+                      }
+  in
+  (List.hd env.func_obj) := StringMap.add fname dummy_func_obj !(List.hd env.func_obj);
+  (List.hd env.func_inds) := StringMap.add fname (find_max_index !(List.hd env.func_inds)+1) !(List.hd env.func_inds); (* add index map *)
+  
+  let func_env = {
+          var_inds = ref StringMap.empty :: env.var_inds;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
+          var_types =  ref StringMap.empty :: env.var_types;   (* maps a var name to its type  ex. x -> num *)
+          func_inds =   env.func_inds;            (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
+          func_obj =    env.func_obj;
+          return_type = rtype;                       (* what should the return type be of the current scope *)
+  }  
+  in
+
+  let rec fmls_adder env = function
+  | [] -> ignore()
+  | hd :: tl -> 
+      (List.hd env.var_types) := StringMap.add (snd hd) (fst hd) !(List.hd env.var_types);
+      (List.hd env.var_inds) := StringMap.add (snd hd) (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index map *)
+      ignore(fmls_adder env tl)
+  in 
+  ignore(fmls_adder func_env formals);
+  
+ let populated_fdecl = {
+                        Sast.s_fname = func.fname;
+                        Sast.s_rtype = rtype;
+                        Sast.s_formals = formals;
+                        Sast.s_body = List.map (fun s -> stmt func_env s) func.body 
+                       }
+ in
+ (List.hd env.func_obj) := StringMap.add fname populated_fdecl !(List.hd env.func_obj); (* replace the dummy fobj with the evaluated one *)
+ Sast.Fdecl(populated_fdecl)
   with 
-     Not_found -> raise (Failure ("while issue")))
+     Not_found -> raise (Failure ("fdecl issue")))
 in
 
   (* { Sast.s_funcs = List.map (fun f -> fdecl env f) prog.funcs;
