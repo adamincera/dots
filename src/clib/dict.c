@@ -360,7 +360,7 @@ void *string_dict_max(entry_t **table) {
     return ret;
 }
 
-int len(entry_t **table) {
+int dict_len(entry_t **table) {
     int i;
     entry_t *temp;
     int len = 0;
