@@ -619,7 +619,7 @@ let rec stmt env = function
       (* add the temp var to the symbol table *)
       (List.hd env.var_types) := StringMap.add v dt !(List.hd env.var_types); (* add type map *)
       (List.hd env.var_inds) := StringMap.add v (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
-      Sast.For(v, s_e, List.map (fun s -> stmt env s) sl)    
+      Sast.For(expr env v, s_e, List.map (fun s -> stmt env s) sl)    
     | Dict(dtk, dtv) ->
       (try 
         ignore(find_var v env.var_inds);
@@ -631,7 +631,7 @@ let rec stmt env = function
       (* add the temp var to the symbol table *)
       (List.hd env.var_types) := StringMap.add v dtk !(List.hd env.var_types); (* add type map *)
       (List.hd env.var_inds) := StringMap.add v (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
-      Sast.For(v, s_e, List.map (fun s -> stmt env s) sl)    
+      Sast.For(expr env v, s_e, List.map (fun s -> stmt env s) sl)    
     | Graph -> 
       (try 
         ignore(find_var v env.var_inds);
@@ -643,7 +643,7 @@ let rec stmt env = function
       (* add the temp var to the symbol table *)
       (List.hd env.var_types) := StringMap.add v Sast.Node !(List.hd env.var_types); (* add type map *)
       (List.hd env.var_inds) := StringMap.add v (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index mapping *)
-      Sast.For(v, s_e, List.map (fun s -> stmt env s) sl)
+      Sast.For(expr env v, s_e, List.map (fun s -> stmt env s) sl)
     | _ -> raise(Failure("Trying to for loop an expr that doesnt return an iterable"))
   )
   (* temp var must NOT have already been declared *)
