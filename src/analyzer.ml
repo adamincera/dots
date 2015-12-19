@@ -535,7 +535,7 @@ let rec translate_expr env = function
                                  For(Assign(Id(elem_type, auto_var), print_expr),
                                      Id(Ptr(List(elem_type)), auto_var),
                                      Assign(Id(elem_type, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
-                                     [Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))])]
+                                     [Expr(Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))]))]
                                  );
                                  Vdecl(Ptr(List(dt_to_ct dt)), auto_var)
                                 ]
@@ -681,7 +681,7 @@ let rec translate_expr env = function
                     (match e with 
                       | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
                             Block([Expr(Assign(Id((dt_to_ct e_dt), auto_var), 
-                                              Call(dt_to_ct e_dt, "pop", [])))])
+                                              Call(dt_to_ct e_dt, "pop", [ce] ) ))])
                       | _ -> raise (Failure("not dequeue")))
                            
                           (* let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
@@ -798,7 +798,7 @@ let rec translate_stmt env = function
 
             let csl = List.map (translate_stmt env) sl in
             Block(
-            [Vdecl(Ptr(dt_to_ct iter_type), auto_index); Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter))]
+            [Expr(Vdecl(Ptr(dt_to_ct iter_type), auto_index); Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter)))]
             @
             [
             (match iter_type with

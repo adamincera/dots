@@ -362,7 +362,7 @@ let rec expr env = function
             Sast.MemberCall(s_e, m, s_el, Sast.Void)
     | "dequeue" | "pop" -> 
         if num_args != 0 then raise (Failure ("dequeue/pop requires 0 args"))
-        else Sast.MemberCall(s_e, m, s_el, e_dt)
+        else Sast.MemberCall(s_e, m, s_el, Sast.Void)
     | "oute" | "ine" -> 
         if num_args != 0 then raise (Failure ("oute/ine requires 0 args"))
         else Sast.MemberCall(s_e, m, s_el, Dict(Node, Num))
