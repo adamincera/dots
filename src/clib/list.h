@@ -123,3 +123,11 @@ void node_index_insert(list_t *l, int i, node_t *a);
 
 void graph_index_insert(list_t *l, int i, graph_t *a);
 
+float num_list_min(list_t *l);
+
+float num_list_max(list_t *l);
+
+char *string_list_min(list_t *l);
+
+char *string_list_max(list_t *l);
+

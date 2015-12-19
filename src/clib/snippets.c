@@ -236,3 +236,9 @@ graph_t *g2 = graph_plus_node(g1, n2);
 
 /** dict.remove(key) **/
 <type>_dict_remove(dict, key);
+
+/* dict.min() */
+<type>_dict_min(dict);
+
+/* list.max() */
+<type>_list_max(list);
