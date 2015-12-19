@@ -99,6 +99,17 @@ list_t *node_add_back(list_t *l, node_t *data) {
     return add_back(l, data, NULL);
 }
 
+list_t *pop(list_t *l) {
+    node_t *head = l->next;
+    head->previous = NULL;
+    free(l);
+    return head;
+}
+
+void *peek(list_t *l) {
+    return l->data;
+}
+
 list_t *range(int a, int b) {
     list_t *r = NULL;
     int i;

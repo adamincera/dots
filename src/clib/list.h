@@ -80,7 +80,7 @@ int other_list_equals(const list_t *a, const list_t *b, int (*comp)(void *a, voi
 
 /* dequeue/pop */
 
-void *pop(list_t *l);
+list_t *pop(list_t *l);
 
 /* peek */
 void *peek(list_t *l);
