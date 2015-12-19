@@ -13,6 +13,9 @@ int main() {
     list_t *concat = num_list_concat(l, m);
     printf("concat: ");
     print_range(concat);
+    float minf =  num_list_min(concat);
+    float maxf =  num_list_max(concat);
+    printf("min: %f\nmax: %f\n", minf, maxf);
     free_range(l);
     free_range(m);
     l = range(20, 20);
@@ -24,6 +27,9 @@ int main() {
     l = NULL;
     l = string_add_front(l, s2);
     l = string_add_front(l, s1);
+    char *min = string_list_min(l);
+    char *max = string_list_max(l);
+    printf("min: %s\nmax: %s\n", min, max);
     print_strings(l);
     free_list(l);
     printf("list done\n");
@@ -46,6 +52,9 @@ int main() {
     put_string(d, "hello", (void *) "world2");
     put_string(d, "elloh", (void *) "orldw");
     put_string(d, "something else", (void *) "new value");
+    min = string_dict_min(d);
+    max = string_dict_max(d);
+    printf("min: %s\nmax: %s\n", min, max);
     char *got = (char *) get_string(d, "hello");
     printf("got %s\n", got);
     got = (char *) get_string(d, "elloh");
@@ -61,6 +70,9 @@ int main() {
     put_num(nums, 1.23, (void *) "1.23 val");
     put_num(nums, 1.23, (void *) "1.23 second val");
     put_num(nums, 1.24, (void *) "1.24 val");
+    minf = *(float *) num_dict_min(nums);
+    maxf = *(float *) num_dict_max(nums);
+    printf("min: %f\nmax: %f\n", minf, maxf);
     got = (char *)get_num(nums, 1.23);
     printf("got %s\n", got);
     got = (char *)get_num(nums, 1.24);

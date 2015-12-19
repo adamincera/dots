@@ -5,16 +5,17 @@
  */
 
 def dict<node, num> relax (node u, dict<node, num> w) {
-        for (v in u.out) {
-            if w[v] > u.out[v] {
-                w[v] = u.out[v];
+        for (v in u.oute()) {
+            if (w[v] > u.oute()[v]) {
+                w[v] = u.oute()[v];
             }
         }
         return w;
 }
 
 def dict<node, num> dijkstra (graph G, node source){
-    dict<node, num> S, Q;
+    dict<node, num> S;
+    dict<node, num> Q;
     
     for (n in G) {
         Q[n] = INF;
@@ -22,8 +23,10 @@ def dict<node, num> dijkstra (graph G, node source){
     Q[source] = 0;
     
     while (len(Q) != 0) {
-        node u = min(Q);
-        num w = Q[u];
+        node u;
+        u = min(Q);
+        num w;
+        w = Q[u];
         Q.remove(u);
         S[u] = w;
         Q = relax(u, Q);
@@ -39,14 +42,16 @@ node q("nyc");
 node r("boston");
 
 graph g1 = {
-    x --[2] z;
-    z --[2] q;
-    q --[3] r;
-    z --[9] r;
-    x --[8] y;
-    y --[9] r;
+    x --[2] z,
+    z --[2] q,
+    q --[3] r,
+    z --[9] r,
+    x --[8] y,
+    y --[9] r
 };
+
 /* end Graph set-up */
 
 /* find the min costs from "philly" to all other cities: */
-dict<node, num> min_costs = dijkstra(g1, z);
+dict<node, num> min_costs;
+min_costs = dijkstra(g1, z);

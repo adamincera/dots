@@ -103,12 +103,12 @@ list_t *range(int a, int b) {
     list_t *r = NULL;
     int i;
     list_t *t;
-    int *j;
+    float *j;
     int sign = a > b ? 1 : -1;
     for(i = b; i != a + sign; i += sign) {
         t = (list_t *) malloc(sizeof(list_t));
-        j = (int *) malloc(sizeof(int));
-        *j = i;
+        j = (float *) malloc(sizeof(float));
+        *j = (float) i;
         t->data = j;
         if(r)
             r->previous = t;
@@ -132,9 +132,9 @@ void print_range(list_t *r) {
     printf("[");
     for(; r; r = r->next)
         if(r->next)
-            printf("%d, ", *((int *) r->data));
+            printf("%g, ", *((float *) r->data));
         else
-            printf("%d", *((int *) r->data));
+            printf("%g", *((float *) r->data));
     printf("]\n");
 }
 
@@ -374,3 +374,36 @@ void node_index_insert(list_t *l, int i, node_t *a) {
 void graph_index_insert(list_t *l, int i, graph_t *a) {
     index_insert(l, i, a, void_graph_copy);
 }
+
+float num_list_min(list_t *l) {
+    float min = (float) *(int *) l->data;
+    for(; l; l = l->next)
+        if(*(float *) l->data < min)
+            min = (float) *(int *) l->data;
+    return min;
+}
+
+float num_list_max(list_t *l) {
+    float max = *(float *) l->data;
+    for(; l; l = l->next)
+        if(*(float *) l->data > max)
+            max = *(float *) l->data;
+    return max;
+}
+
+char  *string_list_min(list_t *l) {
+    char *min = (char *) l->data;
+    for(; l; l = l->next)
+        if(strcmp((char *)l->data, min) < 0)
+            min = (char *) l->data;
+    return min;
+}
+    
+char  *string_list_max(list_t *l) {
+    char *max = (char *) l->data;
+    for(; l; l = l->next)
+        if(strcmp((char *)l->data, max) > 0)
+            max = (char *) l->data;
+    return max;
+}
+

@@ -147,7 +147,7 @@ vdecl:
 /* PRIMITIVE INITIALIZERS */
 prim_decl_prefix:
 | prim_type ID { Vdecl($1, $2) }                                                   /* num x */
-| prim_type ID ASSIGN expr { Block([Vdecl($1, $2); Assign($2, $4)]) }        /* MOVE THESE  */
+| prim_type ID ASSIGN expr { Block([Vdecl($1, $2); Assign(Id($2), $4)]) }        /* MOVE THESE  */
 
 /* NODE INITIALIZERS */
 node_decl_prefix:
@@ -163,11 +163,11 @@ graph_decl_prefix:
 
 list_decl_prefix:
 | LIST LT data_type GT ID { ListDecl($3, $5) }                                                              /*  list<node> min; */ 
-| LIST LT data_type GT ID ASSIGN expr { Block([ListDecl($3, $5); Assign($5, $7)]) }                        /*  list<node> min_path = { x, y, z; }; */
+| LIST LT data_type GT ID ASSIGN expr { Block([ListDecl($3, $5); Assign(Id($5), $7)]) }                        /*  list<node> min_path = { x, y, z; }; */
 
 dict_decl_prefix:
 | DICT LT data_type COMMA data_type GT ID { DictDecl($3, $5, $7) }                                         /* dict<node, num> parents; */ 
-| DICT LT data_type COMMA data_type GT ID ASSIGN expr { Block([DictDecl($3, $5, $7); Assign($7, $9)]) } /* dict<node, num> parents = { x; y; z; }; */
+| DICT LT data_type COMMA data_type GT ID ASSIGN expr { Block([DictDecl($3, $5, $7); Assign(Id($7), $9)]) } /* dict<node, num> parents = { x; y; z; }; */
 
    
 /////////////////////////////////////////////////////////////////////////////
@@ -184,15 +184,16 @@ stmt_list:
 
 stmt:
    expr SEMI { Expr($1) } 
-  | ID ASSIGN expr SEMI { Assign($1, $3) }
-  /*| access_expr ASSIGN expr SEMI { AccessAssign($1, $3) }*/
+  | log_expr SEMI { Expr($1) }
+  | expr ASSIGN expr SEMI { Assign($1, $3) }
+  /*| access_expr ASSIGN expr SEMI { AccessAssign($1, $3) } */
   | RETURN expr SEMI { Return($2) } 
   /* | LBRACE stmt_list RBRACE { Block(List.rev $2) } */
-  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
-  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
+  | IF LPAREN log_expr RPAREN LBRACE stmt_list RBRACE %prec NOELSE { If($3, Block($6), Block([])) }
+  | IF LPAREN log_expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE   { If($3, Block($6), Block($10)) }
   | FOR LPAREN ID IN expr RPAREN LBRACE stmt_list RBRACE
      { For($3, $5, $8) }
-  | WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
+  | WHILE LPAREN log_expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
   | vdecl { $1 }
   | fdecl { $1 }
 
@@ -236,13 +237,23 @@ expr:
 */
 
 
-expr: 
+log_expr: 
+  | expr EQ  expr { Binop($1, Equal, $3) }
+  | expr NEQ  expr { Binop($1, Neq,   $3) }
+  | expr LT    expr { Binop($1, Less,  $3) }
+  | expr LEQ   expr { Binop($1, Leq,   $3) }
+  | expr GT  expr { Binop($1, Greater,  $3) }
+  | expr GEQ  expr { Binop($1, Geq,   $3) }
+  | log_expr LOGAND log_expr { Binop($1, LogAnd, $3) }
+  | log_expr LOGOR log_expr { Binop($1, LogOr, $3) }
+
+expr:
   | access_expr { $1 }
   | nacc_expr { $1 }
 
 nacc_expr: /* non access exprs */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | expr DOT ID %prec NOCALL { MemberVar($1, $3) }
+  /*| expr DOT ID %prec NOCALL { MemberVar($1, $3) }*/
   | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
   | term               { $1 }
@@ -255,14 +266,6 @@ term :
   | term MINUS  atom { Binop($1, Sub,   $3) }
   | term TIMES  atom { Binop($1, Mult,  $3) }
   | term DIVIDE atom { Binop($1, Div,   $3) }
-  | term EQ     atom { Binop($1, Equal, $3) }
-  | term NEQ    atom { Binop($1, Neq,   $3) }
-  | term LT     atom { Binop($1, Less,  $3) }
-  | term LEQ    atom { Binop($1, Leq,   $3) }
-  | term GT     atom { Binop($1, Greater,  $3) }
-  | term GEQ    atom { Binop($1, Geq,   $3) }
-  | term LOGAND atom { Binop($1, LogAnd, $3) }
-  | term LOGOR atom  { Binop($1, LogOr, $3) }
   | atom             { $1 }
 
 atom:
@@ -277,6 +280,43 @@ expr_opt:
     * nothing * { Noexpr }
   | expr          { $1 }
 */
+
+/* new rules let's go */ 
+/* 
+l_e: 
+  | e EQ     e { Binop($1, Equal, $3) }
+  | e NEQ    e { Binop($1, Neq,   $3) }
+  | e LT     e { Binop($1, Less,  $3) }
+  | e LEQ    e { Binop($1, Leq,   $3) }
+  | e GT     e { Binop($1, Greater,  $3) }
+  | e GEQ    e { Binop($1, Geq,   $3) }
+  | l_e LOGAND l_e { Binop($1, LogAnd, $3) }
+  | l_e LOGOR l_e  { Binop($1, LogOr, $3) }
+
+e: 
+  | LPAREN e RPAREN { $2 }
+  | e PLUS   e { Binop($1, Add,   $3) }
+  | e MINUS  e { Binop($1, Sub,   $3) }
+  | e TIMES  e { Binop($1, Mult,  $3) }
+  | e DIVIDE e { Binop($1, Div,   $3) }
+  | term { $1 }
+  | access_expr { $1 }
+  | literal          { $1 }
+  | INF              { NumLiteral("INF") }
+  | TRUE             { Boolean(True) }
+  | FALSE            { Boolean(False) }
+
+access_expr:
+  | term LBRACKET e RBRACKET { Access($1, $3) } 
+
+term: 
+  | ID               { Id($1) }
+  | term DOT ID %prec NOCALL    { Id($1) } 
+
+*/
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////
                               /* actuals */

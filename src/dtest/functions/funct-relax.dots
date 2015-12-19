@@ -1,9 +1,10 @@
 def dict<node, num> relax (node u, dict<node, num> w) {
-        for (v in u.oute) {
+        for (v in u.oute()) {
 	
-            if ( ((w[v]) > (u.oute[v]))) {
-                w[v] = u.oute[v];
+            if ( w[v] > u.oute()[v]) {
+                w[v] = u.oute()[v];
             }
+            else {}
         }
         return w;
 }
