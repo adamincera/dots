@@ -233,15 +233,65 @@ let create_auto env key dt =
 in
 
     (* 
-    for use with maps where the value is an int 
-    finds the max int value in the map
-    *)
-let string_of_stmt c_v = 
-  let cdt1 = Translate.get_expr_type c_v in
-  let s_dt  = Translate.type_to_str cdt1 in  
-  let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.String)) in
+   char str[50];
+   int len;
 
-  (match cdt1 with
+   strcpy(str, "This is tutorialspoint.com");
+   len = strlen(str);
+    *)
+let string_len c_v = 
+  let cdt1 = Translate.get_expr_type c_v in
+  let s_dt  = Translate.type_to_str cdt1 in 
+  if cdt1 = Cstring then
+      let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
+       (auto_var, Block([
+              Vdecl(Int, auto_var);
+              Assign(Id(Int, auto_var), 
+                     Call(Int, "strlen", [c_v]))]))
+  else 
+    raise (Failure("only possible with string "))
+  in
+
+let string_concat c_v1 c_v2 = 
+  let cdt2 = Translate.get_expr_type c_v2 in
+
+  let len_c1 = (fst (string_len c_v1)) in 
+  let len_c2 = (fst (string_len c_v2)) in 
+  let len_new =  Assoc(Binop(Int, Id(Int,len_c1), Add, Id(Int,len_c2))) in
+
+  let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.String)) in
+    if cdt2 = Cstring then
+   (auto_var, 
+    Block([
+      Vdecl(Cstring, auto_var);
+      Assign(Id(Cstring, auto_var), 
+             Call(Ptr(Void), 
+                  "malloc", 
+                 [Binop(Int, 
+                        Call(Int, "sizeof", [Id(Void, "int")]), 
+                        Mult,
+                        len_new)
+                 ])
+            );
+      Call(Void,
+           "strcpy",
+           [Id(Cstring, auto_var);
+            c_v1]);
+      Call(Void,
+           "strcat",
+           [Id(Cstring, auto_var);
+            c_v2])
+      ]))
+ else 
+    raise (Failure("only accesible for strings"))
+
+ in
+
+let string_of_stmt c_v = 
+  let cdt = Translate.get_expr_type c_v in
+  let s_dt  = Translate.type_to_str cdt in  
+  let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.String)) in
+  (match cdt with
       | Int ->
           (auto_var, Block([
               Vdecl(Cstring, auto_var);
@@ -251,7 +301,7 @@ let string_of_stmt c_v =
                          [Binop(Int, 
                                 Call(Int, "sizeof", [Id(Void, "char")]), 
                                 Mult,
-                                Literal(Int, "256"))
+                                Literal(Int, "400"))
                          ] )
                     );
               Call(Void,
@@ -270,12 +320,12 @@ let string_of_stmt c_v =
                                [Binop(Int, 
                                       Call(Int, "sizeof", [Id(Void, "char")]), 
                                       Mult,
-                                      Literal(Int, "256"))
+                                      Literal(Int, "400"))
                                ] )
                           );
                      Call(Void, 
                           "sprintf",
-                          [Id(Void, "string");
+                          [Id(Void, auto_var);
                             Literal(Cstring,"%d.%02u");
                             Cast(Int, c_v);
                             Cast(Int, 
@@ -326,7 +376,9 @@ let rec translate_expr env = function
                         let float_convert = string_of_stmt ce2 in 
                         Block([(snd float_convert) ;
                          translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e1, String))])
-                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*) 
+                    | Cstring ->  
+                         let c_string = string_concat ce1 ce2 in 
+                         Block([(snd c_string)])
                     | Int -> 
                         let int_convert = string_of_stmt ce2 in 
                         Block([(snd int_convert) ;

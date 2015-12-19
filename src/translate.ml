@@ -46,6 +46,7 @@ type cstmt =
 | If of cstmt * cstmt list * cstmt list
 | For of cstmt * cstmt * cstmt * cstmt list      (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
 | While of cstmt * cstmt list
+| Assoc of cstmt (* wrap the expression in parentheses *)
 | Nostmt
 
 type c_func = { crtype : ctype; (* c return type *)
@@ -123,6 +124,7 @@ let rec get_expr_type = function
 | Cast(dt, e) -> dt
 | Ref(dt, e) -> dt
 | Deref(dt, e) -> dt
+| Assoc(e) -> get_expr_type e
 | _ -> Void
 (* | Noexpr -> Void *)
 
@@ -145,6 +147,7 @@ let rec stmt_type_to_str = function
 | If(cond, el1, el2) -> "If-then-Else"
 | For(assign, cond, incr, sl) -> "For"
 | While(cond, sl) -> "While"
+| Assoc(e) -> stmt_type_to_str e
 | Nostmt -> "Nostmt"
 
 let op_to_str = function
@@ -304,6 +307,7 @@ let rec translate_stmt = function
 | While(cond, sl) -> "while (" ^ translate_stmt cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl) ^
     "\n}"
+| Assoc(e) -> "(" ^ (translate_stmt e) ^ ")"
 | Nostmt -> ""
 
 
