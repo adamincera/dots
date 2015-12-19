@@ -530,28 +530,30 @@ let rec translate_expr env = function
                                 For(Assign(Id(Int, auto_hash), Literal(Int, "0")),
                                     Binop(Int, Id(Int, auto_hash), Less, Id(Int, "TABLE_SIZE")),
                                     Assign(Id(Int, auto_hash), 
-                                           Binop(Int, Id(Int, auto_hash), Add, Literal(Int, "1"))),
+                                           Binop(Int, Id(Int, auto_hash), Add, Literal(Int, "1"))
+                                         ),
                                     [For(Assign(Id(Ptr(Entry), auto_entry),
                                                 Access(Ptr(Entry), print_expr, Id(Int, auto_hash))
                                                ),
                                          Id(Ptr(Entry), auto_entry),
                                          Assign(Id(Ptr(Entry), auto_entry),
                                                 Member(Ptr(Entry), auto_entry, "next")),
-                                         [Assign(Id(Ptr(key_type), auto_key),
+                                         [Expr(Assign(Id(Ptr(key_type), auto_key),
                                                  Cast(Ptr(key_type), Member((Ptr(Void), auto_entry, "key")))
-                                                );
+                                                ));
                                           Vdecl(val_type, auto_val);
-                                          Assign(Id(val_type, auto_val),
+                                          Expr(Assign(Id(val_type, auto_val),
                                                  Deref(val_type, 
                                                        Cast(Ptr(val_type), 
                                                             (* specific call for the key type *)
                                                             call_stmt
                                                            )
                                                       )
-                                                );
+                                              ));
                                           If(Id(Int, auto_first),
-                                             [Assign(Id(Int, auto_first),
-                                                    Literal(Int, "0"))
+                                             [Expr(Assign(Id(Int, auto_first),
+                                                    Literal(Int, "0")
+                                                   ))
                                              ],
                                              [
                                                (*translate_expr env (Sast.Call("print", [Sast.StrLiteral(",", Sast.String)], Sast.Void))*)
@@ -567,7 +569,7 @@ let rec translate_expr env = function
                                          ]
                                     )]
                                    );
-                                Assign(Id(Int, auto_first), Literal(Int, "1"));
+                                Expr(Assign(Id(Int, auto_first), Literal(Int, "1")));
                                 Vdecl(Int, auto_first);
                                 Vdecl(Ptr(key_type), auto_key);
                                 Vdecl(Ptr(Entry), auto_entry);
