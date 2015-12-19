@@ -33,7 +33,7 @@ int contains(graph_t *g, void *data, int (* comp)(void *a, void *b)) {
 }
 
 /* add a node to g by iterating through the list, returning if the node is found, and if not, adding it to the end */
-void add_node(graph_t *g, node_t *node) {
+void add_node(graph_t *g, const node_t *node) {
     nodelist_t *n = (nodelist_t *)malloc(sizeof(nodelist_t));
     n->node = node;
     nodelist_t *temp = g->nodes;
@@ -132,3 +132,15 @@ int graph_equals(const graph_t *a, const graph_t *b) {
     return 1;
 }
 
+graph_t *graph_plus_node(const graph_t *g, const node_t *n) {
+    graph_t *copy = graph_copy(g);
+    add_node(copy, n);
+    return copy;
+}
+
+graph_t *node_plus_node(const node_t *n1, const node_t *n2) {
+    graph_t *ret = init_graph();
+    add_node(ret, n1);
+    add_node(ret, n2);
+    return ret;
+}

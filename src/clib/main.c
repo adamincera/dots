@@ -25,22 +25,26 @@ int main() {
     printf("%o\n", (int) a);
     printf("%o\n", (int) b);
     printf("%o\n", (int) c);
-    
+
     add_node(g, n);
     add_node(g, m);
     add_node(h, o);
+
+    graph_t *sum = node_plus_node(n, m);
 
     printf("print_nodes(g):\n");
     print_nodes(g);
     printf("print_nodes(h):\n");
     print_nodes(h);
+    printf("print_nodes(sum):\n");
+    print_nodes(sum);
 
     connect_undir(m, n);
 
     /*
-    printf("%s -> %s\n", (char *)m->data, (char *)m->out->node->data);
-    printf("%s -> %s\n", (char *)n->data, (char *)n->out->node->data);
-    */
+       printf("%s -> %s\n", (char *)m->data, (char *)m->out->node->data);
+       printf("%s -> %s\n", (char *)n->data, (char *)n->out->node->data);
+     */
 
     entry_t **d = init_dict();
     put_graph(d, g, (void *) "this is graph g's data");
@@ -52,9 +56,9 @@ int main() {
 
     remove_undir_edge(m, n);
     /*
-    printf("%s -> %x\n", (char *)m->data, (int)m->out);
-    printf("%s -> %x\n", (char *)n->data, (int)n->out);
-    */
+       printf("%s -> %x\n", (char *)m->data, (int)m->out);
+       printf("%s -> %x\n", (char *)n->data, (int)n->out);
+     */
 
     plus_equals(g, h);
     printf("print_nodes(g):\n");
@@ -88,6 +92,6 @@ int main() {
     printf("n freed\n");
     free_node(o);
     printf("o freed\n");
-    
+
     return 0;
 }
