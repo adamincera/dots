@@ -188,11 +188,11 @@ stmt:
   /*| access_expr ASSIGN expr SEMI { AccessAssign($1, $3) }*/
   | RETURN expr SEMI { Return($2) } 
   /* | LBRACE stmt_list RBRACE { Block(List.rev $2) } */
-  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
-  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
+  | IF LPAREN log_expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
+  | IF LPAREN log_expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
   | FOR LPAREN ID IN expr RPAREN LBRACE stmt_list RBRACE
      { For($3, $5, $8) }
-  | WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
+  | WHILE LPAREN log_expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
   | vdecl { $1 }
   | fdecl { $1 }
 
@@ -236,30 +236,29 @@ expr:
 */
 
 
-expr: 
-  | higher_prec_expr { $1 }
-  | expr EQ     expr { Binop($1, Equal, $3) }
-  | expr NEQ    expr { Binop($1, Neq,   $3) }
-  | expr LT     expr { Binop($1, Less,  $3) }
-  | expr LEQ    expr { Binop($1, Leq,   $3) }
-  | expr GT     expr { Binop($1, Greater,  $3) }
-  | expr GEQ    expr { Binop($1, Geq,   $3) }
-  | expr LOGAND expr { Binop($1, LogAnd, $3) }
-  | expr LOGOR expr  { Binop($1, LogOr, $3) }
+log_expr: 
+  | expr EQ  expr { Binop($1, Equal, $3) }
+  | expr NEQ  expr { Binop($1, Neq,   $3) }
+  | expr LT    expr { Binop($1, Less,  $3) }
+  | expr LEQ   expr { Binop($1, Leq,   $3) }
+  | expr GT  expr { Binop($1, Greater,  $3) }
+  | expr GEQ  expr { Binop($1, Geq,   $3) }
+  | log_expr LOGAND log_expr { Binop($1, LogAnd, $3) }
+  | log_expr LOGOR log_expr { Binop($1, LogOr, $3) }
 
-higher_prec_expr:
+expr:
   | access_expr { $1 }
   | nacc_expr { $1 }
 
 nacc_expr: /* non access exprs */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | higher_prec_expr DOT ID %prec NOCALL { MemberVar($1, $3) }
-  | higher_prec_expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
-  | LPAREN higher_prec_expr RPAREN { $2 }
+  | expr DOT ID %prec NOCALL { MemberVar($1, $3) }
+  | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
+  | LPAREN expr RPAREN { $2 }
   | term               { $1 }
 
 access_expr:
-  | higher_prec_expr LBRACKET higher_prec_expr RBRACKET { Access($1, $3) }
+  | expr LBRACKET expr RBRACKET { Access($1, $3) }
 
 term : 
    term PLUS   atom { Binop($1, Add,   $3) }
