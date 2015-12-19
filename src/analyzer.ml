@@ -130,7 +130,7 @@ let find_var var map_list =
                 (try StringMap.find var !m
        with
        | Not_found -> finder var tl)
-                | [] -> raise (Not_found)
+                | [] -> raise (Not_found )
     in 
     finder var map_list
 
@@ -219,7 +219,7 @@ let create_auto env key dt =
       (* let ind = (find_max_index !auto_cnt) + 1 in *)
       let ind = (find_max_index !(List.hd env.var_inds)+1) in
       let var_name = (match key with
-         | "" -> "a" ^ string_of_int(ind)
+         | "" -> "v" ^ string_of_int(ind)
          | _ -> key
       ) in
      (*  auto_cnt := StringMap.add var_name ind !auto_cnt; (* add new auto_var ref *) *)
@@ -234,7 +234,9 @@ in
     *)
 let string_of_stmt c_v = 
   let cdt1 = Translate.get_expr_type c_v in
+  let s_dt  = Translate.type_to_str cdt1 in  
   let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.String)) in
+
   (match cdt1 with
       | Int ->
           (auto_var, Block([
@@ -257,6 +259,16 @@ let string_of_stmt c_v =
           ]))
       | Float -> 
           (auto_var, Block([
+                  Vdecl(Cstring, auto_var);
+                    Assign(Id(Cstring, auto_var), 
+                           Call(Ptr(Void), 
+                                "malloc", 
+                               [Binop(Int, 
+                                      Call(Int, "sizeof", [Id(Void, "char")]), 
+                                      Mult,
+                                      Literal(Int, "256"))
+                               ] )
+                          );
                      Call(Void, 
                           "sprintf",
                           [Id(Void, "string");
@@ -270,7 +282,7 @@ let string_of_stmt c_v =
                                 ))
                           ])
                     ]))
-      | _ -> raise (Failure ("cannot convert type to cstring")))
+      | _ -> raise (Failure ("cannot convert type to cstring: " ^  s_dt)))
 in
                   
 (* char *snum = malloc(sizeof(char) * 256); 
@@ -301,15 +313,20 @@ let rec translate_expr env = function
                         let float_convert = string_of_stmt ce1 in 
                         Block(
                         [(snd float_convert) ;
-                         translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e2, String))
-                        ] 
-                        )
+                         translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e2, String))])
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Cstring -> 
                   (match cdt2 with
-                    | Float -> Translate.Binop(cdt1, ce1, op, ce2) (* string concat *)
+                    | Float -> 
+                        let float_convert = string_of_stmt ce2 in 
+                        Block([(snd float_convert) ;
+                         translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e1, String))])
                     | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*) 
+                    | Int -> 
+                        let int_convert = string_of_stmt ce2 in 
+                        Block([(snd int_convert) ;
+                         translate_expr env (Sast.Binop(Id((fst int_convert), String), Add, e1, String))])
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Graph -> 
@@ -325,6 +342,16 @@ let rec translate_expr env = function
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+              |  Int -> 
+                  (match cdt2 with 
+                    | Cstring -> 
+                        let int_convert = string_of_stmt ce1 in 
+                        Block(
+                        [(snd int_convert) ;
+                         translate_expr env (Sast.Binop(Id((fst int_convert), String), Add, e2, String))])
+                    | Int -> Translate.Binop(Int, ce1, op, ce2)
+                    | _ -> raise (Failure("invalid operation"))
+                  )
               |  _ -> raise (Failure("Invalid c type for + binop"))          
             )
           | Sub -> 
