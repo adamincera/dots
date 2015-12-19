@@ -374,6 +374,42 @@ let rec expr env = function
      | Not_found -> raise (Failure("undeclared variable: "))
     );     
 | Ast.MemberCall(e, m, el) -> 
+(
+    let s_e = expr env e in
+    let e_dt = get_expr_type s_e in
+    let num_args = List.length el in
+    let s_el = List.map (expr env) el in
+    (*
+    let mem_r_type = 
+        (try 
+            StringMap.find m mem_vars
+         with
+         | Not_found -> raise (Failure ("no member function: " ^ m))
+        ) 
+    in
+  *)
+    match m with
+    | "enqueue" | "push" -> 
+        if num_args != 1 then raise (Failure ("enqueue/push requires 1 arg"))
+        else   
+            ignore((match e_dt with
+             | List(_) -> ignore()
+             | _ -> raise (Failure ("enqueue/push error: not a list"))
+            ));
+            ignore(check_list env (get_list_type e_dt) s_el); (* check that the arg is the type in the list *)
+            Sast.MemberCall(s_e, m, s_el, Sast.Void)
+    | "dequeue" | "pop" -> 
+        if num_args != 0 then raise (Failure ("dequeue/pop requires 0 args"))
+        else Sast.MemberCall(s_e, m, s_el, (get_list_type e_dt))
+    | "oute" | "ine" -> 
+        if num_args != 0 then raise (Failure ("oute/ine requires 0 args"))
+        else Sast.MemberCall(s_e, m, s_el, Dict(Node, Num))
+    | "value" ->
+        if num_args != 0 then raise (Failure ("value requires 0 args"))
+        else Sast.MemberCall(s_e, m, s_el, String)
+    | _ -> raise (Failure ("no member function: " ^ m))
+)
+(*
     (try 
           let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
           let e1_dt = get_expr_type s_e in
@@ -409,6 +445,7 @@ let rec expr env = function
       with
         | Not_found -> raise (Failure("not a member function for graphs"))
       );
+*)
 | Ast.Undir(v1, v2) -> 
     (*check if v1 and v2 exist *)
     (try                                (*sees if variable defined*)

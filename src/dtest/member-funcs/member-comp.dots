@@ -1,0 +1,10 @@
+list<num> x;
+
+x.enqueue(4);
+x.dequeue();
+
+x.push(3);
+x.pop();
+
+node n;
+n.value();
