@@ -224,7 +224,7 @@ let create_auto env key dt =
       (* let ind = (find_max_index !auto_cnt) + 1 in *)
       let ind = (find_max_index !(List.hd env.var_inds)+1) in
       let var_name = (match key with
-         | "" -> "a" ^ string_of_int(ind)
+         | "" -> "v" ^ string_of_int(ind)
          | _ -> key
       ) in
      (*  auto_cnt := StringMap.add var_name ind !auto_cnt; (* add new auto_var ref *) *)
@@ -237,7 +237,7 @@ let rec translate_expr env = function
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
     | Sast.ListLiteral(el, dt) -> ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *)
-    | Sast.DictLiteral(kvl, dt) -> Nostmt (* TODO *)
+    | Sast.DictLiteral(kvl, dt) ->  DictLiteral(dt_to_ct dt, List.map (fun f -> (translate_expr env (fst f), translate_expr env (snd f))) kvl)(* TODO *)
     | Sast.Boolean(b, dt) -> if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
             let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
@@ -326,38 +326,123 @@ let rec translate_expr env = function
                 let rec print_builder elems = function
                 | [] -> List.rev elems
                 | hd :: tl -> 
+                    let print_expr = translate_expr env hd in
                     let e_t = get_expr_type hd in
                     (match e_t with
                       | Num | String | Bool | Node -> 
-                          print_builder (Expr(Call(Void, "f1", [translate_expr env hd])) :: elems) tl
+                          print_builder (Expr(Call(Void, "f1", [print_expr])) :: elems) tl
                       | List(dt) -> 
                           let elem_type = dt_to_ct dt in
                           let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.List(dt))) in
                           print_builder 
-                          (
-                              (* b/c of building the list up backwards,
-                                 this list must be declared in reverse order
+                            (
+                                (* b/c of building the list up backwards,
+                                   this list must be declared in reverse order
 
-                                  // c translation:
-                                  // print(num_list)
-                                  list_t* auto;
-                                  for (auto = num_list; auto; auto = auto->next) {
-                                    print( *auto );
-                                  } 
-                                *)
-                              [
-                               For(Assign(Id(elem_type, auto_var), translate_expr env hd),
-                                   Id(Ptr(List(elem_type)), auto_var),
-                                   Assign(Id(elem_type, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
-                                   [Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))])]
-                               );
-                               Vdecl(Ptr(List(dt_to_ct dt)), auto_var)
-                              ]
-                             @ elems
-                          )
-                          tl
-                         (*[Nostmt]*)(*TODO*)
-                      | Dict(dtk, dtv) -> print_builder (Nostmt :: elems) tl (*TODO*)
+                                    // c translation:
+                                    // print(num_list)
+                                    list_t* auto;
+                                    for (auto = num_list; auto; auto = auto->next) {
+                                      print( *auto );
+                                    } 
+                                  *)
+                                [
+                                 For(Assign(Id(elem_type, auto_var), print_expr),
+                                     Id(Ptr(List(elem_type)), auto_var),
+                                     Assign(Id(elem_type, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
+                                     [Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))])]
+                                 );
+                                 Vdecl(Ptr(List(dt_to_ct dt)), auto_var)
+                                ]
+                               @ elems
+                            )
+                            tl
+                      | Dict(dtk, dtv) -> 
+                          let key_type = dt_to_ct dtk in
+                          let val_type = dt_to_ct dtv in
+                          let auto_hash = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
+                          let auto_entry = "v" ^ string_of_int(create_auto env "" (Sast.Dict(dtk, dtv))) in
+                          let auto_key = "v" ^ string_of_int(create_auto env "" dtk) in
+                          let auto_first = "v" ^ string_of_int(create_auto env "" Sast.Num) in
+                          let auto_val = "v" ^ string_of_int(create_auto env "" Sast.Num) in
+                          (* build the print value statement for the specific key type *)
+                          let call_stmt = (match dtk with
+                                            | Num -> Call(Ptr(val_type), "get_num", [print_expr; Deref(key_type, Id(Float, auto_key))])
+                                            | String ->Call(Ptr(val_type), "get_string", [print_expr; Deref(key_type, Id(Cstring, auto_key))])
+                                            | Node -> Call(Ptr(val_type), "get_other", [print_expr; Ref(Ptr(Node), Id(Ptr(Node), auto_key))])
+                                            | _ -> raise (Failure ("dict keys can't be of type: " ^ type_to_str dtk))
+                                          ) in
+                          (*
+                            // C code: 
+                            int i;
+                            entry_t *temp;
+                            void *key;
+                            /* print "{"; */
+                            int first = 1;
+                            for(i = 0; i < TABLE_SIZE; i = i + 1) {
+                                for(temp = d[i]; temp; temp = temp->next) {
+                                    key = temp->key;
+                                    if(first) {
+                                        first = 0;
+                                        /* print key, ": ", value */ 
+                                    } else {
+                                        /* print ", " , key, ": ", value */
+                                    }
+                                }
+                            }
+                           *)
+                          print_builder 
+                              (
+                               [
+                                For(Assign(Id(Int, auto_hash), Literal(Int, "0")),
+                                    Binop(Int, Id(Int, auto_hash), Less, Id(Int, "TABLE_SIZE")),
+                                    Assign(Id(Int, auto_hash), 
+                                           Binop(Int, Id(Int, auto_hash), Add, Literal(Int, "1"))),
+                                    [For(Assign(Id(Ptr(Entry), auto_entry),
+                                                Access(Ptr(Entry), print_expr, Id(Int, auto_hash))
+                                               ),
+                                         Id(Ptr(Entry), auto_entry),
+                                         Assign(Id(Ptr(Entry), auto_entry),
+                                                Member(Ptr(Entry), auto_entry, "next")),
+                                         [Assign(Id(Ptr(key_type), auto_key),
+                                                 Cast(Ptr(key_type), Member((Ptr(Void), auto_entry, "key")))
+                                                );
+                                          Vdecl(val_type, auto_val);
+                                          Assign(Id(val_type, auto_val),
+                                                 Deref(val_type, 
+                                                       Cast(Ptr(val_type), 
+                                                            (* specific call for the key type *)
+                                                            call_stmt
+                                                           )
+                                                      )
+                                                );
+                                          If(Id(Int, auto_first),
+                                             [Assign(Id(Int, auto_first),
+                                                    Literal(Int, "0"))
+                                             ],
+                                             [
+                                               (*translate_expr env (Sast.Call("print", [Sast.StrLiteral(",", Sast.String)], Sast.Void))*)
+                                               Expr(Call(Void, "f1", [Literal(Cstring, ",")]))
+                                             ]
+                                            );
+                                          (*translate_expr env (Sast.Call("print", [Id(auto_key, dtk)],Sast.Void))*)
+                                          (* prints Num|String|Bool|Node TODO: handle if the key is a graph *)
+                                          Expr(Call(Void, "f1", [Deref(key_type, Id(Ptr(key_type), auto_key))]));
+                                          Expr(Call(Void, "f1", [Literal(Cstring, " : ")]));
+                                          Expr(Call(Void, "f1", [Id(val_type, auto_val)]));
+
+                                         ]
+                                    )]
+                                   );
+                                Assign(Id(Int, auto_first), Literal(Int, "1"));
+                                Vdecl(Int, auto_first);
+                                Vdecl(Ptr(key_type), auto_key);
+                                Vdecl(Ptr(Entry), auto_entry);
+                                Vdecl(Int, auto_hash)
+                               ]
+                               @ elems
+                              ) 
+                              tl (*TODO*)
                       | Graph -> print_builder (Nostmt :: elems) tl (*TODO*)
                       | Void -> raise (Failure "stop trying to print Void -- it's not gonna happen")
                     )
@@ -475,7 +560,7 @@ let rec translate_stmt env = function
                             Assign(Id(Int, int_var), 
                                 Binop(Int, Id(Int, int_var), Ast.Add,
                                       Literal(Int, "1"))),
-                            [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, index, Id(Int, int_var))), 
+                            [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, Id(Ptr(Entry), index), Id(Int, int_var))), 
                                  Id(Entry, entry_var),
                                  Assign(Id(Ptr(Entry), entry_var), Member(Entry, entry_var, "next")),
                                  List.map (translate_stmt env) sl

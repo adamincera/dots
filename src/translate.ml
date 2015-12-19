@@ -12,29 +12,16 @@ type ctype = | Float | Int | Long | Cstring
              | Ptr of ctype (* pointer to a data type *)
              | Void
              | Entry
-(*
-type cexpr = 
-| Literal of ctype * string
-| Id of ctype * string                   (* ids are ints ex. Id(2) -> v2 *)
-| Binop of ctype * cexpr * Ast.op * cexpr
-| Assign of cexpr * cexpr               (* ex. Assign(2, 5) -> v2 = 5 *)
-| Call of ctype * string * cexpr list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
-| Access of ctype * string * cexpr               (* array access: id[cexpr] *)
-| Member of ctype * string * string (* id, member *)
-| Cast of ctype * cexpr               (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
-| Deref of cexpr (* ex. *var *)
-| Ref of cexpr (* ex. &var *)
-| Noexpr
-*)
 
 type cstmt =
 | Literal of ctype * string
 | ListLiteral of ctype * cstmt list
+| DictLiteral of ctype * (cstmt * cstmt) list
 | Id of ctype * string                           (* ids are ints ex. Id(2) -> v2 *)
 | Binop of ctype * cstmt * Ast.op * cstmt
 | Assign of cstmt * cstmt                        (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cstmt list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
-| Access of ctype * string * cstmt               (* array access: id[cexpr] *)
+| Access of ctype * cstmt * cstmt               (* array access: id[cexpr] *)
 | Member of ctype * string * string              (* id, member *)
 | Cast of ctype * cstmt                          (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
 | Deref of ctype * cstmt                                 (* ex. *var *)
@@ -61,37 +48,6 @@ type cprogram = {
                     (*libs : string list;*) (* names of libraries for include statements *)
                 }
 
-(*
-(match func_name with
-        | "print" ->
-          (* fmt is all the format types so far: ex. %s%f%f *)
-          (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
-          let rec build_str fmt vals = function
-          | [] -> (fmt, vals)
-          | hd :: tl -> build_str (fmt ^ (dt_fmt(get_expr_type hd))) (vals ^ "," ^ (translate_expr env hd)) tl
-              in
-              let result = build_str "" "" el
-              in
-              "printf(\"" ^ fst result ^ "\"" ^ snd result ^ ")"
-
-        | fname -> (try
-               string_of_int(find_var fname env.func_inds) ^ 
-               "(" ^ String.concat ", " (List.map (fun e -> translate_expr env e) el) ^ ")"
-            with Not_found -> raise (Failure ("undefined function " ^ fname))
-           ) )
-*)
-(* 
-   creates a variable declaration statement based on the variable's data type
-   params --> id : variable name ; 2nd arg : variable type 
-*)
-
-(* let translate_vdecl id = function
-| Sast.String -> "char *" ^ id ^ ";"
-| Sast.Num -> "float " ^ id ^ ";"
-| Sast.List(dtv) -> "list todo"
-| Sast.Dict(dtk, dtv) -> "dict todo"
-| x -> raise (Failure ("invalid type in var declaration")) *)
-
 let rec type_to_str = function
 | Float -> "float"
 | Int -> "int"
@@ -114,6 +70,7 @@ let fmt_str = function
 let rec get_expr_type = function
 | Literal(dt, str) -> dt
 | ListLiteral(dt, el) -> dt
+| DictLiteral(dt, tl) -> dt
 | Id(dt, id) -> dt
 | Binop(dt, e1, op, e2) -> dt
 | Assign(id, e1) -> Void
@@ -129,6 +86,7 @@ let rec get_expr_type = function
 let rec stmt_type_to_str = function
 | Literal(dt, str) -> "Literal<" ^ type_to_str dt ^ ">"
 | ListLiteral(dt, el) -> "ListLiteral<" ^ type_to_str dt ^ ">"
+| DictLiteral(dt, tl) -> "DictLiteral<" ^ type_to_str dt ^ ">"
 | Id(dt, id) -> "Id<" ^ type_to_str dt ^ ">"
 | Binop(dt, e1, op, e2) -> "Binop<" ^ type_to_str dt ^ ">"
 | Assign(id, e1) -> "Assign<" ^ stmt_type_to_str id ^ ">"
@@ -235,6 +193,7 @@ let rec translate_stmt = function
     | _ -> raise (Failure "invalid C literal type")
    )
 | ListLiteral(dt, el) -> translate_stmt (Literal(Cstring, "TODO: list literal"))
+| DictLiteral(dt, el) -> translate_stmt (Literal(Cstring, "TODO: dict literal"))
 | Id(dt, id) -> id
 | Binop(dt, e1, op, e2) -> 
     (* check if either e1 is a string or e2 is a string: 
@@ -282,7 +241,7 @@ let rec translate_stmt = function
               ")"
         | _ -> id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
     )
-| Access(dt, id, e) -> id ^ "[" ^ translate_stmt e ^ "]"
+| Access(dt, id, e) -> (translate_stmt id) ^ "[" ^ translate_stmt e ^ "]"
 | Member(dt, id, m) -> id ^ "->" ^ m
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_stmt e ^ ")"
 | Ref(dt, e) -> "&(" ^ translate_stmt e ^ ")"
@@ -293,9 +252,9 @@ let rec translate_stmt = function
 | Return(e) -> "return " ^ translate_stmt e ^ ";"
 | If(cond, sl1, sl2) -> "if (" ^ translate_stmt cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl1) ^
-    "} else {\n" ^
+    "\n} else {\n" ^
     String.concat "\n" (List.map translate_stmt sl2) ^
-    "}"
+    "\n}"
 | For(init, cond, incr, sl) -> "for (" ^ translate_stmt init ^ "; " ^
     translate_stmt cond ^ "; " ^
     translate_stmt incr ^ ") {\n" ^
