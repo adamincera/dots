@@ -1,0 +1,4 @@
+def dict<string, num> func () {
+    dict<string, num> d;
+    return d;
+}

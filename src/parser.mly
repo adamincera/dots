@@ -185,7 +185,7 @@ stmt_list:
 stmt:
    expr SEMI { Expr($1) } 
   | ID ASSIGN expr SEMI { Assign($1, $3) }
-  | access_expr ASSIGN expr SEMI { AccessAssign($1, $3) }
+  /*| access_expr ASSIGN expr SEMI { AccessAssign($1, $3) }*/
   | RETURN expr SEMI { Return($2) } 
   /* | LBRACE stmt_list RBRACE { Block(List.rev $2) } */
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
@@ -208,6 +208,34 @@ alt_stmt:
 assign_expr:
   | ID ASSIGN expr   { Assign($1, $3) }
 */
+
+/*
+expr:
+  | literal          { $1 }
+  | INF              { NumLiteral("INF") }
+  | TRUE             { Boolean(True) }
+  | FALSE            { Boolean(False) }
+  | ID               { Id($1) }
+  | LPAREN expr RPAREN { $2 }
+  | expr PLUS   expr { Binop($1, Add,   $3) }
+  | expr MINUS  expr { Binop($1, Sub,   $3) }
+  | expr TIMES  expr { Binop($1, Mult,  $3) }
+  | expr DIVIDE expr { Binop($1, Div,   $3) }
+  | expr EQ     expr { Binop($1, Equal, $3) }
+  | expr NEQ    expr { Binop($1, Neq,   $3) }
+  | expr LT     expr { Binop($1, Less,  $3) }
+  | expr LEQ    expr { Binop($1, Leq,   $3) }
+  | expr GT     expr { Binop($1, Greater,  $3) }
+  | expr GEQ    expr { Binop($1, Geq,   $3) }
+  | expr LOGAND expr { Binop($1, LogAnd, $3) }
+  | expr LOGOR expr  { Binop($1, LogOr, $3) }
+  COMMENT | expr LBRACKET expr RBRACKET { Access($1, $3) } COMMENT
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | expr DOT ID %prec NOCALL { MemberVar($1, $3) }
+  | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
+*/
+
+
 expr: 
   | access_expr { $1 }
   | nacc_expr { $1 }
@@ -243,6 +271,7 @@ atom:
   | TRUE             { Boolean(True) }
   | FALSE            { Boolean(False) }
   | ID               { Id($1) }
+
 /*
 expr_opt:
     * nothing * { Noexpr }
