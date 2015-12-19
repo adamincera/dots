@@ -209,28 +209,48 @@ list_t *graph_list_copy(const list_t *src) {
     return ret;
 }
 
-void num_list_concat(list_t *target, const list_t *src) {
-    list_t *temp;
-    for(temp = target; temp->next; temp = temp->next);
-    temp->next = num_list_copy(src);
+list_t *num_list_concat(const list_t *target, const list_t *src) {
+    list_t *new_list = num_list_copy(target);
+    if(new_list) {
+        list_t *temp;
+        for(temp = new_list; temp->next; temp = temp->next);
+        temp->next = num_list_copy(src);
+        return new_list;
+    }
+    return num_list_copy(src);
 }
 
-void string_list_concat(list_t *target, const list_t *src) {
-    list_t *temp;
-    for(temp = target; temp->next; temp = temp->next);
-    temp->next = string_list_copy(src);
+list_t *string_list_concat(const list_t *target, const list_t *src) {
+    list_t *new_list = num_list_copy(target);
+    if(new_list) {
+        list_t *temp;
+        for(temp = new_list; temp->next; temp = temp->next);
+        temp->next = num_list_copy(src);
+        return new_list;
+    }
+    return num_list_copy(src);
 }
 
-void node_list_concat(list_t *target, const list_t *src) {
-    list_t *temp;
-    for(temp = target; temp->next; temp = temp->next);
-    temp->next = node_list_copy(src);
+list_t *node_list_concat(const list_t *target, const list_t *src) {
+    list_t *new_list = num_list_copy(target);
+    if(new_list) {
+        list_t *temp;
+        for(temp = new_list; temp->next; temp = temp->next);
+        temp->next = num_list_copy(src);
+        return new_list;
+    }
+    return num_list_copy(src);
 }
 
-void graph_list_concat(list_t *target, const list_t *src) {
-    list_t *temp;
-    for(temp = target; temp->next; temp = temp->next);
-    temp->next = graph_list_copy(src);
+list_t *graph_list_concat(const list_t *target, const list_t *src) {
+    list_t *new_list = num_list_copy(target);
+    if(new_list) {
+        list_t *temp;
+        for(temp = new_list; temp->next; temp = temp->next);
+        temp->next = num_list_copy(src);
+        return new_list;
+    }
+    return num_list_copy(src);
 }
 
 void *list_access(const list_t *l, int i) {
@@ -347,6 +367,10 @@ void string_index_insert(list_t *l, int i, char *a) {
     index_insert(l, i, a, void_strcpy);
 }
 
-void node_index_insert(list_t *l, int i, node_t *a);
+void node_index_insert(list_t *l, int i, node_t *a) {
+    index_insert(l, i, a, NULL);
+}
 
-void graph_index_insert(list_t *l, int i, graph_t *a);
+void graph_index_insert(list_t *l, int i, graph_t *a) {
+    index_insert(l, i, a, void_graph_copy);
+}

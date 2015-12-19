@@ -68,8 +68,9 @@ int main() {
     printf("x = %d\n", x);
     printf("print_nodes(copy):\n");
     print_nodes(g_copy);
+    graph_t *diff;
 
-    g = subtract_graphs(g, h);
+    diff = minus(g, h);
     remove_node(g, o);
     printf("print_nodes(g):\n");
     print_nodes(g);

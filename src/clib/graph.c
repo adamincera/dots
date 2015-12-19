@@ -96,15 +96,16 @@ graph_t *plus_equals(graph_t *a, const graph_t *b) {
 }
 
 /* removes all nodes of *right that exist in *left from *left */
-graph_t *subtract_graphs(graph_t *left, graph_t *right) {
+graph_t *minus(const graph_t *left, const graph_t *right) {
     nodelist_t *temp;
+    graph_t *copy = graph_copy(left);
     for(temp = right->nodes; temp; temp = temp->next) {
         printf("removing temp = %x\n", (int) temp);
-        int i = remove_node(left, temp->node);
+        int i = remove_node(copy, temp->node);
         if(i)
             printf("not removed!\n");
     }
-    return left;
+    return copy;
 }
 
 graph_t *graph_copy(const graph_t *src) {

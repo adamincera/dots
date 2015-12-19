@@ -220,3 +220,8 @@ list_t *l3 = <type>_list_concat(l1, l2);
 /* something = list[i] */
 something = list_access(list, i);
 
+/* g1 = g2 - g3 */
+graph_t *g1 = minus(g2, g3);
+
+/* list list_1 = list_2 + list_3 */
+list_t *list_1 = <type>_list_concat(list_2, list_3);

@@ -7,12 +7,13 @@ int main() {
     free_range(l);
     l = range(10, 0);
     print_range(l);
-    free_range(l);
+    //free_range(l);
     float a = 30;
     list_t *m = range(20, 30);
-    //l = num_list_copy(m);
-    //print_range(l);
-    //free_range(l);
+    list_t *concat = num_list_concat(l, m);
+    printf("concat: ");
+    print_range(concat);
+    free_range(l);
     free_range(m);
     l = range(20, 20);
     print_range(l);
@@ -35,9 +36,6 @@ int main() {
     print_strings(l);
     printf("string_copy = ");
     print_strings(string_copy);
-    printf("\n");
-
-    
 
     printf("l[0] = %s, l[1] = %s\n", list_access(l, 0), list_access(l, 1));
 
