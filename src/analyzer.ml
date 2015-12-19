@@ -45,6 +45,10 @@ let rec stmt_sifter sifted = function
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
+               | Sast.AccessAssign(se1, se2, dt) -> 
+                   stmt_sifter {s_globals = sifted.s_globals; 
+                   s_main = hd :: sifted.s_main; 
+                   s_funcs = sifted.s_funcs} tl                
                | Sast.GraphDef(id, el) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
@@ -105,11 +109,6 @@ let rec enum stride n = function
 let string_map_pairs map pairs =
     List.fold_left (fun m (i, n) -> StringMap.add n i m) map pairs
 
-    (* 
-    for use with maps where the value is an int 
-    finds the max int value in the map
-    *)
-
 let find_max_index map = 
     let bindings = StringMap.bindings map in
     let rec max cur = function
@@ -135,7 +134,7 @@ let find_var var map_list =
                 (try StringMap.find var !m
        with
        | Not_found -> finder var tl)
-                | [] -> raise (Not_found)
+                | [] -> raise (Not_found )
     in 
     finder var map_list
 
@@ -233,6 +232,117 @@ let create_auto env key dt =
       ind
 in
 
+    (* 
+   char str[50];
+   int len;
+
+   strcpy(str, "This is tutorialspoint.com");
+   len = strlen(str);
+    *)
+let string_len c_v = 
+  let cdt1 = Translate.get_expr_type c_v in
+  let s_dt  = Translate.type_to_str cdt1 in 
+  if cdt1 = Cstring then
+      let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
+       (auto_var, Block([
+              Vdecl(Int, auto_var);
+              Assign(Id(Int, auto_var), 
+                     Call(Int, "strlen", [c_v]))]))
+  else 
+    raise (Failure("only possible with string "))
+  in
+
+let string_concat c_v1 c_v2 = 
+  let cdt2 = Translate.get_expr_type c_v2 in
+
+  let len_c1 = (fst (string_len c_v1)) in 
+  let len_c2 = (fst (string_len c_v2)) in 
+  let len_new =  Assoc(Binop(Int, Id(Int,len_c1), Add, Id(Int,len_c2))) in
+
+  let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.String)) in
+    if cdt2 = Cstring then
+   (auto_var, 
+    Block([
+      Vdecl(Cstring, auto_var);
+      Assign(Id(Cstring, auto_var), 
+             Call(Ptr(Void), 
+                  "malloc", 
+                 [Binop(Int, 
+                        Call(Int, "sizeof", [Id(Void, "int")]), 
+                        Mult,
+                        len_new)
+                 ])
+            );
+      Call(Void,
+           "strcpy",
+           [Id(Cstring, auto_var);
+            c_v1]);
+      Call(Void,
+           "strcat",
+           [Id(Cstring, auto_var);
+            c_v2])
+      ]))
+ else 
+    raise (Failure("only accesible for strings"))
+
+ in
+
+let string_of_stmt c_v = 
+  let cdt = Translate.get_expr_type c_v in
+  let s_dt  = Translate.type_to_str cdt in  
+  let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.String)) in
+  (match cdt with
+      | Int ->
+          (auto_var, Block([
+              Vdecl(Cstring, auto_var);
+              Assign(Id(Cstring, auto_var), 
+                     Call(Ptr(Void), 
+                          "malloc", 
+                         [Binop(Int, 
+                                Call(Int, "sizeof", [Id(Void, "char")]), 
+                                Mult,
+                                Literal(Int, "400"))
+                         ] )
+                    );
+              Call(Void,
+                   "itoa",
+                   [c_v;
+                    Id(Cstring, auto_var);
+                    Literal(Int,"10")
+                   ])
+          ]))
+      | Float -> 
+          (auto_var, Block([
+                  Vdecl(Cstring, auto_var);
+                    Assign(Id(Cstring, auto_var), 
+                           Call(Ptr(Void), 
+                                "malloc", 
+                               [Binop(Int, 
+                                      Call(Int, "sizeof", [Id(Void, "char")]), 
+                                      Mult,
+                                      Literal(Int, "400"))
+                               ] )
+                          );
+                     Call(Void, 
+                          "sprintf",
+                          [Id(Void, auto_var);
+                            Literal(Cstring,"%d.%02u");
+                            Cast(Int, c_v);
+                            Cast(Int, 
+                                (Binop(Float,
+                                      (Binop(Float, c_v, Sub, Cast(Int, c_v))),
+                                      Mult,
+                                      Literal(Int, "100"))
+                                ))
+                          ])
+                    ]))
+      | _ -> raise (Failure ("cannot convert type to cstring: " ^  s_dt)))
+in
+                  
+(* char *snum = malloc(sizeof(char) * 256); 
+    sprintf (string,"%d.%02u", (int) number, (int) ((number - (int) number ) * precision) );
+*)
+
 let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> Literal(Float, l)
     | Sast.StrLiteral(l, dt) -> Literal(Cstring, l)
@@ -253,13 +363,26 @@ let rec translate_expr env = function
               |  Float ->
                   (match cdt2 with
                     | Float -> Translate.Binop(Float, ce1, op, ce2)
-                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                    | Cstring -> 
+                        let float_convert = string_of_stmt ce1 in 
+                        Block(
+                        [(snd float_convert) ;
+                         translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e2, String))])
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Cstring -> 
                   (match cdt2 with
-                    | Float -> Translate.Binop(cdt1, ce1, op, ce2) (* string concat *)
-                    | Cstring -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*) 
+                    | Float -> 
+                        let float_convert = string_of_stmt ce2 in 
+                        Block([(snd float_convert) ;
+                         translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e1, String))])
+                    | Cstring ->  
+                         let c_string = string_concat ce1 ce2 in 
+                         Block([(snd c_string)])
+                    | Int -> 
+                        let int_convert = string_of_stmt ce2 in 
+                        Block([(snd int_convert) ;
+                         translate_expr env (Sast.Binop(Id((fst int_convert), String), Add, e1, String))])
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  Graph -> 
@@ -275,6 +398,16 @@ let rec translate_expr env = function
                     | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                   )
               |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+              |  Int -> 
+                  (match cdt2 with 
+                    | Cstring -> 
+                        let int_convert = string_of_stmt ce1 in 
+                        Block(
+                        [(snd int_convert) ;
+                         translate_expr env (Sast.Binop(Id((fst int_convert), String), Add, e2, String))])
+                    | Int -> Translate.Binop(Int, ce1, op, ce2)
+                    | _ -> raise (Failure("invalid operation"))
+                  )
               |  _ -> raise (Failure("Invalid c type for + binop"))          
             )
           | Sub -> 
@@ -511,6 +644,7 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
+    | Sast.AccessAssign(e1, e2, dt) -> Nostmt
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         (match s with

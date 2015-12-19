@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "list.h"
 #define TABLE_SIZE 256
 
 struct entry {
@@ -10,6 +10,8 @@ struct entry {
 typedef struct entry entry_t;
 
 entry_t **init_dict();
+
+entry_t **dict_copy(entry_t **src);
 
 void *get_string(entry_t **table, char *key);
 

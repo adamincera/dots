@@ -11,6 +11,15 @@ entry_t **init_dict() {
     return table;
 }
 
+/*
+entry_t **dict_copy(entry_t **src) {
+    entry_t **dst = init_dict();
+    int i;
+    entry_t *temp;
+    for(i = 0; i < TABLE_SIZE; i++)
+        for(temp = src[i]; temp; temp = temp->next) {
+*/
+
 int float_equals(float a, float b) {
     return fabsf(a - b) < EPSILON * a;
 }
@@ -156,13 +165,11 @@ void put_graph(entry_t **table, graph_t *key, void *value) {
     int k = hash_graph(key);
     entry_t *temp = table[k];
     if(!temp) {
-    printf("here. temp = %o = table[%d]\n", temp, k);
         table[k] = (entry_t *) malloc(sizeof(entry_t));
         table[k]->next = NULL;
         table[k]->value = value;
         table[k]->key = graph_copy(key);
     } else {
-    printf("here. temp = %o = table[%d]\n", temp, k);
         while(temp->next) {
             if(graph_equals((graph_t *) temp->key, key)) {
                 temp->value = value;

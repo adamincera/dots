@@ -20,8 +20,8 @@ type cstmt =
 | Id of ctype * string                           (* ids are ints ex. Id(2) -> v2 *)
 | Binop of ctype * cstmt * Ast.op * cstmt
 | Assign of cstmt * cstmt                        (* ex. Assign(2, 5) -> v2 = 5 *)
-| Call of ctype * string * cstmt list            (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
-| Access of ctype * cstmt * cstmt               (* array access: id[cexpr] *)
+| Call of ctype * string * cstmt list            (* return type of the function, function name, arguments *) (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
+| Access of ctype * string * cstmt               (* array access: id[cexpr] *)
 | Member of ctype * string * string              (* id, member *)
 | Cast of ctype * cstmt                          (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
 | Deref of ctype * cstmt                                 (* ex. *var *)
@@ -33,6 +33,7 @@ type cstmt =
 | If of cstmt * cstmt list * cstmt list
 | For of cstmt * cstmt * cstmt * cstmt list      (* assign, condition, incr, body -> ex. for (v1 = 3, v1 < 10; v1 = v1 + 1 *)
 | While of cstmt * cstmt list
+| Assoc of cstmt (* wrap the expression in parentheses *)
 | Nostmt
 
 type c_func = { crtype : ctype; (* c return type *)
@@ -80,6 +81,7 @@ let rec get_expr_type = function
 | Cast(dt, e) -> dt
 | Ref(dt, e) -> dt
 | Deref(dt, e) -> dt
+| Assoc(e) -> get_expr_type e
 | _ -> Void
 (* | Noexpr -> Void *)
 
@@ -103,6 +105,7 @@ let rec stmt_type_to_str = function
 | If(cond, el1, el2) -> "If-then-Else"
 | For(assign, cond, incr, sl) -> "For"
 | While(cond, sl) -> "While"
+| Assoc(e) -> stmt_type_to_str e
 | Nostmt -> "Nostmt"
 
 let op_to_str = function
@@ -263,6 +266,7 @@ let rec translate_stmt = function
 | While(cond, sl) -> "while (" ^ translate_stmt cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl) ^
     "\n}"
+| Assoc(e) -> "(" ^ (translate_stmt e) ^ ")"
 | Nostmt -> ""
 
 

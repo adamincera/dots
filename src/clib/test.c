@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "list.h"
 #include "dict.h"
 
 int main() {
@@ -9,9 +8,12 @@ int main() {
     l = range(10, 0);
     print_range(l);
     free_range(l);
-    l = range(20, 30);
-    print_range(l);
-    free_range(l);
+    float a = 30;
+    list_t *m = range(20, 30);
+    //l = num_list_copy(m);
+    //print_range(l);
+    //free_range(l);
+    free_range(m);
     l = range(20, 20);
     print_range(l);
     free_range(l);
@@ -19,16 +21,26 @@ int main() {
     char *s1 = "hello ";
     char *s2 = "world";
     l = NULL;
-    l = add_front(l, s2);
-    l = add_front(l, s1);
+    l = string_add_front(l, s2);
+    l = string_add_front(l, s1);
     print_strings(l);
     free_list(l);
     printf("list done\n");
 
     l = NULL;
-    l = add_back(l, s1);
-    l = add_back(l, s2);
+    l = string_add_back(l, s1);
+    l = string_add_back(l, s2);
+    list_t *string_copy = string_list_copy(l);
+    printf("l = ");
     print_strings(l);
+    printf("string_copy = ");
+    print_strings(string_copy);
+    printf("\n");
+
+    
+
+    printf("l[0] = %s, l[1] = %s\n", list_access(l, 0), list_access(l, 1));
+
     free_list(l);
 
     entry_t **d = init_dict();

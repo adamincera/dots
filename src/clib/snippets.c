@@ -1,6 +1,8 @@
 /* for node in graph */
+nodelist_t *temp;
 node_t *node;
-for(node = graph->nodes; node; node = node->next) {
+for(temp = graph->nodes; temp; temp = temp->next) {
+    node = temp->node;
     /* loop body */
 }
 
@@ -214,3 +216,7 @@ list_t *l3 = <type>_list_concat(l1, l2);
 
 /* data = list.pop() */
 <type> *data = (<type> *) pop(list);
+
+/* something = list[i] */
+something = list_access(list, i);
+

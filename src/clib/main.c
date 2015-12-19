@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "graph.h"
+#include "dict.h"
 
 void print_nodes(graph_t *g) {
     nodelist_t *n;
@@ -41,6 +41,14 @@ int main() {
     printf("%s -> %s\n", (char *)m->data, (char *)m->out->node->data);
     printf("%s -> %s\n", (char *)n->data, (char *)n->out->node->data);
     */
+
+    entry_t **d = init_dict();
+    put_graph(d, g, (void *) "this is graph g's data");
+    printf("here:\n");
+    put_graph(d, h, "this is graph h");
+
+    printf("%s\n", get_graph(d, g));
+    printf("%s\n", get_graph(d, h));
 
     remove_undir_edge(m, n);
     /*

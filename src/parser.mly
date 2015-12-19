@@ -185,6 +185,7 @@ stmt_list:
 stmt:
    expr SEMI { Expr($1) } 
   | ID ASSIGN expr SEMI { Assign($1, $3) }
+  | access_expr ASSIGN expr SEMI { AccessAssign($1, $3) }
   | RETURN expr SEMI { Return($2) } 
   /* | LBRACE stmt_list RBRACE { Block(List.rev $2) } */
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
@@ -208,12 +209,18 @@ assign_expr:
   | ID ASSIGN expr   { Assign($1, $3) }
 */
 expr: 
-   expr LBRACKET expr RBRACKET { Access($1, $3) }
+  | access_expr { $1 }
+  | nacc_expr { $1 }
+
+nacc_expr: /* non access exprs */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | expr DOT ID %prec NOCALL { MemberVar($1, $3) }
   | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
   | term               { $1 }
+
+access_expr:
+  | expr LBRACKET expr RBRACKET { Access($1, $3) }
 
 term : 
    term PLUS   atom { Binop($1, Add,   $3) }

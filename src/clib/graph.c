@@ -116,6 +116,8 @@ graph_t *graph_copy(const graph_t *src) {
 }
 
 int graph_equals(const graph_t *a, const graph_t *b) {
+    if(a == b)
+        return 1;
     const nodelist_t *temp_a = a->nodes;
     const nodelist_t *temp_b = b->nodes;
     while(temp_a && temp_b) {
