@@ -15,7 +15,6 @@ type expr =
   | Binop of expr * op * expr
   | Call of string * expr list 
   | Access of expr * expr (* for dict and list element access, node.in[node2] *)
-  | MemberVar of expr * string (* expr that evaluates to parent variable, the accessed member *)
   | MemberCall of expr * string * expr list (* expr that evaluates to parent variable, accessed funct, parameters *)
   | Undir of string * string (* id, id *)
   | Dir of string * string (* id, id *)
@@ -116,7 +115,6 @@ let rec string_of_expr = function
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Access (e, e1) -> string_of_expr e ^ "[" ^ string_of_expr e1 ^ "]"
-  | MemberVar (e1, s2) -> string_of_expr e1 ^ "." ^ s2
   | MemberCall (e1, s2, el) -> string_of_expr e1 ^ "." ^ s2 ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
 

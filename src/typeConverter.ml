@@ -334,45 +334,7 @@ let rec expr env = function
           )
      with
      | Not_found -> raise (Failure("undeclared variable: "))
-    );                                  
-| Ast.MemberVar(e, m) -> 
-    (try                                (*sees if variable defined*)
-        let s_e1 = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-        let e1_dt = get_expr_type s_e1 in
-         (match e1_dt with
-          | Sast.Node -> 
-              (try 
-                let mem_r_type = StringMap.find m mem_vars in
-                if (mem_r_type = Sast.Node) then
-                  (match m with
-                    | "ine" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
-                    | "oute" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
-                    | "values" -> Sast.MemberVar(s_e1,m, (Sast.String))
-                    | _ -> raise (Failure("undeclared variable: "))
-                  )
-                else 
-                    raise (Failure("stupid "))
-              with
-                | Not_found -> raise (Failure("not a member function for graphs")) 
-              )
-          | Sast.Graph ->  
-            (try
-              let mem_r_type = StringMap.find m mem_vars in
-              if (mem_r_type = Sast.Graph) then 
-                (match m with
-                  | "nodes" -> Sast.MemberVar(s_e1, m, Sast.List(Sast.Node)) 
-                  | _ -> raise (Failure("undeclared variable: "))
-                )
-              else 
-                  raise (Failure("hosanna tired "))
-            with
-            | Not_found -> raise (Failure("not a member function for graphs"))
-            )
-          | _ ->  raise (Failure("must use Node or Graph ya bish"))
-          )
-     with
-     | Not_found -> raise (Failure("undeclared variable: "))
-    );     
+    );                                      
 | Ast.MemberCall(e, m, el) -> 
 (
     let s_e = expr env e in

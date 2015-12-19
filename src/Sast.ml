@@ -19,7 +19,6 @@ type s_expr =
   | Binop of s_expr * Ast.op * s_expr * dataType             (* x + y *)
   | Call of string * s_expr list * dataType
   | Access of s_expr * s_expr  * dataType                    (* for dict and list element access *)
-  | MemberVar of s_expr * string  * dataType                (* parent variable, the accessed member *)
   | MemberCall of s_expr * string * s_expr list * dataType   (* parent variable, accessed funct, parameters *)
   | Undir of string * string  * dataType                     (* id, id *)
   | Dir of string * string  * dataType                       (* id, id *)

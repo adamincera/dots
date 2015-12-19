@@ -175,7 +175,6 @@ let get_expr_type = function
     | Sast.Binop(e1, op, e2, dt) -> dt
     | Sast.Call(v, el, dt) -> dt
     | Sast.Access(v, e, dt) -> dt
-    | Sast.MemberVar(v, m, dt) -> dt
     | Sast.MemberCall(v, m, el, dt) -> dt
     | Sast.Undir(v1, v2, dt) -> Sast.Void
     | Sast.Dir(v1, v2, dt) -> Sast.Void
@@ -624,7 +623,6 @@ let rec translate_expr env = function
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
             Access(dt_to_ct dt, index, ce) *)
-    | Sast.MemberVar(v, m, dt) -> Nostmt (* TODO *)
     | Sast.MemberCall(v, f, el, dt) -> Nostmt (* TODO *)
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
