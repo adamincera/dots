@@ -214,8 +214,9 @@ list_t *l3 = <type>_list_concat(l1, l2);
 /* data = list.peek() */
 <type> *data = (<type> *) peek(list);
 
-/* data = list.pop() */
-<type> *data = (<type> *) pop(list);
+/** ONLY removes first element from list and discards data **/
+/* list.pop() */
+list = pop(list);
 
 /* something = list[i] */
 something = list_access(list, i);
