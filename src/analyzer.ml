@@ -53,7 +53,7 @@ let rec stmt_sifter sifted = function
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
-               | Sast.AccessAssign(se1, se2, dt) -> 
+               | Sast.AccessAssign(se1, se2, se3, dt) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl                
@@ -641,7 +641,26 @@ let rec translate_expr env = function
                 Call(dt_to_ct dt, index, cel)
         )
             
-    | Sast.Access(v, e, dt) -> Nostmt
+    | Sast.Access(e1, e2, dt) -> 
+        let c_dt = dt_to_ct dt in
+        let e1_dt = get_expr_type e1 in
+        let c_e1 = translate_expr env e1 in
+        let c_e2 = translate_expr env e2 in
+        let args = [c_e1; c_e2] in
+        (match e1_dt with
+        | List(dt) -> 
+                Call(Ptr(Void), "list_access", args)
+        | Dict(dtk, dtv) ->
+                let c_dtk = dt_to_ct dtk in
+                (match c_dtk with
+                | Float -> Call(Ptr(Void), "get_num", args)
+                | Cstring -> Call(Ptr(Void), "get_string", args)
+                | Graph -> Call(Ptr(Void), "get_graph", args)
+                | Node -> Call(Ptr(Void), "get_node", args)
+                | _ -> raise(Failure("unsupported dict type"))
+                )
+        | _ -> raise(Failure("unsupported access"))
+        )
 
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
@@ -654,7 +673,7 @@ let rec translate_expr env = function
     | Sast.MemberCall(e, f, el, dt) -> 
         let ce = translate_expr env e in
         let cel = List.map (translate_expr env) el in 
-       (*) let cdt = Translate.get_expr_type ce in *)
+       (* let cdt = Translate.get_expr_type ce in *)
         let e_dt = get_expr_type e in 
         let e_list_type = (get_list_type e_dt) in
         let c_e_list_type = dt_to_ct e_list_type in
@@ -676,6 +695,8 @@ let rec translate_expr env = function
                                 (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) *)
                                  Expr(Assign(Id(Ptr(List(c_e_list_type)),auto_var), Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
                            ) *)
+                    )
+
       
           | _ -> raise (Failure("not enqueue")))
           
@@ -750,7 +771,7 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.AccessAssign(e1, e2, dt) -> Nostmt
+    | Sast.AccessAssign(e1, e2, e3, dt) -> Nostmt
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         let index = "v" ^ string_of_int(find_var id env.var_inds) in

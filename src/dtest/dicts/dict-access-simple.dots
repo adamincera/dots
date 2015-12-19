@@ -1,0 +1,4 @@
+dict<num, node> d1;
+d1[1.2];
+dict<string, num> d2;
+d2["hello"];
