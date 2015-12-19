@@ -15,7 +15,6 @@ type expr =
   | Binop of expr * op * expr
   | Call of string * expr list 
   | Access of expr * expr (* for dict and list element access, node.in[node2] *)
-  | MemberVar of expr * string (* expr that evaluates to parent variable, the accessed member *)
   | MemberCall of expr * string * expr list (* expr that evaluates to parent variable, accessed funct, parameters *)
   | Undir of string * string (* id, id *)
   | Dir of string * string (* id, id *)
@@ -44,7 +43,7 @@ type stmt =
   | Vdecl of string * string (* (type, id) *)
   | ListDecl of  string * string (* elem_type, id *)
   | DictDecl of string * string * string (* key_type, elem_type, id *)
-  | Assign of string * expr
+  | Assign of expr * expr
   | AccessAssign of expr * expr (* a[5] = 10 where first expr is an access expr *)
   | NodeDef of string * expr (* (node id, what goes inside parens) of item *)
 (*   | AssignList of string * expr  *)(* when a list of expressions is assigned to a variable *)
@@ -116,7 +115,6 @@ let rec string_of_expr = function
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Access (e, e1) -> string_of_expr e ^ "[" ^ string_of_expr e1 ^ "]"
-  | MemberVar (e1, s2) -> string_of_expr e1 ^ "." ^ s2
   | MemberCall (e1, s2, el) -> string_of_expr e1 ^ "." ^ s2 ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
 
@@ -127,7 +125,7 @@ let rec string_of_stmt = function
   | Vdecl(dt, id) -> dt ^ " " ^ id ^ ";\n";
   | ListDecl(dt, id) -> "list <" ^ dt ^ "> " ^ id ^ ";\n"
   | DictDecl(kdt, vdt, id) -> "dict <" ^ kdt ^ ", " ^ vdt ^ "> " ^ id ^ ";\n"
-  | Assign(v, e) -> v ^ " = " ^ string_of_expr e ^ ";"
+  | Assign(v, e) -> string_of_expr v ^ " = " ^ string_of_expr e ^ ";"
   | AccessAssign(e1, e2) -> string_of_expr e1 ^ "=" ^ string_of_expr e2 ^ ";\n"
   | NodeDef(v, e) -> v ^ "(" ^ string_of_expr e ^ ")" (* (node id, what goes inside parens) of item *)
   | GraphDef(v, el) -> v ^ " = { " ^ String.concat "," (List.map string_of_expr el) ^ "};"

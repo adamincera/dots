@@ -1,0 +1,3 @@
+node x;
+node v;
+x.oute()[v];

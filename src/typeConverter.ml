@@ -334,46 +334,44 @@ let rec expr env = function
           )
      with
      | Not_found -> raise (Failure("undeclared variable: "))
-    );                                  
-| Ast.MemberVar(e, m) -> 
-    (try                                (*sees if variable defined*)
-        let s_e1 = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-        let e1_dt = get_expr_type s_e1 in
-         (match e1_dt with
-          | Sast.Node -> 
-              (try 
-                let mem_r_type = StringMap.find m mem_vars in
-                if (mem_r_type = Sast.Node) then
-                  (match m with
-                    | "ine" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
-                    | "oute" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
-                    | "values" -> Sast.MemberVar(s_e1,m, (Sast.String))
-                    | _ -> raise (Failure("undeclared variable: "))
-                  )
-                else 
-                    raise (Failure("stupid "))
-              with
-                | Not_found -> raise (Failure("not a member function for graphs")) 
-              )
-          | Sast.Graph ->  
-            (try
-              let mem_r_type = StringMap.find m mem_vars in
-              if (mem_r_type = Sast.Graph) then 
-                (match m with
-                  | "nodes" -> Sast.MemberVar(s_e1, m, Sast.List(Sast.Node)) 
-                  | _ -> raise (Failure("undeclared variable: "))
-                )
-              else 
-                  raise (Failure("hosanna tired "))
-            with
-            | Not_found -> raise (Failure("not a member function for graphs"))
-            )
-          | _ ->  raise (Failure("must use Node or Graph ya bish"))
-          )
-     with
-     | Not_found -> raise (Failure("undeclared variable: "))
-    );     
+    );                                      
 | Ast.MemberCall(e, m, el) -> 
+(
+    let s_e = expr env e in
+    let e_dt = get_expr_type s_e in
+    let num_args = List.length el in
+    let s_el = List.map (expr env) el in
+    (*
+    let mem_r_type = 
+        (try 
+            StringMap.find m mem_vars
+         with
+         | Not_found -> raise (Failure ("no member function: " ^ m))
+        ) 
+    in
+  *)
+    match m with
+    | "enqueue" | "push" -> 
+        if num_args != 1 then raise (Failure ("enqueue/push requires 1 arg"))
+        else   
+            ignore((match e_dt with
+             | List(_) -> ignore()
+             | _ -> raise (Failure ("enqueue/push error: not a list"))
+            ));
+            ignore(check_list env (get_list_type e_dt) s_el); (* check that the arg is the type in the list *)
+            Sast.MemberCall(s_e, m, s_el, Sast.Void)
+    | "dequeue" | "pop" -> 
+        if num_args != 0 then raise (Failure ("dequeue/pop requires 0 args"))
+        else Sast.MemberCall(s_e, m, s_el, (get_list_type e_dt))
+    | "oute" | "ine" -> 
+        if num_args != 0 then raise (Failure ("oute/ine requires 0 args"))
+        else Sast.MemberCall(s_e, m, s_el, Dict(Node, Num))
+    | "value" ->
+        if num_args != 0 then raise (Failure ("value requires 0 args"))
+        else Sast.MemberCall(s_e, m, s_el, String)
+    | _ -> raise (Failure ("no member function: " ^ m))
+)
+(*
     (try 
           let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
           let e1_dt = get_expr_type s_e in
@@ -409,6 +407,7 @@ let rec expr env = function
       with
         | Not_found -> raise (Failure("not a member function for graphs"))
       );
+*)
 | Ast.Undir(v1, v2) -> 
     (*check if v1 and v2 exist *)
     (try                                (*sees if variable defined*)
@@ -523,10 +522,14 @@ let rec stmt env = function
 (*| _ -> failwith "Unknown") *)
 | Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
     let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let s_v = expr env v in
     let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
-    if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
-    then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-    else Sast.Assign(v, s_e, Sast.Void)
+    let v_dt = get_expr_type s_v in
+    (*if not( (find_var v env.var_types) = e_dt)*) (* gets type of var trying to assign get type trying to assign to *)
+    if not (v_dt = e_dt)
+    (*then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) )) *)
+    then raise (Failure ("assignment expression not of type: " ^ (type_to_str v_dt) ))
+    else Sast.Assign(s_v, s_e, Sast.Void)
 | Ast.AccessAssign(e1, e2) -> 
     let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
     let s_e2 = expr env e2 in             (* func rec until it knows datatype -- sast version of ast expr e *)

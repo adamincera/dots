@@ -37,11 +37,15 @@ let rec stmt_sifter sifted = function
                | Sast.Vdecl(dt, id) -> stmt_sifter {s_globals = hd :: sifted.s_globals; 
                                                s_main = sifted.s_main; 
                                                s_funcs = sifted.s_funcs} tl
+               | Sast.Assign(v, e, dt) -> 
+                  stmt_sifter {s_globals = sifted.s_globals; 
+                               s_main = hd :: sifted.s_main; 
+                               s_funcs = sifted.s_funcs} tl
                | Sast.Expr(e) -> 
-                   stmt_sifter {s_globals = sifted.s_globals; 
-                   s_main = hd :: sifted.s_main; 
-                   s_funcs = sifted.s_funcs} tl
-               | Sast.NodeDef(id, e, dt) | Sast.Assign(id, e, dt) -> 
+                  stmt_sifter {s_globals = sifted.s_globals; 
+                               s_main = hd :: sifted.s_main; 
+                               s_funcs = sifted.s_funcs} tl
+               | Sast.NodeDef(id, e, dt) | Sast.Assign(Id(id, Sast.Node), e, dt) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
@@ -171,7 +175,6 @@ let get_expr_type = function
     | Sast.Binop(e1, op, e2, dt) -> dt
     | Sast.Call(v, el, dt) -> dt
     | Sast.Access(v, e, dt) -> dt
-    | Sast.MemberVar(v, m, dt) -> dt
     | Sast.MemberCall(v, m, el, dt) -> dt
     | Sast.Undir(v1, v2, dt) -> Sast.Void
     | Sast.Dir(v1, v2, dt) -> Sast.Void
@@ -620,7 +623,6 @@ let rec translate_expr env = function
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
             Access(dt_to_ct dt, index, ce) *)
-    | Sast.MemberVar(v, m, dt) -> Nostmt (* TODO *)
     | Sast.MemberCall(v, f, el, dt) -> Nostmt (* TODO *)
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
@@ -656,8 +658,9 @@ let rec translate_stmt env = function
             )
     | Sast.Assign(v, e, dt) ->
             let ce = translate_expr env e in
+            let cv = translate_expr env v in
             let var_type = get_expr_type e in
-            let index = "v" ^ string_of_int(find_var v env.var_inds) in
+            (*let index = "v" ^ string_of_int(find_var v env.var_inds) in*)
             let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
             (*(match var_type with
               figure out what the expr actually is if
@@ -674,9 +677,12 @@ let rec translate_stmt env = function
             | Graph -> Expr(Assign(Id((dt_to_ct var_type), index), Call(Graph, "copy", [ce]))) 
             ) *)
             ( match e with 
-              | Binop(e1, op, e2, dt) -> Block([ce;
-                                Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))])
-              | StrLiteral(s1, dt) | NumLiteral(s1, dt) -> Expr(Assign(Id((dt_to_ct var_type), index), ce))
+              | Binop(e1, op, e2, dt) -> 
+                  Block([ce;
+                         (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) *)
+                         Expr(Assign(cv, Id((dt_to_ct var_type), auto_var)))])
+              | StrLiteral(s1, dt) | NumLiteral(s1, dt) -> (* Expr(Assign(Id((dt_to_ct var_type), index), ce)) *)
+                  Expr(Assign(cv, ce))
               | _ -> raise (Failure("Assign don't work like that ")))
 
             

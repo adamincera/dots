@@ -1,0 +1,2 @@
+list<num> x;
+x[2] = x.oute()[x];

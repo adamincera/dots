@@ -1,0 +1,6 @@
+list <string> str_list = ["hello", "world"];
+print(str_list[0],"\n");
+list <num> num_list = [1, 3, 6.5, 9.8];
+num x = num_list[0];
+print(str_list[x],"\n");
+print(num_list[x*3],"\n");
