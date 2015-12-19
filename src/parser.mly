@@ -147,7 +147,7 @@ vdecl:
 /* PRIMITIVE INITIALIZERS */
 prim_decl_prefix:
 | prim_type ID { Vdecl($1, $2) }                                                   /* num x */
-| prim_type ID ASSIGN expr { Block([Vdecl($1, $2); Assign($2, $4)]) }        /* MOVE THESE  */
+| prim_type ID ASSIGN expr { Block([Vdecl($1, $2); Assign(Id($2), $4)]) }        /* MOVE THESE  */
 
 /* NODE INITIALIZERS */
 node_decl_prefix:
@@ -163,11 +163,11 @@ graph_decl_prefix:
 
 list_decl_prefix:
 | LIST LT data_type GT ID { ListDecl($3, $5) }                                                              /*  list<node> min; */ 
-| LIST LT data_type GT ID ASSIGN expr { Block([ListDecl($3, $5); Assign($5, $7)]) }                        /*  list<node> min_path = { x, y, z; }; */
+| LIST LT data_type GT ID ASSIGN expr { Block([ListDecl($3, $5); Assign(Id($5), $7)]) }                        /*  list<node> min_path = { x, y, z; }; */
 
 dict_decl_prefix:
 | DICT LT data_type COMMA data_type GT ID { DictDecl($3, $5, $7) }                                         /* dict<node, num> parents; */ 
-| DICT LT data_type COMMA data_type GT ID ASSIGN expr { Block([DictDecl($3, $5, $7); Assign($7, $9)]) } /* dict<node, num> parents = { x; y; z; }; */
+| DICT LT data_type COMMA data_type GT ID ASSIGN expr { Block([DictDecl($3, $5, $7); Assign(Id($7), $9)]) } /* dict<node, num> parents = { x; y; z; }; */
 
    
 /////////////////////////////////////////////////////////////////////////////
@@ -184,12 +184,13 @@ stmt_list:
 
 stmt:
    expr SEMI { Expr($1) } 
-  | ID ASSIGN expr SEMI { Assign($1, $3) }
-  | access_expr ASSIGN expr SEMI { AccessAssign($1, $3) }
+  | log_expr SEMI { Expr($1) }
+  | expr ASSIGN expr SEMI { Assign($1, $3) }
+  /*| access_expr ASSIGN expr SEMI { AccessAssign($1, $3) } */
   | RETURN expr SEMI { Return($2) } 
   /* | LBRACE stmt_list RBRACE { Block(List.rev $2) } */
-  | IF LPAREN log_expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
-  | IF LPAREN log_expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
+  | IF LPAREN log_expr RPAREN LBRACE stmt_list RBRACE %prec NOELSE { If($3, Block($6), Block([])) }
+  | IF LPAREN log_expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE   { If($3, Block($6), Block($10)) }
   | FOR LPAREN ID IN expr RPAREN LBRACE stmt_list RBRACE
      { For($3, $5, $8) }
   | WHILE LPAREN log_expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
@@ -252,7 +253,7 @@ expr:
 
 nacc_expr: /* non access exprs */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | expr DOT ID %prec NOCALL { MemberVar($1, $3) }
+  /*| expr DOT ID %prec NOCALL { MemberVar($1, $3) }*/
   | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
   | term               { $1 }

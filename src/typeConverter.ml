@@ -523,10 +523,14 @@ let rec stmt env = function
 (*| _ -> failwith "Unknown") *)
 | Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
     let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let s_v = expr env v in
     let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
-    if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
-    then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-    else Sast.Assign(v, s_e, Sast.Void)
+    let v_dt = get_expr_type s_v in
+    (*if not( (find_var v env.var_types) = e_dt)*) (* gets type of var trying to assign get type trying to assign to *)
+    if not (v_dt = e_dt)
+    (*then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) )) *)
+    then raise (Failure ("assignment expression not of type: " ^ (type_to_str v_dt) ))
+    else Sast.Assign(s_v, s_e, Sast.Void)
 | Ast.AccessAssign(e1, e2) -> 
     let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
     let s_e2 = expr env e2 in             (* func rec until it knows datatype -- sast version of ast expr e *)
