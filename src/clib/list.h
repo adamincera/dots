@@ -52,9 +52,9 @@ list_t *other_add_back(list_t *l, void *data);
 
 */
 /* concatenation */
-void string_list_concat(list_t *target, const list_t *src);
+void string_list_concat(list_t *target, list_t *src);
 
-void num_list_concat(list_t *target, const list_t *src);
+list_t *num_list_concat(const list_t *target, const list_t *src);
 
 void graph_list_concat(list_t *target, const list_t *src);
 
@@ -112,6 +112,8 @@ void print_range(list_t *r);
 void print_strings(list_t *r);
 
 void free_list(list_t *r);
+
+void free_range(list_t *r);
 
 void num_index_insert(list_t *l, int i, float *a);
 
