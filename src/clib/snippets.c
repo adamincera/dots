@@ -118,7 +118,7 @@ put_string(d, "literal", (void *) &something);
 put_num(d, 1.23, (void *) &something);
 
 /* d[_node] = something */
-put_other(d, (void *) &_node, (void *) &something);
+put_node(d, (void *) &_node, (void *) &something);
 
 /** dict access **/
 /* something = d["key"]; */
@@ -214,8 +214,9 @@ list_t *l3 = <type>_list_concat(l1, l2);
 /* data = list.peek() */
 <type> *data = (<type> *) peek(list);
 
-/* data = list.pop() */
-<type> *data = (<type> *) pop(list);
+/** ONLY removes first element from list and discards data **/
+/* list.pop() */
+list = pop(list);
 
 /* something = list[i] */
 something = list_access(list, i);
@@ -236,3 +237,12 @@ graph_t *g2 = graph_plus_node(g1, n2);
 
 /** dict.remove(key) **/
 <type>_dict_remove(dict, key);
+
+/* dict.min() */
+<type>_dict_min(dict);
+
+/* list.max() */
+<type>_list_max(list);
+
+/** list[i] = something **/
+<type>_index_insert(list, i, something);

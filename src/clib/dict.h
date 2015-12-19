@@ -1,17 +1,7 @@
 #include "list.h"
 #define TABLE_SIZE 256
 
-struct entry {
-    void *key;
-    void *value;
-    struct entry *next;
-};
-
-typedef struct entry entry_t;
-
 entry_t **init_dict();
-
-entry_t **dict_copy(entry_t **src);
 
 void *get_string(entry_t **table, char *key);
 
@@ -44,3 +34,13 @@ void node_dict_remove(entry_t **table, node_t *key);
 void graph_dict_remove(entry_t **table, graph_t *key);
 
 entry_t **dict_copy(entry_t **table);
+
+void *num_dict_min(entry_t **table);
+
+void *num_dict_max(entry_t **table);
+
+void *string_dict_min(entry_t **table);
+
+void *string_dict_max(entry_t **table);
+
+int len(entry_t **table);

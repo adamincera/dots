@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 #include "dict.h"
 
 #define EPSILON 0.000000001
@@ -12,13 +13,13 @@ entry_t **init_dict() {
 }
 
 /*
-entry_t **dict_copy(entry_t **src) {
-    entry_t **dst = init_dict();
-    int i;
-    entry_t *temp;
-    for(i = 0; i < TABLE_SIZE; i++)
-        for(temp = src[i]; temp; temp = temp->next) {
-*/
+   entry_t **dict_copy(entry_t **src) {
+   entry_t **dst = init_dict();
+   int i;
+   entry_t *temp;
+   for(i = 0; i < TABLE_SIZE; i++)
+   for(temp = src[i]; temp; temp = temp->next) {
+ */
 
 int float_equals(float a, float b) {
     return fabsf(a - b) < EPSILON * a;
@@ -39,9 +40,9 @@ static int hash_num(float key) {
 
 static int hash_graph(graph_t *g) {
     int ret = 0;
-    nodelist_t *temp;
+    list_t *temp;
     for(temp = g->nodes; temp; temp = temp->next) {
-        ret += ((unsigned int) temp->node >> 3);
+        ret += ((unsigned int) temp->data >> 3);
     }
     ret %= TABLE_SIZE;
     return ret;
@@ -64,6 +65,7 @@ void *get_string(entry_t **table, char *key) {
 }
 
 void *get_num(entry_t **table, float key) {
+
     int k = hash_num(key);
     entry_t *temp = table[k];
     while(temp) {
@@ -217,6 +219,10 @@ void put_other(entry_t **table, void *key, void *value) {
     }
 }
 
+void put_node(entry_t **table, node_t *key, void *value) {
+    put_other(table, (void *) key, value); 
+}
+
 static void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b)) {
     entry_t *row = *table;
 
@@ -286,4 +292,80 @@ static int void_graph_equals(void *a, void *b) {
 void graph_dict_remove(entry_t **table, graph_t *key) {
     int k = hash_graph(key);
     dict_remove(table + k, (void *) key, void_graph_equals);
+}
+
+void *num_dict_min(entry_t **table) {
+    int min = INT_MAX;
+    void *ret = NULL;
+    int i;
+    entry_t *temp;
+    for(i = 0; i < TABLE_SIZE; i++) 
+        for(temp = table[i]; temp; temp = temp->next) {
+            if(*(float *) temp->value < min) {
+                min = *(float *) temp->value;
+                ret = temp->key;
+            }
+        }
+    return ret;
+}
+
+void *num_dict_max(entry_t **table) {
+    int max = INT_MIN;
+    void *ret = NULL;
+    int i;
+    entry_t *temp;
+    for(i = 0; i < TABLE_SIZE; i++) 
+        for(temp = table[i]; temp; temp = temp->next) {
+            if(*(float *) temp->value > max) {
+                max = *(float *) temp->value;
+                ret = temp->key;
+            }
+        }
+    return ret;
+}
+
+void *string_dict_min(entry_t **table) {
+    char *min = NULL;
+    void *ret = NULL;
+    int i;
+    entry_t *temp;
+    for(i = 0; i < TABLE_SIZE; i++) 
+        for(temp = table[i]; temp; temp = temp->next) {
+            if(!min) {
+                min = (char *) temp->value;
+                ret = temp->key;
+            } else if(strcmp((char *) temp->value, min) < 0) {
+                min = (char *) temp->value;
+                ret = temp->key;
+            }
+        }
+    return ret;
+}
+
+void *string_dict_max(entry_t **table) {
+    char *max = NULL;
+    void *ret = NULL;
+    int i;
+    entry_t *temp;
+    for(i = 0; i < TABLE_SIZE; i++) 
+        for(temp = table[i]; temp; temp = temp->next) {
+            if(!max) {
+                max = (char *) temp->value;
+                ret = temp->key;
+            } else if(strcmp((char *) temp->value, max) > 0) {
+                max = (char *) temp->value;
+                ret = temp->key;
+            }
+        }
+    return ret;
+}
+
+int len(entry_t **table) {
+    int i;
+    entry_t *temp;
+    int len = 0;
+    for(i = 0; i < TABLE_SIZE; i++)
+        for(temp = table[i]; temp; temp = temp->next)
+            len++;
+    return len;
 }

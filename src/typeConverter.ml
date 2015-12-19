@@ -351,7 +351,7 @@ let rec expr env = function
             Sast.MemberCall(s_e, m, s_el, Sast.Void)
     | "dequeue" | "pop" -> 
         if num_args != 0 then raise (Failure ("dequeue/pop requires 0 args"))
-        else Sast.MemberCall(s_e, m, s_el, (get_list_type e_dt))
+        else Sast.MemberCall(s_e, m, s_el, Sast.Void)
     | "oute" | "ine" -> 
         if num_args != 0 then raise (Failure ("oute/ine requires 0 args"))
         else Sast.MemberCall(s_e, m, s_el, Dict(Node, Num))
@@ -519,18 +519,38 @@ let rec stmt env = function
     (*then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) )) *)
     then raise (Failure ("assignment expression not of type: " ^ (type_to_str v_dt) ))
     else Sast.Assign(s_v, s_e, Sast.Void)
-| Ast.AccessAssign(e1, e2) -> 
+| Ast.AccessAssign(e1, e2, e3) -> 
     let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e1_dt = get_expr_type s_e1 in
     let s_e2 = expr env e2 in             (* func rec until it knows datatype -- sast version of ast expr e *)
     let e2_dt = get_expr_type s_e2 in
-    ( match s_e1 with 
-      | Sast.Access(v, s_e, dt) -> (* this should be checked already*) 
-          if (dt = e2_dt) then 
-            Sast.AccessAssign(s_e1, s_e2, Sast.Void) 
-          else
-            raise(Failure("AccessAssign: trying to set list/dict element to non-matching type."))
-      | _ -> raise(Failure ("AccessAssign's first arg isn't an access expr"))
-    )
+    let s_e3 = expr env e3 in
+    let e3_dt = get_expr_type s_e3 in
+    (try                                (*sees if variable defined*)
+         (match e1_dt with 
+           List(dt) -> 
+              (match e2_dt with 
+                 | Sast.Num -> 
+                 if (e3_dt = dt) then
+                 Sast.AccessAssign(s_e1, s_e2, s_e3, Sast.Void)
+                else
+                raise (Failure("AccessAssign: Assigning wrong type"))
+
+                 | _ -> raise (Failure ("expr to access list should be Num")) 
+              )
+          | Dict(dk,dv) ->  
+            if (e2_dt = dk) then
+                if(e3_dt = dv) then
+                Sast.AccessAssign(s_e1, s_e2, s_e3, Sast.Void)
+              else
+              raise(Failure("AccessAssign: mismatched Value data type"))
+            else 
+                raise (Failure("wrong type: Dict != Dict<?> "))
+          | _ -> raise (Failure("must use Dict or List with access!"))
+          )
+     with
+     | Not_found -> raise (Failure("undeclared variable: "))
+    );                                      
 
 | Ast.NodeDef(v, e) -> (* (node id, what goes inside parens) of item *)
     (try 

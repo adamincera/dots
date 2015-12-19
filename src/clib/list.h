@@ -1,12 +1,5 @@
 #include "graph.h"
 
-struct list {
-    struct list *next;
-    struct list *previous;
-    void *data;
-};
-typedef struct list list_t;
-
 /* copy constructors */
 list_t *string_list_copy(const list_t *src);
 
@@ -80,7 +73,7 @@ int other_list_equals(const list_t *a, const list_t *b, int (*comp)(void *a, voi
 
 /* dequeue/pop */
 
-void *pop(list_t *l);
+list_t *pop(list_t *l);
 
 /* peek */
 void *peek(list_t *l);
@@ -123,3 +116,12 @@ void node_index_insert(list_t *l, int i, node_t *a);
 
 void graph_index_insert(list_t *l, int i, graph_t *a);
 
+float num_list_min(list_t *l);
+
+float num_list_max(list_t *l);
+
+char *string_list_min(list_t *l);
+
+char *string_list_max(list_t *l);
+
+int list_len(list_t *l);

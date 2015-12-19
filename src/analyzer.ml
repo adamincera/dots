@@ -3,9 +3,9 @@ open Ast
 open Sast
 open Translate
 
+
 module StringMap = Map.Make(String)
 (* module DataTypeMap = Map.Make(dataType) *)
-
 type s_program = { s_globals : s_stmt list; s_main: s_stmt list; s_funcs : s_fdecl list; } 
 
 (* read in Sast program creat list of glbs by skipping fdecls  
@@ -31,6 +31,10 @@ program = { s_cmds : s_stmt list }
   @param sifted := a struct that contains the globals, 
       regular stmts, and func decls that have been sorted so far
  *)
+let get_list_type = function
+ | Sast.List(dt) ->  dt
+ | _ -> raise (Failure("wrong type: not a list")) 
+
 let rec stmt_sifter sifted = function
 | [] -> sifted
 | hd :: tl -> (match hd with
@@ -49,7 +53,7 @@ let rec stmt_sifter sifted = function
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
-               | Sast.AccessAssign(se1, se2, dt) -> 
+               | Sast.AccessAssign(se1, se2, se3, dt) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl                
@@ -164,6 +168,24 @@ let rec type_to_str = function
     | Sast.List(dt) -> "list <" ^ type_to_str dt ^ ">"
     | Sast.Void -> "void"
 
+let rec expr_type_str  = function
+    | Sast.NumLiteral(v, dt) -> "NumLiteral"
+    | Sast.StrLiteral(v, dt) -> "StrLiteral"
+    | Sast.ListLiteral(el, dt) -> "ListLiteral"
+    | Sast.DictLiteral(kvl, dt) -> "DictLiteral"
+    | Sast.Boolean(v, dt) -> "Boolean"
+    | Sast.Id(v, dt) -> "Id"
+    | Sast.Binop(e1, op, e2, dt) -> "Binop"
+    | Sast.Call(v, el, dt) -> "Call"
+    | Sast.Access(v, e, dt) -> "Access"
+    | Sast.MemberCall(v, m, el, dt) -> "MemberCall"
+    | Sast.Undir(v1, v2, dt) -> "Undir"
+    | Sast.Dir(v1, v2, dt) -> "Dir"
+    | Sast.UndirVal(v1, v2, w, dt) -> "UndirVal"
+    | Sast.DirVal(v1, v2, w, dt) -> "DirVal"
+    | Sast.BidirVal(w1, v1, v2, w2, dt) -> "BidirVal"
+    | Sast.NoOp(v, dt) -> "NoOp"
+    | Sast.Noexpr -> "Noexpr"
     (* returns the datatype of an Sast expressions *)
 let get_expr_type = function
     | Sast.NumLiteral(v, dt) -> dt
@@ -513,7 +535,7 @@ let rec translate_expr env = function
                                  For(Assign(Id(elem_type, auto_var), print_expr),
                                      Id(Ptr(List(elem_type)), auto_var),
                                      Assign(Id(elem_type, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
-                                     [Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))])]
+                                     [Expr(Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))]))]
                                  );
                                  Vdecl(Ptr(List(dt_to_ct dt)), auto_var)
                                 ]
@@ -619,11 +641,78 @@ let rec translate_expr env = function
                 Call(dt_to_ct dt, index, cel)
         )
             
-    | Sast.Access(v, e, dt) -> Nostmt
+    | Sast.Access(e1, e2, dt) -> 
+        let c_dt = dt_to_ct dt in
+        let e1_dt = get_expr_type e1 in
+        let c_e1 = translate_expr env e1 in
+        let c_e2 = translate_expr env e2 in
+        let args = [c_e1; c_e2] in
+        (match e1_dt with
+        | List(dt) -> 
+                Call(Ptr(Void), "list_access", args)
+        | Dict(dtk, dtv) ->
+                let c_dtk = dt_to_ct dtk in
+                (match c_dtk with
+                | Float -> Call(Ptr(Void), "get_num", args)
+                | Cstring -> Call(Ptr(Void), "get_string", args)
+                | Graph -> Call(Ptr(Void), "get_graph", args)
+                | Node -> Call(Ptr(Void), "get_node", args)
+                | _ -> raise(Failure("unsupported dict type"))
+                )
+        | _ -> raise(Failure("unsupported access"))
+        )
+
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
-            Access(dt_to_ct dt, index, ce) *)
-    | Sast.MemberCall(v, f, el, dt) -> Nostmt (* TODO *)
+            Access(dt_to_ct dt, index, ce)
+            list_t *l3; //
+            g2[1];
+
+            l3 = (num_add_back(l3, 1.24));
+             *)
+    | Sast.MemberCall(e, f, el, dt) -> 
+        let ce = translate_expr env e in
+        let cel = List.map (translate_expr env) el in 
+       (* let cdt = Translate.get_expr_type ce in *)
+        let e_dt = get_expr_type e in 
+        let e_list_type = (get_list_type e_dt) in
+        let c_e_list_type = dt_to_ct e_list_type in
+        (match f with
+              | "enqueue" | "push" -> 
+                  let suffix = (if f = "enqueue" then "back" else "front") in
+                  let func_name = 
+                    (match e_list_type with
+                    | Num -> "num_add_" ^ suffix
+                    | String -> "string_add_" ^ suffix
+                    | Node -> "node_add_" ^ suffix
+                    | Graph -> "graph_add_" ^ suffix
+                    | _ -> raise (Failure("can not enqueue this datatype"))) in
+                    (match e with 
+                      | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
+                            Block([Expr(Assign(ce, Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
+                      | _ -> raise (Failure("not enqueue")))
+              | "dequeue" | "pop" -> 
+                 let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                        
+                 (*  data = list.peek()  <type> *data = (<type> * peek(list);
+                           data = list.pop() 
+                          <type> *data = (<type> * pop(list); *)
+                    (match e with 
+                      | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
+                            Block([Expr(Assign(Id((dt_to_ct e_dt), auto_var), 
+                                              Call(dt_to_ct e_dt, "pop", [ce] ) ))])
+                      | _ -> raise (Failure("not dequeue")))
+                           
+                          (* let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                          Block([ce;
+                                (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) *)
+                                 Expr(Assign(Id(Ptr(List(c_e_list_type)),auto_var), Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
+                           ) *)
+                    )
+
+      
+          | _ -> raise (Failure("not enqueue"))
+      
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.UndirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
@@ -696,16 +785,15 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.AccessAssign(e1, e2, dt) -> Nostmt
+    | Sast.AccessAssign(e1, e2, e3, dt) -> Nostmt
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
+        let index = "v" ^ string_of_int(find_var id env.var_inds) in
         (match s with
           | Sast.Noexpr ->                                                 
-            let index = "v" ^ string_of_int(find_var id env.var_inds) in
             Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
               Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
           | _ -> 
-            let index = "v" ^ string_of_int(find_var id env.var_inds) in
             Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
               Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
         )     
@@ -732,7 +820,7 @@ let rec translate_stmt env = function
 
             let csl = List.map (translate_stmt env) sl in
             Block(
-            [Vdecl(Ptr(dt_to_ct iter_type), auto_index); Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter))]
+            [Expr(Vdecl(Ptr(dt_to_ct iter_type), auto_index); Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter)))]
             @
             [
             (match iter_type with
