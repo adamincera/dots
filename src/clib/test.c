@@ -13,6 +13,7 @@ int main() {
     list_t *concat = num_list_concat(l, m);
     printf("concat: ");
     print_range(concat);
+    printf("concat.len = %d\n", list_len(concat));
     float minf =  num_list_min(concat);
     float maxf =  num_list_max(concat);
     printf("min: %f\nmax: %f\n", minf, maxf);
@@ -63,6 +64,7 @@ int main() {
     printf("got %s\n", got);
     got = (char *) get_string(d, "world");
     printf("got %s\n", got);
+    printf("d.len = %d\n", dict_len(d));
 
     printf("1.23 == 1.24: %d\n", float_equals(1.23,1.24));
 
@@ -70,6 +72,7 @@ int main() {
     put_num(nums, 1.23, (void *) "1.23 val");
     put_num(nums, 1.23, (void *) "1.23 second val");
     put_num(nums, 1.24, (void *) "1.24 val");
+    printf("nums.len = %d\n", dict_len(nums));
     minf = *(float *) num_dict_min(nums);
     maxf = *(float *) num_dict_max(nums);
     printf("min: %f\nmax: %f\n", minf, maxf);
