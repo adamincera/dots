@@ -1,0 +1,7 @@
+def dict<node, num> relax (node u, dict<node, num> w) {
+        return w;
+}
+/*
+def dict<node,num> relax (node u, dict<node, num> w) {
+	return u;
+} */

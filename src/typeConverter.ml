@@ -345,8 +345,8 @@ let rec expr env = function
                 let mem_r_type = StringMap.find m mem_vars in
                 if (mem_r_type = Sast.Node) then
                   (match m with
-                    | "in" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
-                    | "out" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
+                    | "ine" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
+                    | "oute" -> Sast.MemberVar(s_e1,m, Sast.List(Sast.Node))
                     | "values" -> Sast.MemberVar(s_e1,m, (Sast.String))
                     | _ -> raise (Failure("undeclared variable: "))
                   )

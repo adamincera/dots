@@ -1,0 +1,4 @@
+node x;
+for (n in x.oute) {
+n;
+}
