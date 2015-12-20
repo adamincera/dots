@@ -642,7 +642,7 @@ let rec translate_expr env = function
                 Block( print_builder [] el (* TODO *) )
             | "len" ->
                     let arg = List.hd el in
-                    let arg_type = get_expr_type arg in
+                    let arg_type = get_sexpr_type arg in
                     let c_arg = translate_expr env arg in
                     (match arg_type with
                     | List(dt) -> Call(Int, "list_len", [c_arg])
@@ -721,6 +721,7 @@ let rec translate_expr env = function
                             Block([Expr(Assign(Id((dt_to_ct e_dt), auto_var), 
                                               Call(dt_to_ct e_dt, "pop", [ce] ) ))])
                       | _ -> raise (Failure("not dequeue"))
+                    )
                            
                           (* let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
                           Block([ce;
@@ -832,9 +833,9 @@ let rec translate_stmt env = function
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
     | Sast.AccessAssign(e1, e2, e3, dt) -> (* check access first *)
-        let e1_dt = get_expr_type e1 in
-        let e2_dt = get_expr_type e2 in
-        let e3_dt = get_expr_type e3 in
+        let e1_dt = get_sexpr_type e1 in
+        let e2_dt = get_sexpr_type e2 in
+        let e3_dt = get_sexpr_type e3 in
         let c_e1 = translate_expr env e1 in
         let c_e2 = translate_expr env e2 in
         let c_e3 = translate_expr env e3 in
