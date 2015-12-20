@@ -1099,23 +1099,39 @@ let rec translate_stmt env = function
                               let auto_var = "v" ^ string_of_int(create_auto env "" dtv) in
                               (match c_dtk with
                               | Float -> Block([Vdecl(c_dtv, auto_var);
-                                         Expr(Assign(Id(c_dtv, auto_var), e3_deref));
-                                         Expr(Call(Ptr(Void), "put_num", 
-                                         [e1_deref; e2_deref; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
-                              | Cstring -> Block([Vdecl(c_dtv,auto_var);
                                            Expr(Assign(Id(c_dtv, auto_var), e3_deref));
-                                           Expr(Call(Ptr(Void), "put_string", 
-                                           [e1_deref; e2_deref; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
+                                           Expr(Assign(e1_deref, 
+                                                       Call(Ptr(Void), "put_num", 
+                                                           [e1_deref; 
+                                                            e2_deref; 
+                                                            Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))
+                                                           ])
+                                                )
+                                           )
+                                         ])
+                              | Cstring -> Block([Vdecl(c_dtv,auto_var);
+                                                  Expr(Assign(Id(c_dtv, auto_var), e3_deref));
+                                                  Expr(Assign(e1_deref, Call(Ptr(Void), "put_string", 
+                                                                            [e1_deref; 
+                                                                             e2_deref; 
+                                                                             Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))
+                                                                            ])
+                                                                   )
+                                                  )
+                                           ])
                               | Node -> let auto_var2 = "v" ^ string_of_int(create_auto env "" dtk) in
                                         Block([Vdecl(c_dtk,auto_var2);
-                                        Expr(Assign(Id(c_dtk,auto_var2),
-                                             Deref(dt_to_ct e2_dt,
-                                             Id(Ptr(dt_to_ct e2_dt),
-                                             result_e2))));
-                                        Vdecl(c_dtv,auto_var);
-                                        Expr(Assign(Id(c_dtv,auto_var), e3_deref));
-                                        Expr(Call(Ptr(Void), "put_node", 
-                                        [e1_deref; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
+                                          Expr(Assign(Id(c_dtk,auto_var2),
+                                               Deref(dt_to_ct e2_dt,
+                                               Id(Ptr(dt_to_ct e2_dt),
+                                               result_e2))));
+                                          Vdecl(c_dtv,auto_var);
+                                          Expr(Assign(Id(c_dtv,auto_var), e3_deref));
+                                          Expr(Assign(e1_deref, 
+                                                      Call(Ptr(Void), "put_node", 
+                                                           [e1_deref; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))
+                                          )
+                                       ])
                               | _ -> raise(Failure("unsupported dict type"))
                               )
                             else
@@ -1205,25 +1221,27 @@ let rec translate_stmt env = function
                   | Dict(dtk, dtv) -> 
                           let iter_deref = Deref(Ptr(Entry), Id(Ptr(Ptr(Entry)), iter_result)) in
                           let int_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
+                          let for_loop = 
+                              For(Assign(Id(Int, int_var), Literal(Int, "0")),
+                                  Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
+                                  Assign(Id(Int, int_var), 
+                                         Binop(Int, Id(Int, int_var), Ast.Add,
+                                         Literal(Int, "1"))),
+                                  [For(Assign(Id(Ptr(Entry), loop_var), Access(Entry, Assoc(iter_deref), Id(Int, int_var))), 
+                                      Id(Entry, loop_var),
+                                      Assign(Id(Ptr(Entry), loop_var), Member(Entry, loop_var, "next")),
+                                      ( Expr(Assign(Id(Ptr(Void), key_var), 
+                                                    Member(Ptr(Void), loop_var, "key")
+                                            )
+                                        )
+                                        :: List.map (translate_stmt env) sl
+                                      )
+                                  )]
+                                ) in
                           Block([Vdecl(Int, int_var); 
                                  Vdecl(Ptr(Entry), loop_var);
                                  Vdecl(Ptr(Void), key_var); 
-                                 For(Assign(Id(Int, int_var), Literal(Int, "0")),
-                                     Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
-                                     Assign(Id(Int, int_var), 
-                                            Binop(Int, Id(Int, int_var), Ast.Add,
-                                                  Literal(Int, "1"))),
-                                     [For(Assign(Id(Ptr(Entry), loop_var), Access(Entry, Assoc(iter_deref), Id(Int, int_var))), 
-                                          Id(Entry, loop_var),
-                                          Assign(Id(Ptr(Entry), loop_var), Member(Entry, loop_var, "next")),
-                                          ( Expr(Assign(Id(Ptr(Void), key_var), 
-                                                        Member(Ptr(Void), loop_var, "key")
-                                                )
-                                            )
-                                            :: List.map (translate_stmt env) sl
-                                          )
-                                     )]
-                                )
+                                 If(iter_deref, [for_loop], [])
                           ])
                   | Node -> 
                       let iter_deref = Deref(Node, Id(Ptr(Node), iter_result)) in
