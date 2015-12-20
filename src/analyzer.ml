@@ -839,12 +839,13 @@ let rec translate_expr env = function
         let e2_dt = get_sexpr_type e2 in
         let c_e1 = translate_expr env e1 in (* translate e1 to c *)
           let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e1_deref = Deref(dt_to_ct e1_dt, Id(Ptr(dt_to_ct e1_dt), result_e1)) in
         let c_e2 = translate_expr env e2 in (* translate e2 to c *)
           let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e2's translation *)
-        
+          let e2_deref = Deref(dt_to_ct e2_dt, Id(Ptr(dt_to_ct e2_dt), result_e2)) in
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
         let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
-        let args = [Id(dt_to_ct e1_dt, result_e1); Id(dt_to_ct e2_dt, result_e2)] in (* specific to access function calls *)
+        let args = [e1_deref; e2_deref] in (* specific to access function calls *)
         let access_call = (match e1_dt with
                       | List(dt) -> 
                               Call(Ptr(Void), "list_access", args)
@@ -863,7 +864,7 @@ let rec translate_expr env = function
                  c_e1;
                  c_e2;
                  result_decl;
-                 Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Cast(Ptr(c_dt), access_call))(* store the result of Access in our result_var *)
+                 Assign(Id(Ptr(c_dt), result_var), Expr(Cast(Ptr(c_dt), access_call)))(* store the result of Access in our result_var *)
               ])
 
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
