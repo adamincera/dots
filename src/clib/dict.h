@@ -13,15 +13,15 @@ void *get_other(entry_t **table, void *key);
 
 void *get_node(entry_t **table, node_t *n);
 
-void put_string(entry_t **table, char *key, void *value);
+entry_t **put_string(entry_t **table, char *key, void *value);
 
-void put_num(entry_t **table, float key, void *value);
+entry_t **put_num(entry_t **table, float key, void *value);
 
-void put_graph(entry_t **table, graph_t *g, void *value);
+entry_t **put_graph(entry_t **table, graph_t *g, void *value);
 
-void put_node(entry_t **table, node_t *n, void *value);
+entry_t **put_node(entry_t **table, node_t *n, void *value);
 
-void put_other(entry_t **table, void *key, void *value);
+entry_t **put_other(entry_t **table, void *key, void *value);
 
 int float_equals(float a, float b);
 
