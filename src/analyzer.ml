@@ -433,27 +433,49 @@ let rec translate_expr env = function
                         | Graph -> "graph_add_back"
                         | _ -> raise (Failure("can not enqueue this datatype"))
                        ) in
-        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
+        let temp_list = "v" ^ string_of_int(create_auto env "" (dt)) in (* the variable containing the list *)
+
         let rec build_enqueue ops = function
         | [] -> ops
         | hd :: tl -> 
             let elem_c = translate_expr env hd in (* translate list element being added *)
             let elem_result =  "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result of element translation *)
-            let en_stmt = Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)),
-                                      Call(c_dt, enq_func, [Deref(c_dt, Id(Ptr(c_dt), result_var));
-                                                            Deref(elem_ctype, Id(Ptr(elem_ctype), elem_result)) (* element translation result *)
-                                                           ]
-                                      )
-                               )
+            let enq_call = Call(c_dt, enq_func, [Deref(c_dt, Id(Ptr(c_dt), temp_list));
+                                                 Id(Ptr(elem_ctype), elem_result) (* element translation result *)
+                                                ]
                           ) in
-            build_enqueue (en_stmt :: ops) tl
+            build_enqueue ((elem_c, enq_call) :: ops) tl
         in
-        let enqueue_stmts = build_enqueue [] el in
-        Block( Vdecl(Ptr(c_dt), result_var) :: enqueue_stmts )
+        let enq_calls = build_enqueue [] el in (* get calls for each element in the list *)
+
+        let rec build_list stmts = function
+        | [] -> stmts
+        | hd :: tl -> 
+            let en_stmt = Block([(fst hd);
+                                 Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), temp_list)),
+                                             (snd hd)
+                                     )
+                                 )
+                          ]) in
+            build_list (en_stmt :: stmts) tl
+        in
+        let c_stmts = build_list [] enq_calls in (* combines the element translation and enqueue calls *)
+
+        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* will equal the temporary list created earlier *)
+
+        Block(([Vdecl(Ptr(c_dt), temp_list);
+                Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), temp_list)), Id(Void, "NULL")));
+                Vdecl(Ptr(c_dt), result_var)
+               ] 
+              @ 
+              (List.rev (Expr(Assign(Id(Ptr(c_dt), result_var), Id(Ptr(c_dt), temp_list))) 
+               :: (List.rev c_stmts) 
+              )))) (* add the assignment to the end of enqueue calls *)
         (* ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *) *)
 
     | Sast.DictLiteral(kvl, dt) ->  
-        DictLiteral(dt_to_ct dt, List.map (fun f -> (translate_expr env (fst f), translate_expr env (snd f))) kvl)(* TODO *)
+        DictLiteral(dt_to_ct dt, 
+                    List.map (fun f -> (translate_expr env (fst f), translate_expr env (snd f))) kvl)(* TODO *)
     | Sast.Boolean(b, dt) -> 
         if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
