@@ -545,11 +545,19 @@ let rec translate_expr env = function
                 let rec print_builder elems = function
                 | [] -> List.rev elems
                 | hd :: tl -> 
-                    let print_expr = translate_expr env hd in
-                    let e_t = get_sexpr_type hd in
-                    (match e_t with
+                    let hd_type = get_sexpr_type hd in
+                    let print_expr = translate_expr env hd in (* elem to print *)
+                    let print_type = dt_to_ct hd_type in (* type of elem *)
+                    let print_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of elem translation *)
+
+                    (match hd_type with
                       | Num | String | Bool | Node -> 
-                          print_builder (Expr(Call(Void, "f1", [print_expr])) :: elems) tl
+                          print_builder (Block([print_expr;
+                                                Expr(Call(Void, "printf", [Literal(Cstring, get_fmt_str print_type); 
+                                                                          Deref(print_type, Id(Ptr(print_type), print_result))
+                                                                          ]))
+                                                ]) :: elems)
+                                        tl
                       | List(dt) -> 
                           let elem_type = dt_to_ct dt in
                           let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.List(dt))) in
