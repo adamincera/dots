@@ -1,12 +1,5 @@
 #include "graph.h"
 
-struct list {
-    struct list *next;
-    struct list *previous;
-    void *data;
-};
-typedef struct list list_t;
-
 /* copy constructors */
 list_t *string_list_copy(const list_t *src);
 
@@ -131,3 +124,4 @@ char *string_list_min(list_t *l);
 
 char *string_list_max(list_t *l);
 
+int list_len(list_t *l);

@@ -100,7 +100,7 @@ list_t *node_add_back(list_t *l, node_t *data) {
 }
 
 list_t *pop(list_t *l) {
-    node_t *head = l->next;
+    list_t *head = l->next;
     head->previous = NULL;
     free(l);
     return head;
@@ -418,3 +418,9 @@ char  *string_list_max(list_t *l) {
     return max;
 }
 
+int list_len(list_t *l) {
+    int len = 0;
+    for(; l; l = l->next)
+        len++;
+    return len;
+}

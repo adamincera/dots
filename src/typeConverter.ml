@@ -12,27 +12,14 @@ let get_list_type = function
  | Sast.List(dt) ->  dt
  | _ -> raise (Failure("wrong type: not a list"))
 
-(*       let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-      let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
-      (try                                (*sees if variable defined*)
-          (find_var v env.var_inds)
-       with
-       | Not_found -> raise (Failure("undeclared variable: "))
-      );
-      if not( (find_var v env.var_types) = e_dt) (* gets type of var trying to assign get type trying to assign to *)
-      then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-      else Sast.Assign(v, s_e, e_dt)
-
-      let get_dict_type = function
+let get_dict_type = function
  | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
  | _ -> raise (Failure("wrong type: not a dict "))
-*)
-
 
 let rec check_list env v_e = function
  | [] -> ""
  | hd::tl -> 
-    if not(v_e = (get_expr_type hd)) then 
+    if not(v_e = (get_sexpr_type hd)) then 
        raise (Failure ("list element not of type: " ^ type_to_str ( v_e )) )
     else 
       check_list env v_e tl
@@ -41,7 +28,7 @@ let rec check_graph_list env = function
  | hd::tl -> 
       (match hd with 
         | Sast.Id(v, dt) ->  
-          let e_dt = get_expr_type hd in
+          let e_dt = get_sexpr_type hd in
           (if not (e_dt = Sast.Node || e_dt = Sast.Graph) then
             raise (Failure ("you can not have a graph def with type other than Node or Graph")) 
           else 
@@ -57,7 +44,7 @@ let rec check_graph_list env = function
 let rec check_dict env v_e = function
  | [] -> ""
  | hd::tl -> 
-    if not((fst v_e = get_expr_type (fst hd)) && (snd v_e = get_expr_type (snd hd))) then
+    if not((fst v_e = get_sexpr_type (fst hd)) && (snd v_e = get_sexpr_type (snd hd))) then
       raise (Failure ("assignment expression not of type: " ) )
     else 
       check_dict env v_e tl
@@ -67,7 +54,7 @@ let rec check_dict env v_e = function
     | [], [] -> true
     | [], _ -> raise (Failure ("formal list fucked up" ) )
     | _, [] -> raise (Failure ("formal list fucked up" ) )
-    | hd1::tl1, hd2::tl2 -> ((fst hd1) = (get_expr_type hd2)) && (formal_check tl1 tl2)  
+    | hd1::tl1, hd2::tl2 -> ((fst hd1) = (get_sexpr_type hd2)) && (formal_check tl1 tl2)  
 
 let convert_ast prog env =
 
@@ -87,7 +74,7 @@ let rec expr env = function
   let s_el = List.map (expr env) el in
   (match el with
    | [] -> ListLiteral([], List(Void))
-   | x ->  let dt = get_expr_type (List.hd s_el) 
+   | x ->  let dt = get_sexpr_type (List.hd s_el) 
            in
            ignore (check_list env dt s_el); 
            ListLiteral(s_el, List(dt))
@@ -98,7 +85,7 @@ let rec expr env = function
   (match s_el with 
     | [] -> DictLiteral([], Dict(Void,Void))
     | x -> 
-      let dt = (get_expr_type (fst(List.hd s_el)), get_expr_type (snd(List.hd s_el))) 
+      let dt = (get_sexpr_type (fst(List.hd s_el)), get_sexpr_type (snd(List.hd s_el))) 
               in 
               ignore (check_dict env dt s_el);
               DictLiteral(s_el, Sast.Dict(fst dt, snd dt))
@@ -113,8 +100,8 @@ let rec expr env = function
 | Ast.Binop(e1, op, e2) -> 
     let s_e1 = expr env e1 in
     let s_e2 = expr env e2 in              
-    let e1_dt = get_expr_type s_e1 in
-    let e2_dt = get_expr_type s_e2 in
+    let e1_dt = get_sexpr_type s_e1 in
+    let e2_dt = get_sexpr_type s_e2 in
     (match op with
     | Add -> 
       (match e1_dt with
@@ -283,7 +270,7 @@ let rec expr env = function
   else if (f = "min" || f = "max") then    
       (try                            
         let s_el = List.map (expr env) el in
-        let data_type = get_expr_type (List.hd s_el) in
+        let data_type = get_sexpr_type (List.hd s_el) in
         let len = List.length el in 
           if (len = 1) then
              (match data_type with 
@@ -297,7 +284,7 @@ let rec expr env = function
   else if f = "len" then 
         (try                            
         let s_el = List.map (expr env) el in
-        let data_type = get_expr_type (List.hd s_el) in
+        let data_type = get_sexpr_type (List.hd s_el) in
         let len = List.length el in 
           if (len = 1) then
              (match data_type with 
@@ -309,15 +296,17 @@ let rec expr env = function
         with 
           Not_found -> raise (Failure("undeclared variable: ")))
   else 
+    (
       let fdecl = find_var f env.func_obj in 
        ignore (formal_check fdecl.s_formals s_el);
        let rtype = fdecl.s_rtype in
-       Sast.Call(f, s_el , rtype) (* TODO: figure out the return type and use that *)
+       Sast.Call(f, s_el , rtype)
+    )
 | Ast.Access(e1, e2) -> 
     let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
-    let e1_dt = get_expr_type s_e1 in
+    let e1_dt = get_sexpr_type s_e1 in
     let s_e2 = expr env e2 in             (* func rec until it knows datatype -- sast version of ast expr e *)
-    let e2_dt = get_expr_type s_e2 in
+    let e2_dt = get_sexpr_type s_e2 in
     (try                                (*sees if variable defined*)
          (match e1_dt with 
            List(dt) -> 
@@ -338,7 +327,7 @@ let rec expr env = function
 | Ast.MemberCall(e, m, el) -> 
 (
     let s_e = expr env e in
-    let e_dt = get_expr_type s_e in
+    let e_dt = get_sexpr_type s_e in
     let num_args = List.length el in
     let s_el = List.map (expr env) el in
     (*
@@ -374,11 +363,11 @@ let rec expr env = function
 (*
     (try 
           let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
-          let e1_dt = get_expr_type s_e in
+          let e1_dt = get_sexpr_type s_e in
           let len = List.length el in
           if (len = 1) then
               let s_el = List.map (expr env) el in 
-              let data_type = get_expr_type (List.hd s_el) in
+              let data_type = get_sexpr_type (List.hd s_el) in
               let mem_r_type = StringMap.find m mem_vars in
               (match e1_dt with
                   | Sast.List(dt) ->  
@@ -438,9 +427,9 @@ let rec expr env = function
           if find_var v1 env.var_types = Sast.Graph then 
               if find_var v2 env.var_types = Sast.Graph then
                 let s_w1 = expr env w1 in
-                if get_expr_type s_w1 = Sast.Num then
+                if get_sexpr_type s_w1 = Sast.Num then
                   let s_w2 = expr env w2 in
-                  if get_expr_type s_w2 = Sast.Num then 
+                  if get_sexpr_type s_w2 = Sast.Num then 
                     Sast.BidirVal(expr env w1, v1, v2, expr env w2, Sast.Void)
                   else 
                     raise (Failure("undeclared variable: "))
@@ -457,7 +446,7 @@ let rec expr env = function
             if find_var v1 env.var_types = Sast.Graph then 
                 if find_var v2 env.var_types = Sast.Graph then 
                   let s_w = expr env w in
-                  if get_expr_type s_w = Sast.Num then 
+                  if get_sexpr_type s_w = Sast.Num then 
                       Sast.UndirVal(v1, v2, expr env w, Sast.Void)
                   else 
                     raise (Failure("undeclared variable: "))
@@ -472,7 +461,7 @@ let rec expr env = function
         if find_var v1 env.var_types = Sast.Graph then 
           if find_var v2 env.var_types = Sast.Graph then
             let s_w = expr env w in
-            if get_expr_type s_w = Sast.Num then 
+            if get_sexpr_type s_w = Sast.Num then 
                 Sast.DirVal(v1, v2, expr env w, Sast.Void)
             else 
               raise (Failure("undeclared variable: "))
@@ -523,31 +512,51 @@ let rec stmt env = function
 | Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
     let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
     let s_v = expr env v in
-    let e_dt = get_expr_type s_e in     (* data type of that sast expr with function get_expr_type*)
-    let v_dt = get_expr_type s_v in
+    let e_dt = get_sexpr_type s_e in     (* data type of that sast expr with function get_sexpr_type*)
+    let v_dt = get_sexpr_type s_v in
     (*if not( (find_var v env.var_types) = e_dt)*) (* gets type of var trying to assign get type trying to assign to *)
     if not (v_dt = e_dt)
     (*then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) )) *)
     then raise (Failure ("assignment expression not of type: " ^ (type_to_str v_dt) ))
     else Sast.Assign(s_v, s_e, Sast.Void)
-| Ast.AccessAssign(e1, e2) -> 
+| Ast.AccessAssign(e1, e2, e3) -> 
     let s_e1 = expr env e1 in             (* func rec until it knows datatype -- sast version of ast expr e *)
+    let e1_dt = get_sexpr_type s_e1 in
     let s_e2 = expr env e2 in             (* func rec until it knows datatype -- sast version of ast expr e *)
-    let e2_dt = get_expr_type s_e2 in
-    ( match s_e1 with 
-      | Sast.Access(v, s_e, dt) -> (* this should be checked already*) 
-          if (dt = e2_dt) then 
-            Sast.AccessAssign(s_e1, s_e2, Sast.Void) 
-          else
-            raise(Failure("AccessAssign: trying to set list/dict element to non-matching type."))
-      | _ -> raise(Failure ("AccessAssign's first arg isn't an access expr"))
-    )
+    let e2_dt = get_sexpr_type s_e2 in
+    let s_e3 = expr env e3 in
+    let e3_dt = get_sexpr_type s_e3 in
+    (try                                (*sees if variable defined*)
+         (match e1_dt with 
+           List(dt) -> 
+              (match e2_dt with 
+                 | Sast.Num -> 
+                 if (e3_dt = dt) then
+                 Sast.AccessAssign(s_e1, s_e2, s_e3, Sast.Void)
+                else
+                raise (Failure("AccessAssign: Assigning wrong type"))
+
+                 | _ -> raise (Failure ("expr to access list should be Num")) 
+              )
+          | Dict(dk,dv) ->  
+            if (e2_dt = dk) then
+                if(e3_dt = dv) then
+                Sast.AccessAssign(s_e1, s_e2, s_e3, Sast.Void)
+              else
+              raise(Failure("AccessAssign: mismatched Value data type"))
+            else 
+                raise (Failure("wrong type: Dict != Dict<?> "))
+          | _ -> raise (Failure("must use Dict or List with access!"))
+          )
+     with
+     | Not_found -> raise (Failure("undeclared variable: "))
+    );                                      
 
 | Ast.NodeDef(v, e) -> (* (node id, what goes inside parens) of item *)
     (try 
       let v_e = (find_var v env.var_types) in 
       let s_e = expr env e in 
-      let e_dt = get_expr_type s_e in 
+      let e_dt = get_sexpr_type s_e in 
       if v_e = Sast.Node then
         Sast.NodeDef(v, s_e, e_dt)
       else raise (Failure ("Node Def failure"))
@@ -586,7 +595,7 @@ let rec stmt env = function
     (try  
       (*let rt = str_to_type fdl.s_rtype in *)
         let s_e = expr env e in
-       (match get_expr_type s_e with  
+       (match get_sexpr_type s_e with  
          | Sast.Node -> Sast.Return(s_e, Sast.Node)
          | Sast.Num -> Sast.Return(s_e, Sast.Num)
          | Sast.String -> Sast.Return(s_e, Sast.String)
@@ -600,7 +609,7 @@ let rec stmt env = function
 | Ast.If(cond, s1, s2) -> 
     (try  
       let s_cond = expr env cond in
-      if (get_expr_type s_cond) = Sast.Bool then 
+      if (get_sexpr_type s_cond) = Sast.Bool then 
         Sast.If(expr env cond, stmt env s1, stmt env s2)
       else 
         raise (Failure ("if issue"))
@@ -609,7 +618,7 @@ let rec stmt env = function
 | Ast.For(v, e, sl) -> 
   (* iterable expr must have var which already has been been declared *)
   let s_e = expr env e in 
-  let e_dt = get_expr_type s_e in 
+  let e_dt = get_sexpr_type s_e in 
   (match e_dt with 
     | Sast.List(dt) ->
       (try 
@@ -690,7 +699,7 @@ let rec stmt env = function
 | Ast.While(cond, sl) -> 
     (try 
       let s_cond = expr env cond in 
-      if (get_expr_type s_cond) = Sast.Bool then 
+      if (get_sexpr_type s_cond) = Sast.Bool then 
           Sast.While(expr env cond, List.map (fun s -> stmt env s) sl)
       else 
         raise (Failure ("while issue"))
@@ -698,31 +707,59 @@ let rec stmt env = function
      Not_found -> raise (Failure ("while issue")))
 | Ast.Fdecl(func) ->  (*Fdecl of func_decl and *)
    (try
+    let fname = func.fname in
     let formals = List.map (fun (dt, v) -> (str_to_type dt, v)) func.formals in
     let rtype = str_to_type func.rtype in
 
     (* add formal variables to local scope variable maps *)
+    (*
     let map_builder fmls m = (List.map (fun f -> m := (StringMap.add (snd f) (fst f) !m); "") formals) in
     let types_map = ref StringMap.empty in
       ignore (map_builder formals types_map);
     let fml_inds = enum 1 1 (List.map (fun f -> (snd f)) formals) in
     let inds_map = ref (string_map_pairs StringMap.empty fml_inds) in
+    *)
 
-    let func_env = {
-            var_inds = inds_map :: env.var_inds;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
-            var_types =  types_map :: env.var_types;   (* maps a var name to its type  ex. x -> num *)
-            func_inds =   ref StringMap.empty :: env.func_inds;            (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
-            func_obj = ref StringMap.empty :: env.func_obj;
-            return_type = rtype;                       (* what should the return type be of the current scope *)
-    }  
-  in Sast.Fdecl({
-                  Sast.s_fname = func.fname;
-                  Sast.s_rtype = rtype;
-                  Sast.s_formals = formals;
-                  Sast.s_body = List.map (fun s -> stmt func_env s) func.body 
-               })
+  (* add this function to symbol table *)
+  let dummy_func_obj = {
+                        Sast.s_fname = fname;
+                        Sast.s_rtype = rtype;
+                        Sast.s_formals = [];
+                        Sast.s_body = [] 
+                      }
+  in
+  (List.hd env.func_obj) := StringMap.add fname dummy_func_obj !(List.hd env.func_obj);
+  (List.hd env.func_inds) := StringMap.add fname (find_max_index !(List.hd env.func_inds)+1) !(List.hd env.func_inds); (* add index map *)
+  
+  let func_env = {
+          var_inds = ref StringMap.empty :: env.var_inds;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
+          var_types =  ref StringMap.empty :: env.var_types;   (* maps a var name to its type  ex. x -> num *)
+          func_inds =   env.func_inds;            (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
+          func_obj =    env.func_obj;
+          return_type = rtype;                       (* what should the return type be of the current scope *)
+  }  
+  in
+
+  let rec fmls_adder env = function
+  | [] -> ignore()
+  | hd :: tl -> 
+      (List.hd env.var_types) := StringMap.add (snd hd) (fst hd) !(List.hd env.var_types);
+      (List.hd env.var_inds) := StringMap.add (snd hd) (find_max_index !(List.hd env.var_inds)+1) !(List.hd env.var_inds); (* add index map *)
+      ignore(fmls_adder env tl)
+  in 
+  ignore(fmls_adder func_env formals);
+  
+ let populated_fdecl = {
+                        Sast.s_fname = func.fname;
+                        Sast.s_rtype = rtype;
+                        Sast.s_formals = formals;
+                        Sast.s_body = List.map (fun s -> stmt func_env s) func.body 
+                       }
+ in
+ (List.hd env.func_obj) := StringMap.add fname populated_fdecl !(List.hd env.func_obj); (* replace the dummy fobj with the evaluated one *)
+ Sast.Fdecl(populated_fdecl)
   with 
-     Not_found -> raise (Failure ("while issue")))
+     Not_found -> raise (Failure ("fdecl issue")))
 in
 
   (* { Sast.s_funcs = List.map (fun f -> fdecl env f) prog.funcs;

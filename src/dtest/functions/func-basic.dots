@@ -1,0 +1,6 @@
+def num hello(num x, num y){
+    num z = x + y;
+    return z;
+}
+
+print(hello(5, 6));

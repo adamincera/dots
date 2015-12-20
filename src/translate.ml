@@ -17,7 +17,7 @@ type cstmt =
 | Literal of ctype * string
 | ListLiteral of ctype * cstmt list              (* [2.5, 3, x] *)
 | DictLiteral of ctype * (cstmt * cstmt) list
-| Id of ctype * string                           (* ids are ints ex. Id(2) -> v2 *)
+| Id of ctype * string                           (* ids arget_cexpr_typee ints ex. Id(2) -> v2 *)
 | Binop of ctype * cstmt * Ast.op * cstmt
 | Assign of cstmt * cstmt                        (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cstmt list            (* return type of the function, function name, arguments *) (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
@@ -68,7 +68,7 @@ let fmt_str = function
 | Cstring -> "%s"
 | _ -> raise (Failure ("can't print other types directly"))
 
-let rec get_expr_type = function
+let rec get_cexpr_type = function
 | Literal(dt, str) -> dt
 | ListLiteral(dt, el) -> dt
 | DictLiteral(dt, tl) -> dt
@@ -81,7 +81,7 @@ let rec get_expr_type = function
 | Cast(dt, e) -> dt
 | Ref(dt, e) -> dt
 | Deref(dt, e) -> dt
-| Assoc(e) -> get_expr_type e
+| Assoc(e) -> get_cexpr_type e
 | _ -> Void
 (* | Noexpr -> Void *)
 
@@ -146,7 +146,7 @@ let rec translate_expr = function
             (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
             (* takes expr to translate, data type of expr *)
             let get_fmt_val expr = 
-                let expr_type = get_expr_type expr in
+                let expr_type = get_cexpr_type expr in
                 (match expr_type with
                   | Float -> [("%.3f", translate_expr expr)]
                   | Int -> [("%d", translate_expr expr)]
@@ -211,7 +211,7 @@ let rec translate_stmt = function
             (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
             (* takes expr to translate, data type of expr *)
             let get_fmt_val expr = 
-                let expr_type = get_expr_type expr in
+                let expr_type = get_cexpr_type expr in
                 (match expr_type with
                   | Float -> [("%.3f", translate_stmt expr)]
                   | Int -> [("%d", translate_stmt expr)]

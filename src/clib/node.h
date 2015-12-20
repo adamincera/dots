@@ -1,19 +1,17 @@
 struct node;
-struct edgelist;
 typedef struct node node_t;
-typedef struct edgelist edgelist_t;
+typedef struct entry entry_t;
 
 struct node {
     char *data;
-    edgelist_t *in;
-    edgelist_t *out;
+    entry_t **in;
+    entry_t **out;
 };
 
-struct edgelist {
-    node_t *node;
-    float weight;
-    edgelist_t *next;
-    edgelist_t *previous;
+struct entry {
+    void *key;
+    void *value;
+    struct entry *next;
 };
 
 /* initialize a new node that contains *data */

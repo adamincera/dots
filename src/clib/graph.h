@@ -1,14 +1,15 @@
 #include "node.h"
-typedef struct nodelist nodelist_t;
-struct nodelist {
-    node_t *node;
-    nodelist_t *next;
-    nodelist_t *previous;
+
+typedef struct list list_t;
+struct list {
+    struct list *next;
+    struct list *previous;
+    void *data;
 };
 
 typedef struct graph graph_t;
 struct graph {
-    nodelist_t *nodes;
+    list_t *nodes;
     int count;
 };
 

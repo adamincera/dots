@@ -185,8 +185,9 @@ stmt_list:
 stmt:
    expr SEMI { Expr($1) } 
   | log_expr SEMI { Expr($1) }
-  | expr ASSIGN expr SEMI { Assign($1, $3) }
+  | ID ASSIGN expr SEMI { Assign(Id($1), $3) }
   /*| access_expr ASSIGN expr SEMI { AccessAssign($1, $3) } */
+  | expr LBRACKET expr RBRACKET ASSIGN expr SEMI { AccessAssign($1, $3, $6) } 
   | RETURN expr SEMI { Return($2) } 
   /* | LBRACE stmt_list RBRACE { Block(List.rev $2) } */
   | IF LPAREN log_expr RPAREN LBRACE stmt_list RBRACE %prec NOELSE { If($3, Block($6), Block([])) }
