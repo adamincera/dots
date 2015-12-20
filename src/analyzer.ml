@@ -247,7 +247,7 @@ let rec dt_to_ct = function
     | Sast.Graph -> Void (* TODO *)
     | Sast.Node -> Node (* TODO *)
     | Sast.List(dt) -> List(dt_to_ct dt) (* TODO *)
-    | Sast.Dict(dtk, dtv) -> Void (* TODO *)
+    | Sast.Dict(dtk, dtv) -> Ptr(Ptr(Entry)) (* TODO *)
     | Sast.Void -> Void
 
     (* the meat of the compiler *)
@@ -788,12 +788,23 @@ let rec translate_expr env = function
             | "len" ->
                     let arg = List.hd el in
                     let arg_type = get_sexpr_type arg in
+                    let arg_ctype = dt_to_ct arg_type in
                     let c_arg = translate_expr env arg in
-                    (match arg_type with
-                    | List(dt) -> Call(Int, "list_len", [c_arg])
+                    let c_dt = dt_to_ct dt in
+                    let arg_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                    let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                    let result_decl = Vdecl(c_dt, result_var) in (* declare this expr's result var *)
+                    let call = (match arg_type with
+                    | List(dt) -> Call(Int, "list_len", [Deref(arg_ctype, Id(Ptr(arg_ctype), arg_result))])
+                    | Dict(dtk, dtv) -> Call(Int, "dict_len", [Deref(arg_ctype, Id(Ptr(arg_ctype), arg_result))])
                     | _-> raise (Failure "len not implemented for this type")
                      
-                    )
+                    ) in
+                    Block([
+                        c_arg;
+                        result_decl;
+                        Assign(Id(c_dt, result_var), call);
+                    ])
             | _ -> 
                 let cel = List.map (translate_expr env) el in
                 let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
@@ -922,10 +933,42 @@ let rec translate_expr env = function
                          (* store the result of Access in our result_var *)
                     ]) 
               | _ -> raise (Failure("not enqueue"))) 
-    | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
-    | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
-    | Sast.UndirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
-    | Sast.DirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
+    | Sast.Undir(v1, v2, dt) -> 
+            let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
+            let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
+            Call(Void, "connect_undir", [Id(Ptr(Node), v1_index); Id(Ptr(Node), v2_index)])
+    | Sast.Dir(v1, v2, dt) ->
+            let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
+            let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
+            Call(Void, "connect_dir", [Id(Ptr(Node), v1_index); Id(Ptr(Node), v2_index)])
+    | Sast.UndirVal(v1, v2, w, dt) -> 
+            let c_dt = dt_to_ct dt in
+            let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
+            let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
+            let w_c = translate_expr env w in
+            let w_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            let w_deref = Deref(dt_to_ct (get_sexpr_type w), Id(Ptr(dt_to_ct
+            (get_sexpr_type w)), w_result)) in
+
+            Block([
+                w_c;
+                Call(Void, "connect_undir_weighted ", [Id(Ptr(Node), v1_index); Id(Ptr(Node),
+                v2_index); w_deref])
+            ])
+    | Sast.DirVal(v1, v2, w, dt) ->
+            let c_dt = dt_to_ct dt in
+            let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
+            let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
+            let w_c = translate_expr env w in
+            let w_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            let w_deref = Deref(dt_to_ct (get_sexpr_type w), Id(Ptr(dt_to_ct 
+            (get_sexpr_type w)), w_result)) in
+
+            Block([
+                w_c;
+                Call(Void, "connect_dir_weighted ", [Id(Ptr(Node), v1_index); Id(Ptr(Node),
+                v2_index); w_deref])
+            ])
     | Sast.BidirVal(w1, v1, v2, w2, dt) -> Nostmt (* TODO *)
     | Sast.NoOp(s, dt) -> Nostmt (* TODO *)
     | Sast.Noexpr -> Nostmt
@@ -990,7 +1033,19 @@ let rec translate_stmt env = function
               | DictLiteral(tl, dt) -> Expr(Assign(cv, Id(Void, "NULL"))) (* TODO *)
               | _ -> raise (Failure("Assign don't work like that ")))
 *)
-            Block([
+(*
+            (match var_type with
+            | Dict(dtk, dtv) -> 
+                    Block([
+                        ce;
+                        cv;
+                        Assign(Id(var_type, v_result), Call(var_type,
+                        "init_dict", []))
+                    ])
+
+            | _ ->
+                    *)
+                Block([
                     ce; (* translation of assignment *)
                     cv; (* translation of asignee *)
                     Expr(Assign(Deref(var_type, Id(Ptr(var_type), v_result)), Deref(var_type, Id(Ptr(var_type), e_result))))
@@ -1011,64 +1066,80 @@ let rec translate_stmt env = function
         let e2_dt = get_sexpr_type e2 in
         let e3_dt = get_sexpr_type e3 in
         let c_e1 = translate_expr env e1 in
+          let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e1_deref = Deref(dt_to_ct e1_dt, Id(Ptr(dt_to_ct e1_dt), result_e1)) in
         let c_e2 = translate_expr env e2 in
+          let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e2_deref = Deref(dt_to_ct e2_dt, Id(Ptr(dt_to_ct e2_dt), result_e2)) in
         let c_e3 = translate_expr env e3 in
+          let result_e3 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e3_deref = Deref(dt_to_ct e3_dt, Id(Ptr(dt_to_ct e3_dt), result_e3)) in
         let args = [c_e1; c_e2; c_e3] in
-        (match e1_dt with
-        | List(dt) -> 
-          if (e2_dt = Sast.Num) then 
-            if (e3_dt = dt) then
-              let c_dt = dt_to_ct dt in 
-              (match c_dt with
-                | Float -> Call(Ptr(Void), "num_index_insert", args)
-                | Cstring -> Call(Ptr(Void), "string_index_insert", args)
-                | Graph -> Call(Ptr(Void), "graph_index_insert", args)
-                | Node -> Call(Ptr(Void), "node_index_insert", args)
-                | _ -> raise(Failure("unsupported list type"))
-              )
-            else
-              raise(Failure("accessassign: expr right of = is not same type as list"))
-          else
-            raise(Failure("AccessAssign: assign expr on left is wrong for list"))
-        | Dict(dtk, dtv) ->
-          if (e2_dt = dtk) then
-            if (e3_dt = dtv) then
-              let c_dtk = dt_to_ct dtk in
-              let c_dtv = dt_to_ct dtv in
-              (* try to get rid of problem with & *)
-              let auto_var = "v" ^ string_of_int(create_auto env "" dtv) in
-              (match c_dtk with
-              | Float -> Block([Vdecl(c_dtv,auto_var);
-                         Assign(Id(c_dtv,auto_var),c_e3);
-                         Expr(Call(Ptr(Void), "put_num", 
-                         [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
-              | Cstring -> Block([Vdecl(c_dtv,auto_var);
-                           Assign(Id(c_dtv,auto_var),c_e3);
-                           Expr(Call(Ptr(Void), "put_string", 
-                           [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
-              | Node -> let auto_var2 = "v" ^ string_of_int(create_auto env "" dtk) in
-                        Block([Vdecl(c_dtk,auto_var2);
-                        Assign(Id(c_dtk,auto_var2),c_e2);
-                        Vdecl(c_dtv,auto_var);
-                        Assign(Id(c_dtv,auto_var),c_e3);
-                        Expr(Call(Ptr(Void), "put_node", 
-                        [c_e1; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
-              | _ -> raise(Failure("unsupported dict type"))
-              )
-            else
-              raise(Failure("accessassign: expr right of = is not dict value type"))
-          else
-            raise(Failure("accessassign: assign expr on left for dict is wrong"))
-(*                 let c_dtk = dt_to_ct dtk in
-                (match c_dtk with
-                | Float -> Call(Ptr(Void), "get_num", args)
-                | Cstring -> Call(Ptr(Void), "get_string", args)
-                | Graph -> Call(Ptr(Void), "get_graph", args)
-                | Node -> Call(Ptr(Void), "get_node", args)
-                | _ -> raise(Failure("unsupported dict type"))
-                ) *)
-        | _ -> raise(Failure("unsupported access"))
-      )
+        let call = (match e1_dt with
+                        | List(dt) -> 
+                          if (e2_dt = Sast.Num) then 
+                            if (e3_dt = dt) then
+                              let c_dt = dt_to_ct dt in 
+                              (match c_dt with
+                                | Float -> Call(Ptr(Void), "num_index_insert", args)
+                                | Cstring -> Call(Ptr(Void), "string_index_insert", args)
+                                | Graph -> Call(Ptr(Void), "graph_index_insert", args)
+                                | Node -> Call(Ptr(Void), "node_index_insert", args)
+                                | _ -> raise(Failure("unsupported list type"))
+                              )
+                            else
+                              raise(Failure("accessassign: expr right of = is not same type as list"))
+                          else
+                            raise(Failure("AccessAssign: assign expr on left is wrong for list"))
+                        | Dict(dtk, dtv) ->
+                          if (e2_dt = dtk) then
+                            if (e3_dt = dtv) then
+                              let c_dtk = dt_to_ct dtk in
+                              let c_dtv = dt_to_ct dtv in
+                              (* try to get rid of problem with & *)
+                              let auto_var = "v" ^ string_of_int(create_auto env "" dtv) in
+                              (match c_dtk with
+                              | Float -> Block([Vdecl(c_dtv, auto_var);
+                                         Expr(Assign(Id(c_dtv, auto_var), e3_deref));
+                                         Expr(Call(Ptr(Void), "put_num", 
+                                         [e1_deref; e2_deref; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
+                              | Cstring -> Block([Vdecl(c_dtv,auto_var);
+                                           Expr(Assign(Id(c_dtv, auto_var), e3_deref));
+                                           Expr(Call(Ptr(Void), "put_string", 
+                                           [e1_deref; e2_deref; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
+                              | Node -> let auto_var2 = "v" ^ string_of_int(create_auto env "" dtk) in
+                                        Block([Vdecl(c_dtk,auto_var2);
+                                        Expr(Assign(Id(c_dtk,auto_var2),
+                                             Deref(dt_to_ct e2_dt,
+                                             Id(Ptr(dt_to_ct e2_dt),
+                                             result_e2))));
+                                        Vdecl(c_dtv,auto_var);
+                                        Expr(Assign(Id(c_dtv,auto_var), e3_deref));
+                                        Expr(Call(Ptr(Void), "put_node", 
+                                        [e1_deref; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
+                              | _ -> raise(Failure("unsupported dict type"))
+                              )
+                            else
+                              raise(Failure("accessassign: expr right of = is not dict value type"))
+                          else
+                            raise(Failure("accessassign: assign expr on left for dict is wrong"))
+                (*                 let c_dtk = dt_to_ct dtk in
+                                (match c_dtk with
+                                | Float -> Call(Ptr(Void), "get_num", args)
+                                | Cstring -> Call(Ptr(Void), "get_string", args)
+                                | Graph -> Call(Ptr(Void), "get_graph", args)
+                                | Node -> Call(Ptr(Void), "get_node", args)
+                                | _ -> raise(Failure("unsupported dict type"))
+                                ) *)
+                        | _ -> raise(Failure("unsupported access"))
+                    ) in
+        Block([
+            c_e1;
+            c_e2;
+            c_e3;
+            call;
+        ])
+
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
@@ -1093,54 +1164,80 @@ let rec translate_stmt env = function
         let c_s1 =  translate_stmt env s1 in
         let c_s2 =  translate_stmt env s2 in 
         If (c_cond, [c_s1], [c_s2])
-    | Sast.For (temp, iter, sl) ->
-            let iter_type = get_sexpr_type iter in
-            let auto_index = "v" ^ string_of_int(create_auto env temp iter_type) in
-            let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
+    | Sast.For (key, iter, sl) ->
+            let iter_stype = get_sexpr_type iter in
+            let iter_ctype = dt_to_ct iter_stype in
+            let c_iter = translate_expr env iter in (* evaluate the iterable *)
+            let iter_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of iterable *)
+            
+            let loop_var = "v" ^ string_of_int(create_auto env key (Sast.Void)) in
+            let key_var = "v" ^ string_of_int(create_auto env key iter_stype) in (* the temp var in "for x in iterable " *)
             (*let index = "v" ^ string_of_int (find_var iter env.var_inds) in*)
             
             (*let iter_type = (find_var iter env.var_types) in*)
 
             let csl = List.map (translate_stmt env) sl in
             Block(
+              (*
             [Vdecl(Ptr(dt_to_ct iter_type), auto_index); 
              Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter))
             ]
             @
+          *)
+            c_iter :: 
             [
-                (match iter_type with
-                  | List(dt) -> Block([Vdecl(List(dt_to_ct dt), auto_var); 
-                      For(Assign(Id(dt_to_ct dt, auto_var), Id(List(dt_to_ct dt), auto_index)),
-                      Id(List(dt_to_ct dt), auto_var),
-                      Assign(Id(dt_to_ct dt, auto_var), Member(List(dt_to_ct dt), auto_var, "next")),
-                      csl
-                      )
-                                       ])
+                (match iter_stype with
+                  | List(dt) -> 
+                      let key_var_type = dt_to_ct dt in
+                      let iter_deref = Deref(iter_ctype, Id(Ptr(iter_ctype), iter_result)) in
+                      Block([Vdecl(key_var_type, key_var); (*  *)
+                             Vdecl(iter_ctype, loop_var);
+                             For(Assign(Id(iter_ctype, loop_var), iter_deref),
+                                 Id(iter_ctype, loop_var),
+                                 Assign(Id(iter_ctype, loop_var), Member(iter_ctype, loop_var, "next")),
+
+                                 Expr(Assign(Id(key_var_type, key_var), 
+                                             Deref(key_var_type, Cast(Ptr(key_var_type), Member(Ptr(Void), loop_var, "data")))
+                                      )
+                                 )
+                                 :: csl
+                            )
+                      ])
                   | Dict(dtk, dtv) -> 
+                          let iter_deref = Deref(Ptr(Entry), Id(Ptr(Ptr(Entry)), iter_result)) in
                           let int_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
-                          let entry_var = "v" ^ string_of_int(create_auto env "" (Sast.Dict(Void, Void))) in
-                          let key_var = "v" ^ string_of_int(create_auto env "" (Sast.Void)) in
-                          Block([Vdecl(Int, int_var); Vdecl(Ptr(Entry), entry_var);
-                              Vdecl(Ptr(Void), key_var); 
-                              For(Assign(Id(Int, int_var), Literal(Int, "0")),
-                                  Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
-                                  Assign(Id(Int, int_var), 
-                                      Binop(Int, Id(Int, int_var), Ast.Add,
-                                            Literal(Int, "1"))),
-                                  [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, Id(Ptr(Entry), auto_index), Id(Int, int_var))), 
-                                       Id(Entry, entry_var),
-                                       Assign(Id(Ptr(Entry), entry_var), Member(Entry, entry_var, "next")),
-                                       List.map (translate_stmt env) sl
-                                  )]
-                              )
+                          Block([Vdecl(Int, int_var); 
+                                 Vdecl(Ptr(Entry), loop_var);
+                                 Vdecl(Ptr(Void), key_var); 
+                                 For(Assign(Id(Int, int_var), Literal(Int, "0")),
+                                     Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
+                                     Assign(Id(Int, int_var), 
+                                            Binop(Int, Id(Int, int_var), Ast.Add,
+                                                  Literal(Int, "1"))),
+                                     [For(Assign(Id(Ptr(Entry), loop_var), Access(Entry, Assoc(iter_deref), Id(Int, int_var))), 
+                                          Id(Entry, loop_var),
+                                          Assign(Id(Ptr(Entry), loop_var), Member(Entry, loop_var, "next")),
+                                          ( Expr(Assign(Id(Ptr(Void), key_var), 
+                                                        Member(Ptr(Void), loop_var, "key")
+                                                )
+                                            )
+                                            :: List.map (translate_stmt env) sl
+                                          )
+                                     )]
+                                )
                           ])
                   | Node -> 
-                      Block([Vdecl(Ptr(Node), auto_var); 
-                      Expr(Assign(Id(Ptr(Node), auto_var), Ref(Node, Id(Ptr(Node), auto_index))))] @ csl)
-                  | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
-                                    For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_index, "nodes")),
-                                      Id(Ptr(Node), auto_var),
-                                      Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_var, "next")),
+                      let iter_deref = Deref(Node, Id(Ptr(Node), iter_result)) in
+                      Block([Vdecl(Ptr(Node), key_var); 
+                             Expr(Assign(Id(Ptr(Node), key_var), iter_deref))
+                      ] @ csl)
+                  | Graph -> 
+                      let iter_deref = Deref(Graph, Id(Ptr(Graph), iter_result)) in
+                      Block([Vdecl(Node, key_var);
+                                    Vdecl(Entry, loop_var); 
+                                    For(Assign(Id(Entry, loop_var), Member(Entry, "*" ^ iter_result, "nodes")),
+                                      Id(Entry, loop_var),
+                                      Assign(Id(Entry, loop_var), Member(Entry, loop_var, "next")),
                                       csl
                                       )
                                    ])

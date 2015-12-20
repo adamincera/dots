@@ -401,22 +401,22 @@ let rec expr env = function
     (*check if v1 and v2 exist *)
     (try                                (*sees if variable defined*)
         let v1_e = find_var v1 env.var_types in
-         if v1_e = Sast.Graph then 
+         if v1_e = Sast.Node then 
             let v2_e = find_var v2 env.var_types in 
-              if v2_e = Sast.Graph then 
+              if v2_e = Sast.Node then 
                 Sast.Undir(v1, v2, Sast.Void)
-              else raise (Failure("undeclared variable: "))
+              else raise (Failure("Wrong variable types"))
           else 
-            raise (Failure("undeclared variable: "))
+            raise (Failure("Wrong variable types"))
       with
      | Not_found -> raise (Failure("undeclared variable: ")))
 
 | Ast.Dir(v1, v2) -> 
    (try                                (*sees if variable defined*)
         let v1_e = find_var v1 env.var_types in
-          if v1_e = Sast.Graph then 
+          if v1_e = Sast.Node then 
             let v2_e = find_var v2 env.var_types in 
-              if v2_e = Sast.Graph then 
+              if v2_e = Sast.Node then 
                 Sast.Dir(v1, v2, Sast.Void)
               else raise (Failure("undeclared variable: "))
           else raise (Failure("undeclared variable: "))
@@ -443,8 +443,8 @@ let rec expr env = function
      | Not_found -> raise (Failure("undeclared variable: ")))  
 | Ast.UndirVal(v1, v2, w) -> 
       (try                                (*sees if variable defined*)
-            if find_var v1 env.var_types = Sast.Graph then 
-                if find_var v2 env.var_types = Sast.Graph then 
+            if find_var v1 env.var_types = Sast.Node then 
+                if find_var v2 env.var_types = Sast.Node then 
                   let s_w = expr env w in
                   if get_sexpr_type s_w = Sast.Num then 
                       Sast.UndirVal(v1, v2, expr env w, Sast.Void)
@@ -458,8 +458,8 @@ let rec expr env = function
         | Not_found -> raise (Failure("undeclared variable: ")))
 | Ast.DirVal(v1, v2, w) -> 
     (try 
-        if find_var v1 env.var_types = Sast.Graph then 
-          if find_var v2 env.var_types = Sast.Graph then
+        if find_var v1 env.var_types = Sast.Node then 
+          if find_var v2 env.var_types = Sast.Node then
             let s_w = expr env w in
             if get_sexpr_type s_w = Sast.Num then 
                 Sast.DirVal(v1, v2, expr env w, Sast.Void)

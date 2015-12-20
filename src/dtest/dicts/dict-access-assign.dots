@@ -1,0 +1,2 @@
+dict<num, string> d;
+d[1.23] = "hello";
