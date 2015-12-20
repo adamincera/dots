@@ -639,7 +639,9 @@ let rec translate_expr env = function
                                               op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
                   |  Cstring -> 
                       let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in 
-                         Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
+                         Block([Vdecl(Int, auto_var);
+                                Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])))
+                              ]);
                   | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                 )
               | LogAnd | LogOr -> Translate.Binop(Int,ce1,op,ce2)
