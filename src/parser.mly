@@ -103,8 +103,8 @@ edge_op:
 |  ID REDGE ID { Dir($1, $3) }                                  /*   x --> y        */
 |  ID REDGE LBRACKET expr RBRACKET ID { DirVal($1, $6, $4) }    /*   x -->[5] y     */
 |  ID UEDGE LBRACKET expr RBRACKET ID { UndirVal($1, $6, $4) }  /*   x --[5] y      */
-|  ID LBRACKET expr RBRACKET UEDGE LBRACKET expr RBRACKET ID    /*   x [3]--[5] y   */
-   { BidirVal($3, $1, $9, $7) }                                 
+/*|  ID LBRACKET expr RBRACKET UEDGE LBRACKET expr RBRACKET ID */   /*   x [3]--[5] y   */
+   /*{ BidirVal($3, $1, $9, $7) }                                 */
 
 /////////////////////////////////////////////////////////////////////////////
                           /* VARIABLES */
@@ -185,6 +185,7 @@ stmt_list:
 stmt:
    expr SEMI { Expr($1) } 
   | log_expr SEMI { Expr($1) }
+  | edge_op SEMI { Expr($1) }
   | ID ASSIGN expr SEMI { Assign(Id($1), $3) }
   /*| access_expr ASSIGN expr SEMI { AccessAssign($1, $3) } */
   | expr LBRACKET expr RBRACKET ASSIGN expr SEMI { AccessAssign($1, $3, $6) } 

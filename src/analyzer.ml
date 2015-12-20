@@ -247,7 +247,7 @@ let rec dt_to_ct = function
     | Sast.Graph -> Void (* TODO *)
     | Sast.Node -> Node (* TODO *)
     | Sast.List(dt) -> List(dt_to_ct dt) (* TODO *)
-    | Sast.Dict(dtk, dtv) -> Void (* TODO *)
+    | Sast.Dict(dtk, dtv) -> Ptr(Ptr(Entry)) (* TODO *)
     | Sast.Void -> Void
 
     (* the meat of the compiler *)
@@ -920,10 +920,29 @@ let rec translate_expr env = function
                              Block([ce; Expr(Assign(Id(Cstring,auto_var), Member(Ptr(Void), index, "data")))])
                     | _ -> raise (Failure("can't use ine without node")))
           | _ -> raise (Failure("not enqueue")))
-    | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
-    | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
-    | Sast.UndirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
+    | Sast.Undir(v1, v2, dt) -> 
+            let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
+            let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
+            Call(Void, "connect_undir", [Id(Ptr(Node), v1_index); Id(Ptr(Node), v2_index)])
+    | Sast.Dir(v1, v2, dt) ->
+            let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
+            let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
+            Call(Void, "connect_dir", [Id(Ptr(Node), v1_index); Id(Ptr(Node), v2_index)])
+    | Sast.UndirVal(v1, v2, w, dt) -> 
+            let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
+            let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
+            let w_c = translate_expr env w in
+            let w_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            let w_deref = Deref(dt_to_ct (get_sexpr_type w), Id(Ptr(dt_to_ct
+            (get_sexpr_type w)), w_result)) in
+            Call(Void, "connect_undir_weighted", [Id(Ptr(Node), v1_index);
+            Id(Ptr(Node), v2_index); w_deref])
     | Sast.DirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
+    (*
+            let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
+            let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
+            Call(Void, "connect_undir", [Id(Ptr(Node), v1_index); Id(Ptr(Node), v2_index)])
+*)
     | Sast.BidirVal(w1, v1, v2, w2, dt) -> Nostmt (* TODO *)
     | Sast.NoOp(s, dt) -> Nostmt (* TODO *)
     | Sast.Noexpr -> Nostmt
@@ -1022,10 +1041,13 @@ let rec translate_stmt env = function
         let e3_dt = get_sexpr_type e3 in
         let c_e1 = translate_expr env e1 in
           let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e1_deref = Deref(dt_to_ct e1_dt, Id(Ptr(dt_to_ct e1_dt), result_e1)) in
         let c_e2 = translate_expr env e2 in
           let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e2_deref = Deref(dt_to_ct e2_dt, Id(Ptr(dt_to_ct e2_dt), result_e2)) in
         let c_e3 = translate_expr env e3 in
           let result_e3 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e3_deref = Deref(dt_to_ct e3_dt, Id(Ptr(dt_to_ct e3_dt), result_e3)) in
         let args = [c_e1; c_e2; c_e3] in
         let call = (match e1_dt with
                         | List(dt) -> 
@@ -1051,21 +1073,24 @@ let rec translate_stmt env = function
                               (* try to get rid of problem with & *)
                               let auto_var = "v" ^ string_of_int(create_auto env "" dtv) in
                               (match c_dtk with
-                              | Float -> Block([Vdecl(c_dtv,auto_var);
-                                         Expr(Assign(Id(c_dtv,auto_var),c_e3));
+                              | Float -> Block([Vdecl(c_dtv, auto_var);
+                                         Expr(Assign(Id(c_dtv, auto_var), e3_deref));
                                          Expr(Call(Ptr(Void), "put_num", 
-                                         [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
+                                         [e1_deref; e2_deref; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
                               | Cstring -> Block([Vdecl(c_dtv,auto_var);
-                                           Expr(Assign(Id(c_dtv,auto_var),c_e3));
+                                           Expr(Assign(Id(c_dtv, auto_var), e3_deref));
                                            Expr(Call(Ptr(Void), "put_string", 
-                                           [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
+                                           [e1_deref; e2_deref; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
                               | Node -> let auto_var2 = "v" ^ string_of_int(create_auto env "" dtk) in
                                         Block([Vdecl(c_dtk,auto_var2);
-                                        Expr(Assign(Id(c_dtk,auto_var2),c_e2));
+                                        Expr(Assign(Id(c_dtk,auto_var2),
+                                             Deref(dt_to_ct e2_dt,
+                                             Id(Ptr(dt_to_ct e2_dt),
+                                             result_e2))));
                                         Vdecl(c_dtv,auto_var);
-                                        Expr(Assign(Id(c_dtv,auto_var),c_e3));
+                                        Expr(Assign(Id(c_dtv,auto_var), e3_deref));
                                         Expr(Call(Ptr(Void), "put_node", 
-                                        [c_e1; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
+                                        [e1_deref; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
                               | _ -> raise(Failure("unsupported dict type"))
                               )
                             else
@@ -1086,7 +1111,7 @@ let rec translate_stmt env = function
             c_e1;
             c_e2;
             c_e3;
-            Expr(call);
+            call;
         ])
 
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
