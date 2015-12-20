@@ -55,7 +55,7 @@ int main() {
     put_string(d, "something else", (void *) "new value");
     min = string_dict_min(d);
     max = string_dict_max(d);
-    printf("min: %s\nmax: %s\n", min, max);
+    printf("min: %s: %s\nmax: %s: %s\n", min, (char *) get_string(d, min), max, get_string(d, max));
     char *got = (char *) get_string(d, "hello");
     printf("got %s\n", got);
     got = (char *) get_string(d, "elloh");

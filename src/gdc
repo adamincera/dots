@@ -12,4 +12,4 @@ if [ -z "$2" ]; then
 fi
 
 # gcc -I ${DOTS} -o exec file.c -L${DOTS} -ldots
-gcc -I ${DOTS} -o ${OUT_FILE} $1.c -L${DOTS} -ldots
+gcc $1.c -I ${DOTS} -L${DOTS} -ldots -o ${OUT_FILE}

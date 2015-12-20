@@ -1,3 +1,6 @@
 dict <string, num> d1;
-d1 = {"foo" : 3.14, "blah" : 2, "bar" : 2.2};
-print(d1);
+#d1 = {"foo" : 3.14, "blah" : 2, "bar" : 2.2};
+d1["foo"] = 3.14;
+d1["blah"] = 2;
+d1["bar"] = 2.2;
+print(d1, "\n");
