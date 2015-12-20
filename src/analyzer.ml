@@ -894,16 +894,22 @@ let rec translate_expr env = function
                              (* store the result of Access in our result_var *)
                         ])
                   | "ine" ->                    
-                      Block([Expr(Assign(Id(Ptr(Entry),result_e), Member(Ptr(Entry), result_var, "out")))])
+                      Block([
+                             c_e;
+                             result_decl;
+                             Expr(Assign(Id(Ptr(Ptr(Entry)),result_e), 
+                                         Member(Ptr(Entry), result_var, "in")))
+                             (* store the result of Access in our result_var *)
+                        ])
                   | "oute" -> 
-                     Block([
-                         Expr(Assign(Id(Ptr(Entry),result_e), Member(Ptr(Entry), result_var, "out")));
-                         c_e;
-                         result_decl;
-                         Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Cast(Ptr(c_dt), 
-                                Call(c_dt, "pop", [c_e] ))))
-                         (* store the result of Access in our result_var *)
-                    ]) 
+                      let dict = Ptr(Ptr(Entry)) in
+                      Block([
+                             c_e;
+                             Vdecl(dict, result_var);
+                             Expr(Assign(
+                                      Id(Ptr(Ptr(Entry)), result_var), Member(Ptr(Entry),result_e , "out")))
+                             (* store the result of Access in our result_var *)
+                        ])
       (* Node * n; returns value  snippet n= n.val() datamember of *t Node->data  *)
                   | "val" -> 
                       Block([
