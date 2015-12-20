@@ -1,0 +1,4 @@
+node x;
+node y;
+x -- y;
+
