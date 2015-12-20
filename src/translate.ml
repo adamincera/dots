@@ -264,7 +264,13 @@ let rec translate_stmt = function
 | Deref(dt, e) -> "*(" ^ translate_stmt e ^ ")"
 | Block(sl) -> String.concat "\n" (List.map translate_stmt sl)
 | Expr(e) -> translate_stmt e ^ ";"
-| Vdecl(dt, id) -> type_to_str dt ^ " " ^ id ^ ";"
+| Vdecl(dt, id) -> 
+    (match dt with
+     | Ptr(Ptr(Entry)) -> type_to_str dt ^ " " ^ id ^ " = NULL;"
+     | List(vdt) -> type_to_str dt ^ " " ^ id ^ " = NULL;"
+     | _ -> type_to_str dt ^ " " ^ id ^ ";"
+    )
+    
 | Return(e) -> "return " ^ translate_stmt e ^ ";"
 | If(cond, sl1, sl2) -> "if (" ^ translate_stmt cond ^ ") {\n" ^
     String.concat "\n" (List.map translate_stmt sl1) ^

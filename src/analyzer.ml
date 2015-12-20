@@ -244,7 +244,7 @@ let rec dt_to_ct = function
     | Sast.Num -> Float
     | Sast.String -> Cstring
     | Sast.Bool -> Int
-    | Sast.Graph -> Void (* TODO *)
+    | Sast.Graph -> Graph (* TODO *)
     | Sast.Node -> Node (* TODO *)
     | Sast.List(dt) -> List(dt_to_ct dt) (* TODO *)
     | Sast.Dict(dtk, dtv) -> Ptr(Ptr(Entry)) (* TODO *)
@@ -487,6 +487,11 @@ let rec translate_expr env = function
             let v_type = dt_to_ct dt in
             Block([
                       Vdecl(Ptr(v_type), result_var);
+                      (*
+                      Expr(Assign(Id(Ptr(v_type), result_var), 
+                           Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, Translate.type_to_str v_type)] ) ])
+                          ));
+                      *)
                       Expr(Assign(Id(Ptr(v_type), result_var), Ref(Ptr(v_type), Id(v_type, index) )))
                   ])
     | Sast.Binop(e1, op, e2, dt) ->
