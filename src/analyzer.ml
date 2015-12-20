@@ -1,4 +1,4 @@
-(* semantically checks dot sast and converts to c ast *)
+f(* semantically checks dot sast and converts to c ast *)
 open Ast
 open Sast
 open Translate
@@ -784,7 +784,68 @@ let rec translate_stmt env = function
            Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
            Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
                          ]) *)
-    | Sast.AccessAssign(e1, e2, e3, dt) -> Nostmt
+    | Sast.AccessAssign(e1, e2, e3, dt) -> (* check access first *)
+        let e1_dt = get_expr_type e1 in
+        let e2_dt = get_expr_type e2 in
+        let e3_dt = get_expr_type e3 in
+        let c_e1 = translate_expr env e1 in
+        let c_e2 = translate_expr env e2 in
+        let c_e3 = translate_expr env e3 in
+        let args = [c_e1; c_e2; c_e3] in
+        (match e1_dt with
+        | List(dt) -> 
+          if (e2_dt = Sast.Num) then 
+            if (e3_dt = dt) then
+              let c_dt = dt_to_ct dt in 
+              (match c_dt with
+                | Float -> Call(Ptr(Void), "num_index_insert", args)
+                | Cstring -> Call(Ptr(Void), "string_index_insert", args)
+                | Graph -> Call(Ptr(Void), "graph_index_insert", args)
+                | Node -> Call(Ptr(Void), "node_index_insert", args)
+                | _ -> raise(Failure("unsupported list type"))
+              )
+            else
+              raise(Failure("accessassign: expr right of = is not same type as list"))
+          else
+            raise(Failure("AccessAssign: assign expr on left is wrong for list"))
+        | Dict(dtk, dtv) ->
+          if (e2_dt = dtk) then
+            if (e3_dt = dtv) then
+              let c_dtk = dt_to_ct dtk in
+              let c_dtv = dt_to_ct dtv in
+              (* try to get rid of problem with & *)
+              let auto_var = "v" ^ string_of_int(create_auto env "" dtv) in
+              (match c_dtk with
+              | Float -> Block([Vdecl(c_dtv,auto_var);
+                         Assign(auto_var,c_e3);
+                         Call(Ptr(Void), "put_num", 
+                         [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, auto_var))])])
+              | Cstring -> Block([Vdecl(c_dtv,auto_var);
+                           Assign(auto_var,c_e3);
+                           Call(Ptr(Void), "put_string", 
+                           [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, auto_var))])])
+              | Node -> let auto_var2 = "v" ^ string_of_int(create_auto env "" dtk) in
+                        Block([Vdecl(c_dtk,auto_var2);
+                        Assign(auto_var2,c_e2);
+                        Vdecl(c_dtv,auto_var);
+                        Assign(auto_var,c_e3);
+                        Call(Ptr(Void), "put_node", 
+                        [c_e1; Cast(Ptr(Void),Ref(c_dtk, auto_var2)); Cast(Ptr(Void),Ref(c_dtv, auto_var))])])
+              | _ -> raise(Failure("unsupported dict type"))
+              )
+            else
+              raise(Failure("accessassign: expr right of = is not dict value type"))
+          else
+            raise(Failure("accessassign: assign expr on left for dict is wrong"))
+(*                 let c_dtk = dt_to_ct dtk in
+                (match c_dtk with
+                | Float -> Call(Ptr(Void), "get_num", args)
+                | Cstring -> Call(Ptr(Void), "get_string", args)
+                | Graph -> Call(Ptr(Void), "get_graph", args)
+                | Node -> Call(Ptr(Void), "get_node", args)
+                | _ -> raise(Failure("unsupported dict type"))
+                ) *)
+        | _ -> raise(Failure("unsupported access"))
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
