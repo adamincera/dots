@@ -487,130 +487,162 @@ let rec translate_expr env = function
                       Expr(Assign(Id(Ptr(v_type), result_var), Ref(Ptr(v_type), Id(v_type, index) )))
                   ])
     | Sast.Binop(e1, op, e2, dt) ->
+        let c_dt = dt_to_ct dt in
         let ce1 = translate_expr env e1 in
+          let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e1_cdt = dt_to_ct (get_sexpr_type e1) in    (*gets is the c data type of the expression*)
         let ce2 = translate_expr env e2 in
+          let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+          let e2_cdt = dt_to_ct (get_sexpr_type e2) in 
         let cdt1 = Translate.get_cexpr_type ce1 in
         let cdt2 = Translate.get_cexpr_type ce2 in 
-        (match op with
-          | Add -> 
-            (match cdt1 with
-              |  Float ->
-                  (match cdt2 with
-                    | Float -> Translate.Binop(Float, ce1, op, ce2)
-                    | Cstring -> 
-                        let float_convert = string_of_stmt ce1 in 
-                        Block(
-                        [(snd float_convert) ;
-                         translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e2, String))])
-                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                  )
-              |  Cstring -> 
-                  (match cdt2 with
-                    | Float -> 
-                        let float_convert = string_of_stmt ce2 in 
-                        Block([(snd float_convert) ;
-                         translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e1, String))])
-                    | Cstring ->  
-                         let c_string = string_concat ce1 ce2 in 
-                         Block([(snd c_string)])
-                    | Int -> 
-                        let int_convert = string_of_stmt ce2 in 
-                        Block([(snd int_convert) ;
-                         translate_expr env (Sast.Binop(Id((fst int_convert), String), Add, e1, String))])
-                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                  )
-              |  Graph -> 
-                  (match cdt2 with
-                    | Node -> 
-                        let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
-                        let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
-                        Vdecl(Ptr(Graph), index);
+        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+        let args = [Id(cdt1, result_e1); Id(cdt2, result_e2)] in
+        let result_decl = Vdecl(Ptr(c_dt), result_var) in                (* declare this expr's result var *)
+        let binop_func = 
+            (match op with
+              | Add -> 
+                (match e1_cdt with
+                  |  Float -> 
+                      (match e2_cdt with
+                        | Float -> Translate.Binop(Float, 
+                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
+                        | Cstring -> 
+                            let float_convert = string_of_stmt ce1 in 
+                            Block(
+                            [(snd float_convert) ;
+                             translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e2, String))])
+                        | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                      )
+                  |  Cstring -> 
+                      (match e2_cdt with
+                        | Float -> 
+                            let float_convert = string_of_stmt ce2 in 
+                            Block([(snd float_convert) ;
+                             translate_expr env (Sast.Binop(Id((fst float_convert), String), Add, e1, String))])
+                        | Cstring ->  
+                             let c_string = string_concat ce1 ce2 in 
+                             Block([(snd c_string)])
+                        | Int -> 
+                            let int_convert = string_of_stmt ce2 in 
+                            Block([(snd int_convert) ;
+                             translate_expr env (Sast.Binop(Id((fst int_convert), String), Add, e1, String))])
+                        | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                      )
+                  |  Graph -> 
+                      (match e2_cdt with
+                        | Node -> 
+                            let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
+                            let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
+                            Vdecl(Ptr(Graph), index);
 
-                        Block([Vdecl(Ptr(Graph), index);
-                               Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])));
-                               Expr(Call(Void, "add_node", [Id(Graph, index); ce2]));
-                               Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
+                            Block([Vdecl(Ptr(Graph), index);
+                                   Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])));
+                                   Expr(Call(Void, "add_node", [Id(Graph, index); ce2]));
+                                   Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
 
-                        ])
-                    | Graph -> 
-                        (* g1 = plus(g2, g3); *)
-                        let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
-                        let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
-                        Block([Vdecl(Ptr(Graph), index);
-                               Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
+                            ])
+                        | Graph -> 
+                            (* g1 = plus(g2, g3); *)
+                            let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
+                            let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
+                            Block([Vdecl(Ptr(Graph), index);
+                                   Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
 
-                             ])
-                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                  )
-              |  Node -> 
-                  (match cdt2 with
-                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                  )
-              |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-              |  Int -> 
-                  (match cdt2 with 
-                    | Cstring -> 
-                        let int_convert = string_of_stmt ce1 in 
-                        Block(
-                        [(snd int_convert) ;
-                         translate_expr env (Sast.Binop(Id((fst int_convert), String), Add, e2, String))])
-                    | Int -> Translate.Binop(Int, ce1, op, ce2)
-                    | _ -> raise (Failure("invalid operation"))
-                  )
-              |  _ -> raise (Failure("Invalid c type for + binop"))          
-            )
-          | Sub -> 
-            (match cdt1 with
-              |  Float -> Translate.Binop(cdt1, ce1, op, ce2)
-              |  Graph -> 
-                  (match cdt2 with
-                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
-                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
-                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                  )
-              | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-            )
-          | Mult | Div -> Translate.Binop(Float, ce1, op, ce2)
-          | Equal | Neq -> 
-          (* This one isn't complete, dict maps to what c type? confusion *)
-            (match cdt1 with
-              |  Float -> Translate.Binop(Float, ce1, op, ce2)
-              |  Int -> Translate.Binop(Int, ce1, op, ce2)
-              |  Cstring -> 
-                    (* (strcmp(check,input) = 0) *)
-                    let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in 
-                     Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
-              |  Graph -> 
-                  (match cdt2 with
-                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                  )
-              |  Node -> 
-                  (match cdt2 with
-                    | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                    | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                    | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                  )
-              |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-              |  Void -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-              |  _ -> raise (Failure("Invalid c type for ==/!= binop"))     
-            )
-          | Less | Leq | Greater | Geq -> 
-            (match cdt1 with
-              | Float -> Translate.Binop(Float,ce1,op,ce2)
-              | Int -> 
-                  Translate.Binop(Int,ce1,op,ce2)
-              | Long -> Translate.Binop(Long,ce1,op,ce2)
-              |  Cstring -> 
-                  let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in 
-                     Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
-              | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-            )
-          | LogAnd | LogOr -> Translate.Binop(Int,ce1,op,ce2)
-        )
+                                 ])
+                        | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                      )
+                  |  Node -> 
+                      (match e2_cdt with
+                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                      )
+                  |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                  |  Int -> 
+                      (match e2_cdt with 
+                        | Cstring -> 
+                            let int_convert = string_of_stmt ce1 in 
+                            Block(
+                            [(snd int_convert) ;
+                             translate_expr env (Sast.Binop(Id((fst int_convert), String), Add, e2, String))])
+                        | Int -> Translate.Binop(Int, 
+                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
+                        | _ -> raise (Failure("invalid operation"))
+                      )
+                  |  _ -> raise (Failure("Invalid c type for + binop " ^ (Translate.type_to_str cdt2)))          
+                )
+              | Sub -> 
+                (match e1_cdt with
+                  |  Float -> Translate.Binop(Float, 
+                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
+                  |  Graph -> 
+                      (match cdt2 with
+                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
+                        | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (* TODO *)
+                        | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                      )
+                  | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                )
+              | Mult | Div -> Translate.Binop(Float, ce1, op, ce2)
+              | Equal | Neq -> 
+              (* This one isn't complete, dict maps to what c type? confusion *)
+                (match e1_cdt with
+                  |  Float -> Translate.Binop(Float, 
+                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
+                  |  Int -> Translate.Binop(Float, 
+                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
+                  |  Cstring -> 
+                        (* (strcmp(check,input) = 0) *)
+                        let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in 
+                         Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
+                  |  Graph -> 
+                      (match e2_cdt with
+                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                      )
+                  |  Node -> 
+                      (match e2_cdt with
+                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                      )
+                  |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                  |  Void -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                  |  _ -> raise (Failure("Invalid c type for ==/!= binop"))     
+                )
+              | Less | Leq | Greater | Geq -> 
+                (match e1_cdt with
+                  | Float -> Translate.Binop(Float, 
+                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
+                  | Int -> 
+                      Translate.Binop(Int, 
+                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
+                  | Long -> Translate.Binop(Long, 
+                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
+                  |  Cstring -> 
+                      let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in 
+                         Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
+                  | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                )
+              | LogAnd | LogOr -> Translate.Binop(Int,ce1,op,ce2)
+            ) in
+            Block([
+                 ce1;
+                 ce2;
+                 result_decl;
+                 Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), binop_func
+                 ))(* store the result of Access in our result_var *)
+            ]) 
     | Sast.Call(func_name, el, dt) -> 
         (
             match func_name with
