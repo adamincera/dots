@@ -1091,17 +1091,17 @@ translate_stmt env = function
         let c_e3 = translate_expr env e3 in
           let result_e3 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
           let e3_deref = Deref(dt_to_ct e3_dt, Id(Ptr(dt_to_ct e3_dt), result_e3)) in
-        let args = [c_e1; c_e2; c_e3] in
+        let args = [e1_deref; e2_deref; Id(dt_to_ct e3_dt, result_e3)] in
         let call = (match e1_dt with
                         | List(dt) -> 
                           if (e2_dt = Sast.Num) then 
                             if (e3_dt = dt) then
                               let c_dt = dt_to_ct dt in 
                               (match c_dt with
-                                | Float -> Call(Ptr(Void), "num_index_insert", args)
-                                | Cstring -> Call(Ptr(Void), "string_index_insert", args)
-                                | Graph -> Call(Ptr(Void), "graph_index_insert", args)
-                                | Node -> Call(Ptr(Void), "node_index_insert", args)
+                                | Float -> Expr(Call(Ptr(Void), "num_index_insert", args))
+                                | Cstring -> Expr(Call(Ptr(Void), "string_index_insert", args))
+                                | Graph -> Expr(Call(Ptr(Void), "graph_index_insert", args))
+                                | Node -> Expr(Call(Ptr(Void), "node_index_insert", args))
                                 | _ -> raise(Failure("unsupported list type"))
                               )
                             else
