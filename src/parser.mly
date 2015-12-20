@@ -64,10 +64,10 @@ decls:
 fdecl:
    DEF f_data_type ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
      { Fdecl({ 
-      rtype = $2;
-      fname = $3;
-      formals = $5;
-      body = List.rev $8 
+              rtype = $2;
+              fname = $3;
+              formals = $5;
+              body = List.rev $8 
     }) }
 
 /* Optional Formal Args */
@@ -261,7 +261,7 @@ expr:
   | nacc_expr { $1 }
 
 nacc_expr: /* non access exprs */
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  
   /*| expr DOT ID %prec NOCALL { MemberVar($1, $3) }*/
   | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
@@ -271,10 +271,11 @@ access_expr:
   | expr LBRACKET expr RBRACKET { Access($1, $3) }
 
 term : 
-   term PLUS   atom { Binop($1, Add,   $3) }
-  | term MINUS  atom { Binop($1, Sub,   $3) }
-  | term TIMES  atom { Binop($1, Mult,  $3) }
-  | term DIVIDE atom { Binop($1, Div,   $3) }
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | term PLUS   term { Binop($1, Add,   $3) }
+  | term MINUS  term { Binop($1, Sub,   $3) }
+  | term TIMES  term { Binop($1, Mult,  $3) }
+  | term DIVIDE term { Binop($1, Div,   $3) }
   | atom             { $1 }
 
 atom:

@@ -1,0 +1,12 @@
+def num sum (num x, num y) {
+    return x + y;
+}
+
+def num double_sum (num x, num y) {
+    return sum(x, y) + sum(x, y);
+}
+
+num d = double_sum(4, 2);
+
+#num d = sum(4, 2);
+print(d);

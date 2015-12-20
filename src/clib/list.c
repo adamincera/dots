@@ -175,8 +175,6 @@ list_t *num_list_copy(const list_t *src) {
     list_t *ret = NULL;
     const list_t *temp;
     for(temp = src; temp; temp = temp->next) {
-        printf("here %x\n", temp);
-        printf("copying %d\n", *(int *) temp->data);
         ret = num_add_back(ret, (float *) temp->data);
     }
     return ret;
@@ -188,7 +186,6 @@ list_t *string_list_copy(const list_t *src) {
     list_t *ret = NULL;
     const list_t *temp;
     for(temp = src; temp; temp = temp->next) {
-        printf("copying %s\n", (char *) temp->data);
         ret = string_add_back(ret, (char *) temp->data);
     }
     return ret;
@@ -200,8 +197,6 @@ list_t *node_list_copy(const list_t *src) {
     list_t *ret = NULL;
     const list_t *temp;
     for(temp = src; temp; temp = temp->next) {
-        printf("here %x\n", temp);
-        printf("copying %d\n", *(int *) temp->data);
         ret = node_add_back(ret, (node_t *) temp->data);
     }
     return ret;
@@ -213,8 +208,6 @@ list_t *graph_list_copy(const list_t *src) {
     list_t *ret = NULL;
     const list_t *temp;
     for(temp = src; temp; temp = temp->next) {
-        printf("here %x\n", temp);
-        printf("copying %d\n", *(int *) temp->data);
         ret = graph_add_back(ret, (graph_t *) temp->data);
     }
     return ret;
