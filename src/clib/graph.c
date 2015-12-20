@@ -35,7 +35,7 @@ int contains(graph_t *g, void *data, int (* comp)(void *a, void *b)) {
 /* add a node to g by iterating through the list, returning if the node is found, and if not, adding it to the end */
 void add_node(graph_t *g, const node_t *node) {
     list_t *n = (list_t *)malloc(sizeof(list_t));
-    n->data = node;
+    n->data = (void *) node;
     list_t *temp = g->nodes;
     /* make temp point to last list_t in g->nodes */
     if(temp) {
