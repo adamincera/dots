@@ -674,6 +674,12 @@ let rec translate_expr env = function
                       | List(dt) -> 
                           let elem_type = dt_to_ct dt in
                           let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.List(dt))) in
+                          let print_loop = translate_stmt env 
+                                              (Sast.For("elem", hd, 
+                                                        [Expr(Call("print", [Id("elem", dt)], Sast.Void));
+                                                         Expr(Call("print", [StrLiteral(", ", String)], Sast.Void))
+                                                        ])) in
+                          
                           print_builder 
                             (
                                 (* b/c of building the list up backwards,
@@ -686,6 +692,7 @@ let rec translate_expr env = function
                                       print( *auto );
                                     } 
                                   *)
+                            (*
                                 [
                                  For(Assign(Id(elem_type, auto_var), print_expr),
                                      Id(List(elem_type), auto_var),
@@ -694,9 +701,19 @@ let rec translate_expr env = function
                                  );
                                  Vdecl(List(dt_to_ct dt), auto_var)
                                 ]
+                           *)
+                              [
+                                
+                                Expr(Call(Void, "printf", [Literal(Cstring, "]")]));
+                                print_loop;
+                                Expr(Call(Void, "printf", [Literal(Cstring, "[")]))
+                                
+                                
+                              ]
                                @ elems
                             )
                             tl
+                          
                       | Dict(dtk, dtv) -> 
                           let key_type = dt_to_ct dtk in
                           let val_type = dt_to_ct dtv in
@@ -970,9 +987,9 @@ let rec translate_expr env = function
             ])
     | Sast.BidirVal(w1, v1, v2, w2, dt) -> Nostmt (* TODO *)
     | Sast.NoOp(s, dt) -> Nostmt (* TODO *)
-    | Sast.Noexpr -> Nostmt
-            in
-let rec translate_stmt env = function 
+    | Sast.Noexpr -> (Nostmt)
+and
+translate_stmt env = function 
     | Sast.Block(sl) -> 
             let csl = List.map (translate_stmt env) sl in
             Block(csl)
