@@ -635,6 +635,15 @@ let rec translate_expr env = function
                     )
                 in
                 Block( print_builder [] el (* TODO *) )
+            | "len" ->
+                    let arg = List.hd el in
+                    let arg_type = get_expr_type arg in
+                    let c_arg = translate_expr env arg in
+                    (match arg_type with
+                    | List(dt) -> Call(Int, "list_len", [c_arg])
+                    | _-> raise (Failure "len not implemented for this type")
+                     
+                    )
             | _ -> 
                 let cel = List.map (translate_expr env) el in
                 let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
@@ -701,7 +710,7 @@ let rec translate_expr env = function
                       | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
                             Block([Expr(Assign(Id((dt_to_ct e_dt), auto_var), 
                                               Call(dt_to_ct e_dt, "pop", [ce] ) ))])
-                      | _ -> raise (Failure("not dequeue")))
+                      | _ -> raise (Failure("not dequeue"))
                            
                           (* let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
                           Block([ce;
@@ -712,6 +721,7 @@ let rec translate_expr env = function
 
       
           | _ -> raise (Failure("not enqueue"))
+          )
       
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
