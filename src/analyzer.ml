@@ -423,7 +423,35 @@ let rec translate_expr env = function
               )
             ]) 
     | Sast.ListLiteral(el, dt) -> 
-        ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *)
+        let c_dt = dt_to_ct dt in
+        let elem_stype = get_list_type dt in
+        let elem_ctype = dt_to_ct elem_stype in
+        let enq_func = (match elem_stype with
+                        | Num -> "num_add_back"
+                        | String -> "string_add_back"
+                        | Node -> "node_add_back"
+                        | Graph -> "graph_add_back"
+                        | _ -> raise (Failure("can not enqueue this datatype"))
+                       ) in
+        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
+        let rec build_enqueue ops = function
+        | [] -> ops
+        | hd :: tl -> 
+            let elem_c = translate_expr env hd in (* translate list element being added *)
+            let elem_result =  "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result of element translation *)
+            let en_stmt = Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)),
+                                      Call(c_dt, enq_func, [Deref(c_dt, Id(Ptr(c_dt), result_var));
+                                                            Deref(elem_ctype, Id(Ptr(elem_ctype), elem_result)) (* element translation result *)
+                                                           ]
+                                      )
+                               )
+                          ) in
+            build_enqueue (en_stmt :: ops) tl
+        in
+        let enqueue_stmts = build_enqueue [] el in
+        Block( Vdecl(Ptr(c_dt), result_var) :: enqueue_stmts )
+        (* ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *) *)
+
     | Sast.DictLiteral(kvl, dt) ->  
         DictLiteral(dt_to_ct dt, List.map (fun f -> (translate_expr env (fst f), translate_expr env (snd f))) kvl)(* TODO *)
     | Sast.Boolean(b, dt) -> 

@@ -15,7 +15,7 @@ type ctype = | Float | Int | Long | Cstring
 
 type cstmt =
 | Literal of ctype * string
-| ListLiteral of ctype * cstmt list              (* [2.5, 3, x] *)
+(* | ListLiteral of ctype * cstmt list     *)         (* [2.5, 3, x] *)
 | DictLiteral of ctype * (cstmt * cstmt) list
 | Id of ctype * string                           (* ids arget_cexpr_typee ints ex. Id(2) -> v2 *)
 | Binop of ctype * cstmt * Ast.op * cstmt
@@ -70,7 +70,7 @@ let fmt_str = function
 
 let rec get_cexpr_type = function
 | Literal(dt, str) -> dt
-| ListLiteral(dt, el) -> dt
+(* | ListLiteral(dt, el) -> dt *)
 | DictLiteral(dt, tl) -> dt
 | Id(dt, id) -> dt
 | Binop(dt, e1, op, e2) -> dt
@@ -87,7 +87,7 @@ let rec get_cexpr_type = function
 
 let rec stmt_type_to_str = function
 | Literal(dt, str) -> "Literal<" ^ type_to_str dt ^ ">"
-| ListLiteral(dt, el) -> "ListLiteral<" ^ type_to_str dt ^ ">"
+(* | ListLiteral(dt, el) -> "ListLiteral<" ^ type_to_str dt ^ ">" *)
 | DictLiteral(dt, tl) -> "DictLiteral<" ^ type_to_str dt ^ ">"
 | Id(dt, id) -> "Id<" ^ type_to_str dt ^ ">"
 | Binop(dt, e1, op, e2) -> "Binop<" ^ type_to_str dt ^ ">"
@@ -207,7 +207,7 @@ let rec translate_stmt = function
     | Void -> if v = "NULL" then v else raise (Failure "Void lit should only be 'NULL'")
     | _ -> raise (Failure "invalid C literal type")
    )
-| ListLiteral(dt, el) -> translate_stmt (Literal(Cstring, "TODO: list literal"))
+(* | ListLiteral(dt, el) -> translate_stmt (Literal(Cstring, "TODO: list literal")) *)
 | DictLiteral(dt, el) -> translate_stmt (Literal(Cstring, "TODO: dict literal"))
 | Id(dt, id) -> id
 | Binop(dt, e1, op, e2) -> 
