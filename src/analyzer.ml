@@ -395,10 +395,33 @@ let rec translate_expr env = function
     | Sast.NumLiteral(l, dt) -> 
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
         Block([   Vdecl(Ptr(Float), result_var);
-                  Expr(Assign(Deref(Float, Id(Ptr(Float), result_var)), Literal(Float, l)))
+                    Expr(Assign(Id(Ptr(Float), result_var), 
+                         Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
+                         ));
+                  Expr(Assign( Deref(Float, Id( Ptr(Float), result_var)), Literal(Float, l)))
               ])
-    | Sast.StrLiteral(l, dt) -> 
-        Literal(Cstring, l)
+    | Sast.StrLiteral(l, dt) ->
+        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
+            Block([   
+              (*create string*)
+              Vdecl(Ptr(Cstring), result_var); (* char **result *)
+              Expr(Assign(Id(Ptr(Cstring), result_var), 
+                          Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "char *")] ) ])
+                          )
+             ); (* *result = malloc(strlen(literal)) *)
+             Expr(Assign(Deref(Cstring, Id(Ptr(Cstring), result_var)), 
+                         Call(Ptr(Void), "malloc", 
+                              [ Call(Int, "strlen", [Literal(Cstring, l)]) ]
+                             )
+                       )
+              ); (* strcpy( *result, literal) *)
+              Expr(Call(Ptr(Void),
+                    "strcpy", [Deref(Cstring, Id(Ptr(Cstring), result_var)); 
+                                   Literal(Cstring, l)
+                                  ]
+                        )
+              )
+            ]) 
     | Sast.ListLiteral(el, dt) -> 
         ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *)
     | Sast.DictLiteral(kvl, dt) ->  
@@ -872,7 +895,7 @@ let rec translate_stmt env = function
             Block([
                     ce; (* translation of assignment *)
                     cv; (* translation of asignee *)
-                    Expr(Assign(Id(var_type, v_result), Id(var_type, e_result)))
+                    Expr(Assign(Deref(var_type, Id(Ptr(var_type), v_result)), Deref(var_type, Id(Ptr(var_type), e_result))))
                   ])
 
             
