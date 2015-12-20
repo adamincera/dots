@@ -38,7 +38,7 @@ type s_stmt =
   | AccessAssign of s_expr * s_expr * s_expr * dataType (* a[5] = 10  where first thing is an access expr *)
   | Return of s_expr * dataType                         (* return x (dataType) *)
   | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
-  | For of string * s_expr * s_stmt list       (* temp var, iterable var, var decls, stmts *)
+  | For of string * s_expr * s_stmt list       (* temp var, iterable var, stmts *)
   | While of s_expr * s_stmt list              (* condition, var decls, stmt list *)
   | Fdecl of s_fdecl and 
 
