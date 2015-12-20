@@ -48,8 +48,8 @@ int main() {
 
     free_list(l);
 
-    entry_t **d = init_dict();
-    put_string(d, "hello", (void *) "world");
+    entry_t **d = NULL; //init_dict();
+    d = put_string(d, "hello", (void *) "world");
     put_string(d, "hello", (void *) "world2");
     put_string(d, "elloh", (void *) "orldw");
     put_string(d, "something else", (void *) "new value");
