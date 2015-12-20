@@ -213,7 +213,7 @@ let rec expr env = function
                   if (e1_dt = e2_dt) then
                     Sast.Binop(s_e1,op,s_e2,Sast.Bool)
                   else 
-                    raise (Failure("wrong type: Dict ==/!= Dict<?> "))
+                    raise (Failure("wrong type binop: Dict ==/!= Dict<?> "))
               | _ -> raise (Failure("wrong type: Dict ==/!= ? "))
             )
       )
@@ -318,7 +318,7 @@ let rec expr env = function
             if (e2_dt = dk) then
                 Sast.Access(s_e1, s_e2, dv)
             else 
-                raise (Failure("wrong type: Dict != Dict<?> "))
+                raise (Failure("wrong type ast.access: sexpr type != Dict<?>, expected " ^ (type_to_str dk) ^ " got " ^ (type_to_str e2_dt) ^ " life sucks"))
           | _ -> raise (Failure("must use Dict or List with access!"))
           )
      with
@@ -545,7 +545,7 @@ let rec stmt env = function
               else
               raise(Failure("AccessAssign: mismatched Value data type"))
             else 
-                raise (Failure("wrong type: Dict != Dict<?> "))
+                raise (Failure("wrong type accessassign: Dict != Dict<?> "))
           | _ -> raise (Failure("must use Dict or List with access!"))
           )
      with
@@ -708,8 +708,8 @@ let rec stmt env = function
 | Ast.Fdecl(func) ->  (*Fdecl of func_decl and *)
    (try
     let fname = func.fname in
-    let formals = List.map (fun (dt, v) -> (str_to_type dt, v)) func.formals in
-    let rtype = str_to_type func.rtype in
+    let formals = List.map (fun (dt, v) -> (f_dt_to_type dt, v)) func.formals in
+    let rtype = f_dt_to_type func.rtype in
 
     (* add formal variables to local scope variable maps *)
     (*

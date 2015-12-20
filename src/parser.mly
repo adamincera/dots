@@ -62,7 +62,7 @@ decls:
 
 /* (1)def (2)func (3)<funcName> ( (5)arg1,...argN ) { (8) <local variables> (9) <body> } */
 fdecl:
-   DEF data_type ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+   DEF f_data_type ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
      { Fdecl({ 
       rtype = $2;
       fname = $3;
@@ -76,8 +76,8 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    data_type ID                   { [($1, $2)] }
-  | formal_list COMMA data_type ID { ($3, $4) :: $1 }
+    f_data_type ID                   { [($1, $2)] }
+  | formal_list COMMA f_data_type ID { ($3, $4) :: $1 }
 
 /* Dictionary Formal Arguments */
 /* assigning  to a dict */
@@ -136,6 +136,13 @@ data_type:
 | LIST LT data_type GT  { "list" }
 | NODE  { "node" }
 | GRAPH { "graph" }
+
+f_data_type:
+| prim_type { Basic($1) }
+| DICT LT data_type COMMA data_type GT  { Dict($3,$5) }
+| LIST LT data_type GT  { List($3) }
+| NODE { Basic("node") }
+| GRAPH { Basic("graph") } 
 
 vdecl:
 |  prim_decl_prefix SEMI { $1 }

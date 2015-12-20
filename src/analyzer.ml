@@ -182,7 +182,13 @@ let str_to_type = function
     | "void" -> Sast.Void
     | x -> raise (Failure ("unknown type: " ^ x))
 
-    (* converts a dataType to a string *)
+(* for function args only, pass in a special type *)
+let f_dt_to_type = function  
+    | Ast.Basic(dt) -> str_to_type dt 
+    | Ast.List(dt) -> Sast.List(str_to_type dt)
+    | Ast.Dict(dtk,dtv) -> Sast.Dict(str_to_type dtk, str_to_type dtv)
+
+(* converts a dataType to a string *)
 let rec type_to_str = function
     | Sast.Num -> "num"
     | Sast.String -> "string"
@@ -792,18 +798,22 @@ let rec translate_expr env = function
                     let arg_id = Id((dt_to_ct arg_dt), arg_e) in
                     
                     let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-                    let result_decl = Vdecl(e_dt, result_var) in
-                    let final_result = Id(e_dt, result_var) in 
+                    let result_decl = Vdecl(Ptr(Float), result_var) in
+                    let final_result = Id(Ptr(Float), result_var) in 
                     (match arg_dt with
                     | List(dt) -> 
                             Block([
                                 elem_c;
                                 result_decl;
-                                
-                                Expr(Assign(
-                                    Id(Int, result_var),
-                                    Call(Int, "list_len", [ Deref((dt_to_ct arg_dt), arg_id) ])
-                                ))
+                                Expr(Assign(Id(Ptr(Float), result_var),
+                                    Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
+                                    ) 
+                                );
+              
+                                Expr(Assign(  Deref(Float, final_result),
+                                              Cast((Float), 
+                                                   Call(Int, "list_len", [ Deref((dt_to_ct arg_dt), arg_id) ])) 
+                                ));
                              ])
                     | Dict(dtk, dtv) -> 
                         Block([
