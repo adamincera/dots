@@ -58,7 +58,7 @@ for directory in os.walk(path):
 
             if (comp_success):
                 out_child = Popen('./' + os.path.join(directory[0], dir_entry[:-5]) + '.exec', 
-                    shell=True, stdout=PIPE)
+                    shell=True, stdout=PIPE, stderr=PIPE)
                 output = out_child.communicate()[0]
                 
                 output_filepath = os.path.join(directory[0], dir_entry[:-5] + '.outgdc')
