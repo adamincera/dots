@@ -941,20 +941,33 @@ let rec translate_expr env = function
             let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
             Call(Void, "connect_dir", [Id(Ptr(Node), v1_index); Id(Ptr(Node), v2_index)])
     | Sast.UndirVal(v1, v2, w, dt) -> 
+            let c_dt = dt_to_ct dt in
             let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
             let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
             let w_c = translate_expr env w in
             let w_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
             let w_deref = Deref(dt_to_ct (get_sexpr_type w), Id(Ptr(dt_to_ct
             (get_sexpr_type w)), w_result)) in
-            Call(Void, "connect_undir_weighted", [Id(Ptr(Node), v1_index);
-            Id(Ptr(Node), v2_index); w_deref])
-    | Sast.DirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
-    (*
+
+            Block([
+                w_c;
+                Call(Void, "connect_undir_weighted ", [Id(Ptr(Node), v1_index); Id(Ptr(Node),
+                v2_index); w_deref])
+            ])
+    | Sast.DirVal(v1, v2, w, dt) ->
+            let c_dt = dt_to_ct dt in
             let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
             let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
-            Call(Void, "connect_undir", [Id(Ptr(Node), v1_index); Id(Ptr(Node), v2_index)])
-*)
+            let w_c = translate_expr env w in
+            let w_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            let w_deref = Deref(dt_to_ct (get_sexpr_type w), Id(Ptr(dt_to_ct 
+            (get_sexpr_type w)), w_result)) in
+
+            Block([
+                w_c;
+                Call(Void, "connect_dir_weighted ", [Id(Ptr(Node), v1_index); Id(Ptr(Node),
+                v2_index); w_deref])
+            ])
     | Sast.BidirVal(w1, v1, v2, w2, dt) -> Nostmt (* TODO *)
     | Sast.NoOp(s, dt) -> Nostmt (* TODO *)
     | Sast.Noexpr -> Nostmt
