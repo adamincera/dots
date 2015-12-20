@@ -672,12 +672,23 @@ let rec translate_expr env = function
             | "len" ->
                     let arg = List.hd el in
                     let arg_type = get_sexpr_type arg in
+                    let arg_ctype = dt_to_ct arg_type in
                     let c_arg = translate_expr env arg in
-                    (match arg_type with
-                    | List(dt) -> Call(Int, "list_len", [c_arg])
+                    let c_dt = dt_to_ct dt in
+                    let arg_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                    let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                    let result_decl = Vdecl(c_dt, result_var) in (* declare this expr's result var *)
+                    let call = (match arg_type with
+                    | List(dt) -> Call(Int, "list_len", [Deref(arg_ctype, Id(Ptr(arg_ctype), arg_result))])
+                    | Dict(dtk, dtv) -> Call(Int, "dict_len", [Deref(arg_ctype, Id(Ptr(arg_ctype), arg_result))])
                     | _-> raise (Failure "len not implemented for this type")
                      
-                    )
+                    ) in
+                    Block([
+                        c_arg;
+                        result_decl;
+                        Assign(Id(c_dt, result_var), call);
+                    ])
             | _ -> 
                 let cel = List.map (translate_expr env) el in
                 let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
