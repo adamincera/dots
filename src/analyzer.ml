@@ -677,7 +677,10 @@ translate_expr env = function
                  ce1;
                  ce2;
                  result_decl;
-                 Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), binop_func
+                 Expr(Assign(Id(Ptr(c_dt), result_var),
+                             Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
+                 ));
+                 Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Assoc(binop_func)
                  ))(* store the result of Access in our result_var *)
             ]) 
     | Sast.Call(func_name, el, dt) -> 
