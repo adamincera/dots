@@ -805,6 +805,7 @@ let rec translate_expr env = function
           let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
         let c_e2 = translate_expr env e2 in (* translate e2 to c *)
           let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e2's translation *)
+        
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
         let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
         let args = [Id(dt_to_ct e1_dt, result_e1); Id(dt_to_ct e2_dt, result_e2)] in (* specific to access function calls *)
@@ -838,21 +839,20 @@ let rec translate_expr env = function
             l3 = (num_add_back(l3, 1.24));
              *)
     | Sast.MemberCall(e, f, el, dt) -> 
-        let cel = List.map (translate_expr env) el in 
-       
-        let e_dt = get_sexpr_type e in 
         let c_dt = dt_to_ct dt in
-        let e_dt = get_sexpr_type e in
+        
         let c_e = translate_expr env e in (* translate e1 to c *)
-          let result_e = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
-        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-        let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
-        let args = [Id(dt_to_ct e_dt, result_e)] in 
-        let call = 
+        let result_e = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+        let e_dt = get_sexpr_type e in 
+        let c_id = Id(dt_to_ct e_dt, result_e) in  
+
+         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+         let result_decl = Vdecl(dt_to_ct e_dt, result_var) in (* declare this expr's result var *)
+         let final_result = Id(dt_to_ct e_dt, result_var) in
+
             (match f with
                   | "enqueue" | "push" ->
                    let e_list_type = (get_list_type e_dt) in
-                     let c_e_list_type = dt_to_ct e_list_type in 
                       let suffix = (if f = "enqueue" then "back" else "front") in
                       let func_name = 
                         (match e_list_type with
@@ -861,56 +861,58 @@ let rec translate_expr env = function
                         | Node -> "node_add_" ^ suffix
                         | Graph -> "graph_add_" ^ suffix
                         | _ -> raise (Failure("can not enqueue this datatype"))) in
-                        (match e with 
-                          | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
-                                Block([Expr(Assign(ce, Call((List(c_e_list_type)), func_name, [ce; Block(cel)])))])
-                          | _ -> raise (Failure("not enqueue")))
+                          
+                      let elem_c = (translate_expr env (List.hd el)) in 
+                      let arg_e = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                      let arg_dt = get_cexpr_type elem_c in 
+                      let arg_id = Id(arg_dt, arg_e) in 
+                      
+
+                           (*let e1_cdt = dt_to_ct (get_sexpr_type e1) in *)
+                      Block([
+                        c_e;
+                        elem_c;
+                        result_decl; 
+                        Expr(Assign(final_result, 
+                                Call(c_dt, func_name, 
+                                           [Deref((dt_to_ct e_dt), c_id); 
+                                            arg_id])
+                        ))
+                             (* store the result of Access in our result_var *)
+                        ]) 
                   | "dequeue" | "pop" -> 
-                   let e_list_type = (get_list_type e_dt) in
-                    let c_e_list_type = dt_to_ct e_list_type in
-                        (match e with 
-                          | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
-                                Block([Expr(Assign(Id((dt_to_ct e_dt), auto_var), 
-                                                  Call(dt_to_ct e_dt, "pop", [ce] ) ))])
-                          | _ -> raise (Failure("not dequeue"))
-                        )
+                           Block([
+                                c_e;
+                                result_decl; 
+                                Expr(Assign(final_result, 
+                                        Call(c_dt, "pop", 
+                                                   [Deref((dt_to_ct e_dt), c_id)])
+                                ))
+                             (* store the result of Access in our result_var *)
+                        ])
                   | "ine" ->                    
-                      (match e with
-                      | Id(s, dt) ->
-                          let index = "v" ^ string_of_int (find_var s env.var_inds) in 
-                           Block([Expr(Assign(Id(Ptr(Entry),auto_var), Member(Ptr(Entry), index, "in")))])
-                      | Access(dt, c1, c2) -> 
-                            (*let index = "v" ^ string_of_int (find_var  env.var_inds) in *)
-                           Block([Expr(Assign(Id(Ptr(Entry),auto_var), Member(Ptr(Entry), auto_var, "in")))])
-                      | _ -> raise (Failure("can't use ine without node")))
+                      Block([Expr(Assign(Id(Ptr(Entry),result_e), Member(Ptr(Entry), result_var, "out")))])
                   | "oute" -> 
-                     (match e with
-                      | Id(s, dt) ->
-                          let index = "v" ^ string_of_int (find_var s env.var_inds) in 
-                             Block([ Expr(Assign(Id(Ptr(Entry),auto_var), Member(Ptr(Entry), index, "out")))])
-                      | Access(dtk, c1, c2) ->  
-                           Block([Expr(Assign(Id(Ptr(Entry),auto_var), Member(Ptr(Entry), auto_var, "out")))])
-                      | _ -> raise (Failure("can't use ine without node")))
+                     Block([
+                         Expr(Assign(Id(Ptr(Entry),result_e), Member(Ptr(Entry), result_var, "out")));
+                         c_e;
+                         result_decl;
+                         Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Cast(Ptr(c_dt), 
+                                Call(c_dt, "pop", [c_e] ))))
+                         (* store the result of Access in our result_var *)
+                    ]) 
       (* Node * n; returns value  snippet n= n.val() datamember of *t Node->data  *)
                   | "val" -> 
-                      (match e with
-                        | Id(s, dt) ->
-                          let index = "v" ^ string_of_int (find_var s env.var_inds) in 
-                          Block([Expr(Assign(Id(Cstring,auto_var), Member(Ptr(Void), index, "data")))])
-                        | Access(dt, c1, c2) -> 
-                                 let access_id = translate_expr env e in        
-                                 let index = "v" ^ string_of_int (find_var auto_var env.var_inds) in 
-                                 Block([ce; Expr(Assign(Id(Cstring,auto_var), Member(Ptr(Void), index, "data")))])
-                        | _ -> raise (Failure("can't use ine without node")))
-              | _ -> raise (Failure("not enqueue"))) in
-          Block([
-                 ce1;
-                 ce2;
-                 result_decl;
-                 Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Cast(Ptr(c_dt), call)))
-                 (* store the result of Access in our result_var *)
-            ]) 
-
+                      Block([
+                         Expr(Assign(Id(Ptr(Entry),result_e), Member(Ptr(Entry), result_var, "data")));
+                         c_e;
+                         result_decl;
+                         Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Cast(Ptr(c_dt), 
+                            Call(c_dt, "pop", [c_e] )
+                          )))
+                         (* store the result of Access in our result_var *)
+                    ]) 
+              | _ -> raise (Failure("not enqueue"))) 
     | Sast.Undir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.Dir(v1, v2, dt) -> Nostmt (* TODO *)
     | Sast.UndirVal(v1, v2, w, dt) -> Nostmt (* TODO *)
