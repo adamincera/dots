@@ -752,7 +752,8 @@ let rec translate_expr env = function
                       | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
                             Block([Expr(Assign(Id((dt_to_ct e_dt), auto_var), 
                                               Call(dt_to_ct e_dt, "pop", [ce] ) ))])
-                      | _ -> raise (Failure("not dequeue")))
+                      | _ -> raise (Failure("not dequeue"))
+                    )
                            
                           (* let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
                           Block([ce;
