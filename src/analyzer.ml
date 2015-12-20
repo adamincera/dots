@@ -654,9 +654,8 @@ let rec translate_expr env = function
                  ))(* store the result of Access in our result_var *)
             ]) 
     | Sast.Call(func_name, el, dt) -> 
-        (
             let return_type = dt_to_ct dt in
-            match func_name with
+            (match func_name with
             | "print" ->
                 let rec print_builder elems = function
                 | [] -> List.rev elems
@@ -811,25 +810,39 @@ let rec translate_expr env = function
                 in
                 Block( print_builder [] el (* TODO *) )
             | "len" ->
-                    let arg = List.hd el in
-                    let arg_type = get_sexpr_type arg in
-                    let arg_ctype = dt_to_ct arg_type in
-                    let c_arg = translate_expr env arg in
-                    let c_dt = dt_to_ct dt in
-                    let arg_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            (*func_name, el, dt*)
+                    let e_dt = dt_to_ct dt in
+                    let elem_c = (translate_expr env (List.hd el)) in
+                    let arg_e = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                    let arg_dt = get_sexpr_type (List.hd el) in 
+                    let arg_id = Id((dt_to_ct arg_dt), arg_e) in
+                    
                     let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-                    let result_decl = Vdecl(c_dt, result_var) in (* declare this expr's result var *)
-                    let call = (match arg_type with
-                    | List(dt) -> Call(Int, "list_len", [Deref(arg_ctype, Id(Ptr(arg_ctype), arg_result))])
-                    | Dict(dtk, dtv) -> Call(Int, "dict_len", [Deref(arg_ctype, Id(Ptr(arg_ctype), arg_result))])
-                    | _-> raise (Failure "len not implemented for this type")
+                    let result_decl = Vdecl(e_dt, result_var) in
+                    let final_result = Id(e_dt, result_var) in 
+                    (match arg_dt with
+                    | List(dt) -> 
+                            Block([
+                                elem_c;
+                                result_decl;
+                                
+                                Expr(Assign(
+                                    Id(Int, result_var),
+                                    Call(Int, "list_len", [ Deref((dt_to_ct arg_dt), arg_id) ])
+                                ))
+                             ])
+                    | Dict(dtk, dtv) -> 
+                        Block([
+                                elem_c;
+                                result_decl;
+                                Expr(Assign(
+                                    Id(Int, result_var),
+                                    Call(Int, "dict_len", [ arg_id ])
+                                ))
+                             ])
+                    | _ -> raise (Failure "len not implemented for this type")
                      
-                    ) in
-                    Block([
-                        c_arg;
-                        result_decl;
-                        Assign(Id(c_dt, result_var), call);
-                    ])
+                    )
             | _ -> 
                 let rec build_args args = function
                 | [] -> args
@@ -1303,15 +1316,15 @@ translate_stmt env = function
                                          Literal(Int, "1"))),
                                   [For(Assign(Id(Ptr(Entry), loop_var), Access(Entry, Assoc(iter_deref), Id(Int, int_var))), 
                                       Id(Entry, loop_var),
-                                      Assign(Id(Ptr(Entry), loop_var), Member(Entry, loop_var, "next")),
+                                      Assign(Id(Ptr(Entry), loop_var), Member(Entry, Id(Void, loop_var), "next")),
                                       ( Expr(Assign(Id(Ptr(Void), key_var), 
-                                                    Member(Ptr(Void), loop_var, "key")
+                                                    Member(Ptr(Void), Id(Void, loop_var), "key")
                                             )
                                         )
                                         :: List.map (translate_stmt env) sl
                                       )
                                   )]
-                                ) in
+                                ) in 
                           Block([Vdecl(Int, int_var); 
                                  Vdecl(Ptr(Entry), loop_var);
                                  Vdecl(Ptr(Void), key_var); 
