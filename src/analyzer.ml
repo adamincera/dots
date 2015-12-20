@@ -9,7 +9,28 @@ module StringMap = Map.Make(String)
 type s_program = { s_globals : s_stmt list; s_main: s_stmt list; s_funcs : s_fdecl list; } 
 
 (* 
-  
+  DEALING WITH AUTOMATIC RESULT VARS:
+
+  Step 1: After every "let x = ...." where "translate_expr env ..." is called,
+          create a variable to hold the name of the result variable from that call
+          ex. let e1_result =  "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+
+  Step 2: After the end of all "translate_expr env ..." calls (i.e. when that function
+          is no longer called), create a new auto_var to hold the result of the current
+          function's translation.
+
+          ex. let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
+
+  Step 3: Output a Block([]) that contains:
+          a. a Vdecl object for result_var
+          b. the C code that corresponds to the current expr's translation
+          c. an Assign call that assigns the result of part b. to result_var
+
+          ex. for if the result of e1 is the result of your expression
+               Block([Vdecl(..., result_var);
+                       c_e1;
+                       Assign(Id(..., result_var), Id(..., e1_result))
+                     ])
 *)
 
 (* read in Sast program creat list of glbs by skipping fdecls  
@@ -658,29 +679,32 @@ let rec translate_expr env = function
     | Sast.Access(e1, e2, dt) -> 
         let c_dt = dt_to_ct dt in
         let e1_dt = get_sexpr_type e1 in
-        let c_e1 = translate_expr env e1 in
-          let auto_e1 = "v" ^ string_of_int(create_auto env "" (get_sexpr_type e1)) in
-        let c_e2 = translate_expr env e2 in
-          let auto_e2 = "v" ^ string_of_int(create_auto env "" (get_sexpr_type e2)) in
-        let auto_result = "v" ^ string_of_int(create_auto env "" (dt)) in
-        let cl_args = Block([Vdecl(dt_to_ct (get_sexpr_type e1), auto_e1);
-                             Vdecl(dt_to_ct (get_sexpr_type e2), auto_e2); 
-                             Vdecl(dt_to_ct dt, auto_result)]) in
-        let args = [c_e1; c_e2] in
-        (match e1_dt with
-        | List(dt) -> 
-                Call(Ptr(Void), "list_access", args)
-        | Dict(dtk, dtv) ->
-                let c_dtk = dt_to_ct dtk in
-                (match c_dtk with
-                | Float -> Call(Ptr(Void), "get_num", args)
-                | Cstring -> Call(Ptr(Void), "get_string", args)
-                | Graph -> Call(Ptr(Void), "get_graph", args)
-                | Node -> Call(Ptr(Void), "get_node", args)
-                | _ -> raise(Failure("unsupported dict type"))
-                )
-        | _ -> raise(Failure("unsupported access"))
-        )
+        let e2_dt = get_sexpr_type e2 in
+        let c_e1 = translate_expr env e1 in (* translate e1 to c *)
+          let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
+        let c_e2 = translate_expr env e2 in (* translate e2 to c *)
+          let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e2's translation *)
+        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+        let result_decl = Vdecl(c_dt, result_var) in (* declare this expr's result var *)
+        let args = [Id(dt_to_ct e1_dt, result_e1); Id(dt_to_ct e2_dt, result_e2)] in (* specific to access function calls *)
+        let call = (match e1_dt with
+                      | List(dt) -> 
+                              Call(Ptr(Void), "list_access", args)
+                      | Dict(dtk, dtv) ->
+                              let c_dtk = dt_to_ct dtk in
+                              (match c_dtk with
+                              | Float -> Call(Ptr(Void), "get_num", args)
+                              | Cstring -> Call(Ptr(Void), "get_string", args)
+                              | Graph -> Call(Ptr(Void), "get_graph", args)
+                              | Node -> Call(Ptr(Void), "get_node", args)
+                              | _ -> raise(Failure("unsupported dict type"))
+                              )
+                      | _ -> raise(Failure("unsupported access"))
+                    ) in (* evaluate an Access expression *)
+        Block([
+                 result_decl;
+                 Assign(Id(c_dt, result_var), call) (* store the result of Access in our result_var *)
+              ])
 
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
             let ce = translate_expr env e in
