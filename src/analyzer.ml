@@ -1193,20 +1193,40 @@ translate_stmt env = function
         let graph_shit = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in
         Block(graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl)  
     | Sast.While (cond, sl) -> 
+        (*
         let c_cond = translate_expr env cond in
         let cond_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
         let deref_cond = Deref(Int, Id(Ptr(Int), cond_result)) in
+        *)
+        (match cond with
+         | Binop(e1, op, e2, dt) -> 
+             let c_e1 = translate_expr env e1 in
+             let e1_cdt = dt_to_ct (get_sexpr_type e1) in
+             let e1_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+             
+             let c_e2 = translate_expr env e2 in
+             let e2_cdt = dt_to_ct (get_sexpr_type e2) in
+             let e2_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            
+             let c_stmts = List.map (translate_stmt env) sl in
+             Block([c_e1; c_e2;
+                    While(Translate.Binop(Int, 
+                                          Deref(e1_cdt, Id(Ptr(e1_cdt), e1_result)), 
+                                          op, 
+                                          Deref(e2_cdt, Id(Ptr(e2_cdt), e2_result))
+                                         ), 
+                          c_stmts)
+             ])
+         | _ -> raise (Failure ("not a while loop condition expression"))
+        )
+        
         (* convert body *)
         (*
         let sl_builder = build_args [] sl in
         let c_stmts = List.map (fun t -> (fst t)) c_args in
         let result_params = List.map (fun t -> (snd t)) c_args in
         *)
-        let c_stmts = List.map (translate_stmt env) sl in
-
-        Block([c_cond;
-               While(deref_cond, c_stmts) 
-        ])                                   
+                                          
     | Sast.If (cond, s1, s2) ->
         let c_cond = translate_expr env cond in 
         let c_s1 =  translate_stmt env s1 in
