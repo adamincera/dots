@@ -464,6 +464,9 @@ let rec translate_expr env = function
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* will equal the temporary list created earlier *)
 
         Block(([Vdecl(Ptr(c_dt), temp_list);
+                Expr(Assign(Id(Ptr(c_dt), temp_list), 
+                            Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "list_t *")]) ])
+                ));
                 Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), temp_list)), Id(Void, "NULL")));
                 Vdecl(Ptr(c_dt), result_var)
                ] 
