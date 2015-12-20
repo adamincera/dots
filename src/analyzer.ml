@@ -653,6 +653,7 @@ let rec translate_expr env = function
             ]) 
     | Sast.Call(func_name, el, dt) -> 
         (
+            let return_type = dt_to_ct dt in
             match func_name with
             | "print" ->
                 let rec print_builder elems = function
@@ -660,8 +661,8 @@ let rec translate_expr env = function
                 | hd :: tl -> 
                     let hd_type = get_sexpr_type hd in
                     let print_expr = translate_expr env hd in (* elem to print *)
-                    let print_type = dt_to_ct hd_type in (* type of elem *)
                     let print_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of elem translation *)
+                    let print_type = dt_to_ct hd_type in (* type of elem *)                    
 
                     (match hd_type with
                       | Num | String | Bool | Node -> 
@@ -828,9 +829,33 @@ let rec translate_expr env = function
                         Assign(Id(c_dt, result_var), call);
                     ])
             | _ -> 
-                let cel = List.map (translate_expr env) el in
-                let index = "f" ^ string_of_int(find_var func_name env.func_inds) in
-                Call(dt_to_ct dt, index, cel)
+                let rec build_args args = function
+                | [] -> args
+                | hd :: tl ->
+                    let arg_cstmts = translate_expr env hd in
+                    let arg_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of arg translation *)
+                    let arg_type = dt_to_ct (get_sexpr_type hd) in
+                    build_args ((arg_cstmts, Deref(arg_type, Id(Ptr(arg_type), arg_result))) :: args) tl
+                in
+                let c_args = build_args [] el in
+                let c_stmts = List.map (fun t -> (fst t)) c_args in
+                let result_params = List.map (fun t -> (snd t)) c_args in
+                let func_index = "f" ^ string_of_int(find_var func_name env.func_inds) in
+                let call_result = "v" ^ string_of_int(create_auto env "" (dt)) in
+                Block(c_stmts
+                      @
+                      [
+                        Vdecl(Ptr(return_type), call_result);
+                        Expr(Assign(Id(Ptr(return_type), call_result),
+                                    Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, Translate.type_to_str return_type)] ) ])
+                             ) 
+                        );
+                        Expr(Assign(Deref(return_type, Id(Ptr(return_type), call_result)),
+                                    Call(dt_to_ct dt, func_index, result_params)
+                            )
+                        )
+                      ]
+                )
         )
             
     | Sast.Access(e1, e2, dt) -> 
@@ -1173,7 +1198,15 @@ translate_stmt env = function
             call;
         ])
 
-    | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
+    | Sast.Return(e, dt) -> 
+        let c_e = translate_expr env e in
+        let e_result =  "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+
+        Block([
+          c_e;
+          Translate.Return(Deref(dt_to_ct dt, Id(Ptr(dt_to_ct dt), e_result)))
+        ])
+                 
     | Sast.NodeDef (id, s, dt) -> 
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
         (match s with
