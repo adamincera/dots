@@ -55,7 +55,7 @@ let rec type_to_str = function
 | Long -> "long"
 | Cstring -> "char *"
 | Array(dt) -> type_to_str dt ^ "[]"
-| List(dt) -> "list_t"
+| List(dt) -> "list_t *"
 | Node -> "node_t"
 | Graph -> "graph_t"
 | Ptr(dt) -> type_to_str dt ^ "*"
@@ -121,6 +121,18 @@ let op_to_str = function
 | Ast.Geq -> ">="
 | Ast.LogAnd -> "&&"
 | Ast.LogOr -> "||"
+
+(* takes a c datatype and returns the print format string *)
+let get_fmt_str = function
+| Float -> "%.3f"
+| Int -> "%d"
+| Long -> "%l"
+| Cstring -> "%s"
+| Node -> raise (Failure "type node can't be directly printed")
+| Entry | Graph -> raise (Failure "type requires iterable print handling")
+| List(dt) | Array(dt) -> raise (Failure "type requires iterable print handling")
+| Void -> raise (Failure ("can't directly print Void")) 
+| Ptr(dt) -> raise (Failure "can't directly print pointer")
 
 let cvar_cnt = ref 0
 
@@ -205,6 +217,7 @@ let rec translate_stmt = function
   translate_stmt e1  ^ " " ^ op_to_str(op) ^ " " ^ translate_stmt e2
 | Assign(target, e) -> (translate_stmt target) ^ " = " ^  translate_stmt e
 | Call(dt, id, el) -> 
+    (*
     (match id with
         | "f1" -> 
             (* fmt is all the format types so far: ex. %s%f%f *)
@@ -242,8 +255,8 @@ let rec translate_stmt = function
               "\"" ^ String.concat "" (List.map (fun t -> fst t) fmts) ^ "\", " ^ (* format string *)
               String.concat ", " (List.map (fun t -> snd t) fmts) ^ (* comma separated inputs to fmt string *)
               ")"
-        | _ -> id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
-    )
+        *)
+        id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
 | Access(dt, id, e) -> (translate_stmt id) ^ "[" ^ (translate_stmt e) ^ "]"
 | Member(dt, id, m) -> id ^ "->" ^ m
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_stmt e ^ ")"
