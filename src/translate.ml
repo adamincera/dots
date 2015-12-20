@@ -22,7 +22,7 @@ type cstmt =
 | Assign of cstmt * cstmt                        (* ex. Assign(2, 5) -> v2 = 5 *)
 | Call of ctype * string * cstmt list            (* return type of the function, function name, arguments *) (* Call(3, [Literal(5), Id(3)]) -> f3(5, v3) *)
 | Access of ctype * cstmt * cstmt               (* array access: id[cexpr] *)
-| Member of ctype * string * string              (* id, member *)
+| Member of ctype * cstmt * string              (* id, member *)
 | Cast of ctype * cstmt                          (* ex. Cast(Int, Id(f1)) -> (int)(f1) *)
 | Deref of ctype * cstmt                                 (* ex. *var *)
 | Ref of ctype * cstmt                                   (* ex. &var *)
@@ -77,7 +77,7 @@ let rec get_cexpr_type = function
 | Assign(id, e1) -> Void
 | Call(dt, id, el) -> dt
 | Access(dt, id, e) -> dt
-| Member(dt, id, m) -> dt
+| Member(dt, stmt, m) -> dt
 | Cast(dt, e) -> dt
 | Ref(dt, e) -> dt
 | Deref(dt, e) -> dt
@@ -94,7 +94,7 @@ let rec stmt_type_to_str = function
 | Assign(id, e1) -> "Assign<" ^ stmt_type_to_str id ^ ">"
 | Call(dt, id, el) -> "Call<" ^ type_to_str dt ^ ">"
 | Access(dt, id, e) -> "Access<" ^ type_to_str dt ^ ">"
-| Member(dt, id, m) -> "Member<" ^ type_to_str dt ^ ">"
+| Member(dt, stmt, m) -> "Member<" ^ type_to_str dt ^ ">"
 | Cast(dt, e) -> "Cast<" ^ type_to_str dt ^ ">"
 | Ref(dt, e) -> "Ref<" ^ type_to_str dt ^ ">"
 | Deref(dt, e) -> "Deref<" ^ type_to_str dt ^ ">"
@@ -258,7 +258,8 @@ let rec translate_stmt = function
         *)
         id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
 | Access(dt, id, e) -> (translate_stmt id) ^ "[" ^ (translate_stmt e) ^ "]"
-| Member(dt, id, m) -> id ^ "->" ^ m
+(* | Member(dt, id, m) -> id ^ "->" ^ m *)
+| Member(dt, id, m) -> (translate_stmt (Assoc(id))) ^ "->" ^ m 
 | Cast(dt, e) -> "(" ^ type_to_str dt ^ ")(" ^ translate_stmt e ^ ")"
 | Ref(dt, e) -> "&(" ^ translate_stmt e ^ ")"
 | Deref(dt, e) -> "*(" ^ translate_stmt e ^ ")"

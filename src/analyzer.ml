@@ -684,8 +684,8 @@ let rec translate_expr env = function
                                 [
                                  For(Assign(Id(elem_type, auto_var), print_expr),
                                      Id(List(elem_type), auto_var),
-                                     Assign(Id(elem_type, auto_var), Member(List(dt_to_ct dt), auto_var, "next")),
-                                     [Expr(Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))]))]
+                                     Assign(Id(elem_type, auto_var), Member(List(dt_to_ct dt),  Id(Void, auto_var), "next")),
+                                     [Expr(Call(Void, "f1", [Deref(elem_type, Member(elem_type, Id(Void, auto_var), "data"))]))]
                                  );
                                  Vdecl(List(dt_to_ct dt), auto_var)
                                 ]
@@ -739,9 +739,9 @@ let rec translate_expr env = function
                                                ),
                                          Id(Ptr(Entry), auto_entry),
                                          Assign(Id(Ptr(Entry), auto_entry),
-                                                Member(Ptr(Entry), auto_entry, "next")),
+                                                Member(Ptr(Entry), Id(Void, auto_entry), "next")),
                                          [Expr(Assign(Id(Ptr(key_type), auto_key),
-                                                 Cast(Ptr(key_type), Member((Ptr(Void), auto_entry, "key")))
+                                                 Cast(Ptr(key_type), Member((Ptr(Void), Id(Void, auto_entry), "key")))
                                                 ));
                                           Vdecl(val_type, auto_val);
                                           Expr(Assign(Id(val_type, auto_val),
@@ -904,12 +904,14 @@ let rec translate_expr env = function
                                 ))
                              (* store the result of Access in our result_var *)
                         ])
-                  | "ine" ->                    
+                  | "ine" -> 
+                  let dict = Ptr(Ptr(Entry)) in  
                       Block([
                              c_e;
-                             result_decl;
-                             Expr(Assign(Id(Ptr(Ptr(Entry)),result_e), 
-                                         Member(Ptr(Entry), result_var, "in")))
+                             Vdecl(dict, result_var);
+                             Expr(Assign(
+                                      Id(Ptr(Ptr(Entry)), result_var), 
+                                      Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "in")))
                              (* store the result of Access in our result_var *)
                         ])
                   | "oute" -> 
@@ -918,19 +920,25 @@ let rec translate_expr env = function
                              c_e;
                              Vdecl(dict, result_var);
                              Expr(Assign(
-                                      Id(Ptr(Ptr(Entry)), result_var), Member(Ptr(Entry),result_e , "out")))
+                                      Id(Ptr(Ptr(Entry)), result_var), 
+                                      Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "out")))
                              (* store the result of Access in our result_var *)
                         ])
       (* Node * n; returns value  snippet n= n.val() datamember of *t Node->data  *)
-                  | "val" -> 
+                  | "val" ->
                       Block([
-                         Expr(Assign(Id(Ptr(Entry),result_e), Member(Ptr(Entry), result_var, "data")));
                          c_e;
-                         result_decl;
-                         Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Cast(Ptr(c_dt), 
-                            Call(c_dt, "pop", [c_e] )
-                          )))
-                         (* store the result of Access in our result_var *)
+                         Vdecl(Ptr(Cstring), result_var);
+                         Expr(Assign(
+                                     Id(Cstring, result_var), 
+                                     Call(Ptr(Void), 
+                                          "malloc", 
+                                         [Call(Int, "sizeof", [Id(Void, "char *")]
+                                       )])
+                                    ));
+                         Expr(Assign(
+                                  Deref(Cstring, Id(Ptr(Cstring),result_var)), 
+                                  Member(Cstring, Deref((dt_to_ct e_dt), c_id), "data")))
                     ]) 
               | _ -> raise (Failure("not enqueue"))) 
     | Sast.Undir(v1, v2, dt) -> 
@@ -992,7 +1000,7 @@ let rec translate_stmt env = function
               | Node -> (* Block([Vdecl(Ptr(Node), index); 
                                Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])))
                               ]) *) (* C: node_t *x = init_node(""); *)
-                        Block([Vdecl(Ptr(Node), index);])
+                        Block([Vdecl((Node), index);])
               | List(dt) -> Vdecl(List(dt_to_ct dt), index) (* C: list_t *x; *)
               | Dict(dtk, dtv) -> Vdecl(Ptr(Ptr(Entry)), index) (* TODO *)
               | Void -> raise (Failure ("should not be using Void as a datatype"))
@@ -1143,13 +1151,20 @@ let rec translate_stmt env = function
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
+        let c_s = translate_expr env s in
+          let result_s = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
         (match s with
           | Sast.Noexpr ->                                                 
-            Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
-              Expr(Assign(Member(Ptr(Void), index, "data"), Literal(Cstring,"")))])
+              Block([
+                c_s;
+                 Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")]))); 
+              Expr(Assign(Member(Ptr(Void), Id(Void, index), "data"), Literal(Cstring,"")))])
           | _ -> 
-            Block([Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
-              Expr(Assign(Member(Ptr(Void), index, "data"), translate_expr env s))])
+            Block([
+              c_s;
+              Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])));
+              Expr(Assign(Member(Ptr(Void), Id(Void, index), "data"), Deref(Cstring, Id(Ptr(Cstring), result_s)) ))
+            ])
         )     
     | Sast.GraphDef(id, sl) ->
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
@@ -1194,10 +1209,10 @@ let rec translate_stmt env = function
                              Vdecl(iter_ctype, loop_var);
                              For(Assign(Id(iter_ctype, loop_var), iter_deref),
                                  Id(iter_ctype, loop_var),
-                                 Assign(Id(iter_ctype, loop_var), Member(iter_ctype, loop_var, "next")),
+                                 Assign(Id(iter_ctype, loop_var), Member(iter_ctype, Id(Void, loop_var), "next")),
 
                                  Expr(Assign(Id(key_var_type, key_var), 
-                                             Deref(key_var_type, Cast(Ptr(key_var_type), Member(Ptr(Void), loop_var, "data")))
+                                             Deref(key_var_type, Cast(Ptr(key_var_type), Member(Ptr(Void), Id(Void,loop_var), "data")))
                                       )
                                  )
                                  :: csl
@@ -1216,9 +1231,9 @@ let rec translate_stmt env = function
                                                   Literal(Int, "1"))),
                                      [For(Assign(Id(Ptr(Entry), loop_var), Access(Entry, Assoc(iter_deref), Id(Int, int_var))), 
                                           Id(Entry, loop_var),
-                                          Assign(Id(Ptr(Entry), loop_var), Member(Entry, loop_var, "next")),
+                                          Assign(Id(Ptr(Entry), loop_var), Member(Entry, Id(Void,loop_var), "next")),
                                           ( Expr(Assign(Id(Ptr(Void), key_var), 
-                                                        Member(Ptr(Void), loop_var, "key")
+                                                        Member(Ptr(Void), Id(Void,loop_var), "key")
                                                 )
                                             )
                                             :: List.map (translate_stmt env) sl
@@ -1235,9 +1250,9 @@ let rec translate_stmt env = function
                       let iter_deref = Deref(Graph, Id(Ptr(Graph), iter_result)) in
                       Block([Vdecl(Node, key_var);
                                     Vdecl(Entry, loop_var); 
-                                    For(Assign(Id(Entry, loop_var), Member(Entry, "*" ^ iter_result, "nodes")),
+                                    For(Assign(Id(Entry, loop_var), Member(Entry, Id(Void, "*" ^ iter_result), "nodes")),
                                       Id(Entry, loop_var),
-                                      Assign(Id(Entry, loop_var), Member(Entry, loop_var, "next")),
+                                      Assign(Id(Entry, loop_var), Member(Entry, Id(Void, loop_var), "next")),
                                       csl
                                       )
                                    ])
