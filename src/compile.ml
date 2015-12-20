@@ -20,6 +20,8 @@ let _ =
     )
     in
 
+  (*print_endline("finished Parser -> Ast");*)
+
       let print_decl = {
           s_fname = "print";
           s_rtype = Sast.Void;
@@ -33,31 +35,36 @@ let _ =
           s_body = [];
       } in
 
-  let sast_env = (* set up default environment *)
+(* set up default environment *)
+  let sast_env = 
+      (* built-in function set-up *)
       let bf_names = [ "print"; "range";] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
-      (*  s_fdecl = {
-    s_fname : string;
-    s_rtype : dataType; 
-    (*formals : (string * string) list; *)
-    s_formals : (dataType * string) list;
-    s_body : s_stmt list;
-  }*)
       let bf_fdecl_map = ref (string_map_pairs StringMap.empty [(print_decl, "print"); (range_decl, "range")]) in
+     (* build default symbol tables: *)
      {var_types = [ref StringMap.empty];
                        var_inds = [ref StringMap.empty];
                        func_obj = [bf_fdecl_map];
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
-  (* let sast_prg = convert_ast {funcs = ast_prg.funcs; cmds = List.rev ast_prg.cmds} sast_env  in *)
+
+  (* convert Ast to Sast *)
   let sast_prg = convert_ast { cmds = List.rev ast_prg.cmds} sast_env  in
+  (*print_endline ("finished Ast -> Sast");*)
+
+  (* massage Sast into a form more suitable for C Ast *)
+  (* i.e. split up variable declarations, function definitions, and other *)
   let sifted_prg = stmt_sifter {s_globals = []; s_main = []; s_funcs = []} sast_prg.s_cmds in
+  (*print_endline ("finished Sast -> Sorted Sast");*)
+
+  (* construct Sast program object from sifted *)
   let sifted_prg = {s_globals = List.rev sifted_prg.s_globals; 
                     s_main = List.rev sifted_prg.s_main; 
                     s_funcs = List.rev sifted_prg.s_funcs} in
-  (* comment out for real: *)  (* print_endline ("converted ast to sast");  *)
-  let trans_env = (* set up default environ *)
+
+  (* set up default environ *)
+  let trans_env = 
       let bf_names = [ "print"; "range"; "len"; "min"; "max"] in
       let bf_inds = enum 1 1 bf_names in
       let bf_ind_map = ref (string_map_pairs StringMap.empty bf_inds) in
@@ -67,17 +74,28 @@ let _ =
                        func_obj = [bf_fdecl_map];
                        func_inds = [bf_ind_map];
                        return_type = Sast.Void} in
- (* let main = translate (trans_env, sast_prg.s_funcs, sast_prg.s_cmds) in *)
- (*let main = translate (trans_env, sast_prg.s_cmds) in*)
- (* let cprg = {libs = ["<stdio.h>"]; globals = [] ; cfuncs = [main]} in *)
- (* let cprg = {libs = ["<stdio.h>"]; globals = [] ; cfuncs = [main]} in *)
+
+  (* add declared functions to symbol tables *)
+  let rec func_def_adder env = function
+  | [] -> ignore()
+  | hd :: tl -> 
+      (List.hd env.func_obj) := StringMap.add hd.s_fname hd !(List.hd env.func_obj);
+      (List.hd env.func_inds) := StringMap.add hd.s_fname (find_max_index !(List.hd env.func_inds)+1) !(List.hd env.func_inds); (* add index map *)
+      ignore(func_def_adder env tl)
+  in
+  ignore(func_def_adder trans_env sifted_prg.s_funcs);
+
+ (* convert Sast to C Ast *)
  let cprg = translate(trans_env, sifted_prg) in
+ (*print_endline("finished Sast -> CAst");*)
+
+  (* output C code from C Ast *)
   print_endline (translate_c(cprg.globals, cprg.cfuncs))
 
   (* print_endline (String.concat "\n" (List.map string_of_stmt (List.rev prg.cmds))) *)
 
-(* pretty printing version *)
 
+(* Ast pretty printing version *)
 (*  let _ =
   let lexbuf = Lexing.from_channel stdin in
   let prg = Parser.program Scanner.token lexbuf in

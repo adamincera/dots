@@ -1,0 +1,11 @@
+num fake01;
+
+def num printer(num x, num y) {
+    print("foo");
+    print("blah");
+    print("bar");
+    return 0;
+}
+
+num fake = 3;
+printer(6, 4);

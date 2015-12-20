@@ -43,4 +43,4 @@ void *string_dict_min(entry_t **table);
 
 void *string_dict_max(entry_t **table);
 
-int len(entry_t **table);
+int dict_len(entry_t **table);
