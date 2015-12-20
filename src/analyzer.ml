@@ -60,6 +60,10 @@ let get_list_type = function
  | Sast.List(dt) ->  dt
  | _ -> raise (Failure("wrong type: not a list")) 
 
+ let get_dict_type = function
+  | Sast.Dict(dtk, dtv) -> dtk
+  | _ -> raise (Failure("wrong type: not a list"))
+
 let rec stmt_sifter sifted = function
 | [] -> sifted
 | hd :: tl -> (match hd with
@@ -845,14 +849,59 @@ translate_expr env = function
                         Block([
                                 elem_c;
                                 result_decl;
-                                Expr(Assign(
-                                    Id(Int, result_var),
-                                    Call(Int, "dict_len", [ arg_id ])
-                                ))
+                                Expr(Assign(Id(Ptr(Float), result_var),
+                                    Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
+                                    ) 
+                                );
+              
+                                Expr(Assign(  Deref(Float, final_result),
+                                              Cast((Float), 
+                                                   Call(Int, "dict_len", [ Deref((dt_to_ct arg_dt), arg_id) ])) 
+                                ));
+                             
                              ])
                     | _ -> raise (Failure "len not implemented for this type")
-                     
                     )
+            | "min" | "max" -> 
+                  let e_dt = dt_to_ct dt in
+                    let elem_c = (translate_expr env (List.hd el)) in
+                    let arg_e = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                    let arg_dt = get_sexpr_type (List.hd el) in 
+                    let arg_id = Id((dt_to_ct arg_dt), arg_e) in
+                    
+                    let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                    let result_decl = Vdecl(Ptr(Float), result_var) in
+                    let final_result = Id(Ptr(Float), result_var) in 
+
+                    let fname = 
+                     (match arg_dt with
+                        | List(dt) -> 
+                             let e_list_type = (get_list_type arg_dt) in 
+                              (match e_list_type with
+                                  | Num -> "num_list_" ^ func_name
+                                  | _ -> raise (Failure ("cannot do min max ")))
+                        | Dict(dtk, dtv) ->
+                              let d_k = (get_dict_type arg_dt) in
+                              (match d_k with
+                                  | Num -> "num_dict_" ^ func_name 
+                                  | _ -> raise (Failure ("cannot do min max ")))
+                        | _ -> raise (Failure("can not enqueue this datatype")))
+                        in
+                        Block([
+                                elem_c;
+                                result_decl;
+                                Expr(Assign(Id(Ptr(Float), result_var),
+                                    Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
+                                    ) 
+                                );
+              
+                                Expr(Assign(  Deref(Float, final_result),
+                                              Cast((Float), 
+                                                   Call(Float, fname, [ Deref((dt_to_ct arg_dt), arg_id) ])) 
+                                ));
+                             ])
+
+
             | _ -> 
                 let c_args = build_args [] el in
                 let c_stmts = List.map (fun t -> (fst t)) c_args in
@@ -952,6 +1001,7 @@ translate_expr env = function
                         ]) 
                   | "dequeue" | "pop" -> 
                            Block([
+
                                 c_e;
                                 result_decl; 
                                 Expr(Assign(final_result, 
@@ -1191,7 +1241,9 @@ translate_stmt env = function
     | Sast.GraphDef(id, sl) ->
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
         let graph_shit = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in
-        Block(graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl)  
+        Block(
+          graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl)
+
     | Sast.While (cond, sl) -> 
         (*
         let c_cond = translate_expr env cond in
