@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include <float.h>
 #include "dict.h"
 
 #define EPSILON 0.000000001
@@ -319,7 +320,7 @@ void graph_dict_remove(entry_t **table, graph_t *key) {
 }
 
 void *num_dict_min(entry_t **table) {
-    int min = INT_MAX;
+    float min = FLT_MAX;
     void *ret = NULL;
     int i;
     entry_t *temp;
@@ -334,7 +335,7 @@ void *num_dict_min(entry_t **table) {
 }
 
 void *num_dict_max(entry_t **table) {
-    int max = INT_MIN;
+    float max = FLT_MIN;
     void *ret = NULL;
     int i;
     entry_t *temp;

@@ -387,18 +387,18 @@ void graph_index_insert(list_t *l, int i, graph_t *a) {
 }
 
 float num_list_min(list_t *l) {
-    float min = (float) *(int *) l->data;
+    float min = (float) *(float *) l->data;
     for(; l; l = l->next)
         if(*(float *) l->data < min)
-            min = (float) *(int *) l->data;
+            min = (float) *(float *) l->data;
     return min;
 }
 
 float num_list_max(list_t *l) {
-    float max = *(float *) l->data;
+    float max = (float) *(float *) l->data;
     for(; l; l = l->next)
         if(*(float *) l->data > max)
-            max = *(float *) l->data;
+            max = (float) *(float *) l->data;
     return max;
 }
 

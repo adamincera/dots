@@ -1,0 +1,16 @@
+node w;
+node x;
+node y;
+node z;
+
+graph g1 = {
+#	x -->[1] y,
+	y -->[2] x,
+	z -->[3] x,
+	w -->[4] x
+}; 
+
+for (n in x.ine()) {
+	print(x.ine()[n]);
+
+}

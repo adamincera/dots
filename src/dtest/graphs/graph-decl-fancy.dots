@@ -1,5 +1,6 @@
 node x;
 node y;
 graph g1 = {
-	g1 [1]-> g2;
-} 
+#	x -->[1] y,
+	y -->[2] x
+}; 
