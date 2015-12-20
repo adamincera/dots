@@ -1158,54 +1158,80 @@ let rec translate_stmt env = function
         let c_s1 =  translate_stmt env s1 in
         let c_s2 =  translate_stmt env s2 in 
         If (c_cond, [c_s1], [c_s2])
-    | Sast.For (temp, iter, sl) ->
-            let iter_type = get_sexpr_type iter in
-            let auto_index = "v" ^ string_of_int(create_auto env temp iter_type) in
-            let auto_var = "v" ^ string_of_int(create_auto env temp (Sast.Void)) in
+    | Sast.For (key, iter, sl) ->
+            let iter_stype = get_sexpr_type iter in
+            let iter_ctype = dt_to_ct iter_stype in
+            let c_iter = translate_expr env iter in (* evaluate the iterable *)
+            let iter_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of iterable *)
+            
+            let loop_var = "v" ^ string_of_int(create_auto env key (Sast.Void)) in
+            let key_var = "v" ^ string_of_int(create_auto env key iter_stype) in (* the temp var in "for x in iterable " *)
             (*let index = "v" ^ string_of_int (find_var iter env.var_inds) in*)
             
             (*let iter_type = (find_var iter env.var_types) in*)
 
             let csl = List.map (translate_stmt env) sl in
             Block(
+              (*
             [Vdecl(Ptr(dt_to_ct iter_type), auto_index); 
              Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter))
             ]
             @
+          *)
+            c_iter :: 
             [
-                (match iter_type with
-                  | List(dt) -> Block([Vdecl(List(dt_to_ct dt), auto_var); 
-                      For(Assign(Id(dt_to_ct dt, auto_var), Id(List(dt_to_ct dt), auto_index)),
-                      Id(List(dt_to_ct dt), auto_var),
-                      Assign(Id(dt_to_ct dt, auto_var), Member(List(dt_to_ct dt), auto_var, "next")),
-                      csl
-                      )
-                                       ])
+                (match iter_stype with
+                  | List(dt) -> 
+                      let key_var_type = dt_to_ct dt in
+                      let iter_deref = Deref(iter_ctype, Id(Ptr(iter_ctype), iter_result)) in
+                      Block([Vdecl(key_var_type, key_var); (*  *)
+                             Vdecl(iter_ctype, loop_var);
+                             For(Assign(Id(iter_ctype, loop_var), iter_deref),
+                                 Id(iter_ctype, loop_var),
+                                 Assign(Id(iter_ctype, loop_var), Member(iter_ctype, loop_var, "next")),
+
+                                 Expr(Assign(Id(key_var_type, key_var), 
+                                             Deref(key_var_type, Cast(Ptr(key_var_type), Member(Ptr(Void), loop_var, "data")))
+                                      )
+                                 )
+                                 :: csl
+                            )
+                      ])
                   | Dict(dtk, dtv) -> 
+                          let iter_deref = Deref(Ptr(Entry), Id(Ptr(Ptr(Entry)), iter_result)) in
                           let int_var = "v" ^ string_of_int(create_auto env "" (Sast.Num)) in
-                          let entry_var = "v" ^ string_of_int(create_auto env "" (Sast.Dict(Void, Void))) in
-                          let key_var = "v" ^ string_of_int(create_auto env "" (Sast.Void)) in
-                          Block([Vdecl(Int, int_var); Vdecl(Ptr(Entry), entry_var);
-                              Vdecl(Ptr(Void), key_var); 
-                              For(Assign(Id(Int, int_var), Literal(Int, "0")),
-                                  Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
-                                  Assign(Id(Int, int_var), 
-                                      Binop(Int, Id(Int, int_var), Ast.Add,
-                                            Literal(Int, "1"))),
-                                  [For(Assign(Id(Ptr(Entry), entry_var), Access(Entry, Id(Ptr(Entry), auto_index), Id(Int, int_var))), 
-                                       Id(Entry, entry_var),
-                                       Assign(Id(Ptr(Entry), entry_var), Member(Entry, entry_var, "next")),
-                                       List.map (translate_stmt env) sl
-                                  )]
-                              )
+                          Block([Vdecl(Int, int_var); 
+                                 Vdecl(Ptr(Entry), loop_var);
+                                 Vdecl(Ptr(Void), key_var); 
+                                 For(Assign(Id(Int, int_var), Literal(Int, "0")),
+                                     Binop(Int, Id(Int, int_var), Ast.Less, Id(Int, "TABLE_SIZE")),
+                                     Assign(Id(Int, int_var), 
+                                            Binop(Int, Id(Int, int_var), Ast.Add,
+                                                  Literal(Int, "1"))),
+                                     [For(Assign(Id(Ptr(Entry), loop_var), Access(Entry, Assoc(iter_deref), Id(Int, int_var))), 
+                                          Id(Entry, loop_var),
+                                          Assign(Id(Ptr(Entry), loop_var), Member(Entry, loop_var, "next")),
+                                          ( Expr(Assign(Id(Ptr(Void), key_var), 
+                                                        Member(Ptr(Void), loop_var, "key")
+                                                )
+                                            )
+                                            :: List.map (translate_stmt env) sl
+                                          )
+                                     )]
+                                )
                           ])
                   | Node -> 
-                      Block([Vdecl(Ptr(Node), auto_var); 
-                      Expr(Assign(Id(Ptr(Node), auto_var), Ref(Node, Id(Ptr(Node), auto_index))))] @ csl)
-                  | Graph -> Block([Vdecl(Ptr(Node), auto_var); 
-                                    For(Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_index, "nodes")),
-                                      Id(Ptr(Node), auto_var),
-                                      Assign(Id(Ptr(Node), auto_var), Member(Ptr(Node), auto_var, "next")),
+                      let iter_deref = Deref(Node, Id(Ptr(Node), iter_result)) in
+                      Block([Vdecl(Ptr(Node), key_var); 
+                             Expr(Assign(Id(Ptr(Node), key_var), iter_deref))
+                      ] @ csl)
+                  | Graph -> 
+                      let iter_deref = Deref(Graph, Id(Ptr(Graph), iter_result)) in
+                      Block([Vdecl(Node, key_var);
+                                    Vdecl(Entry, loop_var); 
+                                    For(Assign(Id(Entry, loop_var), Member(Entry, "*" ^ iter_result, "nodes")),
+                                      Id(Entry, loop_var),
+                                      Assign(Id(Entry, loop_var), Member(Entry, loop_var, "next")),
                                       csl
                                       )
                                    ])

@@ -1,8 +1,8 @@
 /* for node in graph */
-nodelist_t *temp;
+list_t *temp;
 node_t *node;
 for(temp = graph->nodes; temp; temp = temp->next) {
-    node = temp->node;
+    node = temp->data;
     /* loop body */
 }
 
@@ -131,6 +131,7 @@ something = *(type *) get_num(d, 1.23);
 something = *(type *) get_other(d, &_node);
 
 /* for key in d */
+// d[i] --> (*d)[i] OR d[0][i]
 int i;
 entry_t *temp;
 void *key;

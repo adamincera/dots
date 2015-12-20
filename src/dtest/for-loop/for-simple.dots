@@ -1,4 +1,4 @@
-list<num> l;
+list<num> l = [2, 3];
 for (x in l) {
-    x;
+    print(x);
 }
