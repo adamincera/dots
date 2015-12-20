@@ -393,7 +393,10 @@ in
 
 let rec translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> 
-        Literal(Float, l)
+        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
+        Block([   Vdecl(Ptr(Float), result_var);
+                  Expr(Assign(Deref(Float, Id(Ptr(Float), result_var)), Literal(Float, l)))
+              ])
     | Sast.StrLiteral(l, dt) -> 
         Literal(Cstring, l)
     | Sast.ListLiteral(el, dt) -> 
@@ -403,8 +406,13 @@ let rec translate_expr env = function
     | Sast.Boolean(b, dt) -> 
         if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
+            let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
             let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
-            Id(dt_to_ct dt, index) 
+            let v_type = dt_to_ct dt in
+            Block([
+                      Vdecl(Ptr(dt_to_ct dt), result_var);
+                      Expr(Assign(Id(Ptr(v_type), result_var), Ref(Ptr(v_type), Id(v_type, index) )))
+                  ])
     | Sast.Binop(e1, op, e2, dt) ->
         let ce1 = translate_expr env e1 in
         let ce2 = translate_expr env e2 in
@@ -816,11 +824,15 @@ let rec translate_stmt env = function
             )
     | Sast.Assign(v, e, dt) ->
             let ce = translate_expr env e in
+            let e_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
             let cv = translate_expr env v in
-            let var_type = get_sexpr_type e in
+            let v_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            let e_type = get_sexpr_type e in
+            let v_type = get_sexpr_type v in
+            let var_type = dt_to_ct v_type in
             (*let index = "v" ^ string_of_int(find_var v  = get_sexpr_type KEYYY HOSANNA
             ) in*)
-            let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            (*let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in*)
             (*(match var_type with
               figure out what the expr actually is if
               its a binop then we get the automatic variable it returns and set that equal to your 
@@ -835,6 +847,7 @@ let rec translate_stmt env = function
             | Dict(dtk, dtv) -> Expr(Assign(Id((dt_to_ct var_type), index), ce)) (* TODO *)
             | Graph -> Expr(Assign(Id((dt_to_ct var_type), index), Call(Graph, "copy", [ce]))) 
             ) *)
+(*
             ( match e with 
               | Binop(e1, op, e2, dt) -> 
                   Block([ce;
@@ -844,6 +857,12 @@ let rec translate_stmt env = function
                   Expr(Assign(cv, ce))
               | DictLiteral(tl, dt) -> Expr(Assign(cv, Id(Void, "NULL"))) (* TODO *)
               | _ -> raise (Failure("Assign don't work like that ")))
+*)
+            Block([
+                    ce; (* translation of assignment *)
+                    cv; (* translation of asignee *)
+                    Expr(Assign(Id(var_type, v_result), Id(var_type, e_result)))
+                  ])
 
             
                     (*         if not( (find_var v env.var_types) = get_sexpr_type e)
