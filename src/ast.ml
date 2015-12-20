@@ -5,6 +5,11 @@ type op = | Add | Sub | Mult | Div
 
 type bool = True | False
 
+type fun_dt = 
+  | Basic of (string)
+  | List of (string)
+  | Dict of (string * string)
+
 type expr =
     NumLiteral of string
   | StrLiteral of string
@@ -55,9 +60,9 @@ type stmt =
   | Fdecl of func_decl and
 
    func_decl = {
-    rtype : string; 
+    rtype : fun_dt; 
     fname : string;
-    formals : (string * string) list;
+    formals : (fun_dt * string) list;
     (*locals : string list;*)
     body : stmt list;
   }
@@ -118,6 +123,11 @@ let rec string_of_expr = function
   | MemberCall (e1, s2, el) -> string_of_expr e1 ^ "." ^ s2 ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
 
+let rec f_type_to_string = function 
+  | Basic(t) -> t
+  | List(t) -> "list <" ^ t ^ ">"
+  | Dict(kt,vt) -> "dict <" ^ kt ^ "," ^ vt ^ ">"
+
 let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
@@ -140,8 +150,8 @@ let rec string_of_stmt = function
   | Fdecl(f) ->  string_of_fdecl f and 
 
   string_of_fdecl fdecl =
-  "def " ^ fdecl.rtype ^ " " ^ fdecl.fname ^ "(" ^ 
-    String.concat ", " (List.map (fun f -> fst f ^ " " ^ snd f) fdecl.formals) ^
+  "def " ^ (f_type_to_string fdecl.rtype) ^ " " ^ fdecl.fname ^ "(" ^ 
+    (String.concat ", " (List.map (fun f ->(f_type_to_string (fst f)) ^ " " ^ snd f) fdecl.formals)) ^
      ")\n{\n" ^
   (*String.concat "" (List.map string_of_vdecl fdecl.locals) ^*)
   String.concat "" (List.map string_of_stmt fdecl.body) ^

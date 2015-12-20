@@ -182,7 +182,13 @@ let str_to_type = function
     | "void" -> Sast.Void
     | x -> raise (Failure ("unknown type: " ^ x))
 
-    (* converts a dataType to a string *)
+(* for function args only, pass in a special type *)
+let f_dt_to_type = function  
+    | Ast.Basic(dt) -> str_to_type dt 
+    | Ast.List(dt) -> Sast.List(str_to_type dt)
+    | Ast.Dict(dtk,dtv) -> Sast.Dict(str_to_type dtk, str_to_type dtv)
+
+(* converts a dataType to a string *)
 let rec type_to_str = function
     | Sast.Num -> "num"
     | Sast.String -> "string"
