@@ -1,2 +1,2 @@
-Node x("dc");
-x.value();
+node x("dc");
+x.val();
