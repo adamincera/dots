@@ -1,0 +1,8 @@
+dict <num,string> d;
+d[1] = "hello \n";
+d[3] = "world \n";
+d[5] = "!!! \n";
+
+for (key in d) {
+	print(d[key]);
+} 

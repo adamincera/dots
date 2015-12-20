@@ -1,4 +1,4 @@
-f(* semantically checks dot sast and converts to c ast *)
+(* semantically checks dot sast and converts to c ast *)
 open Ast
 open Sast
 open Translate
@@ -818,20 +818,20 @@ let rec translate_stmt env = function
               let auto_var = "v" ^ string_of_int(create_auto env "" dtv) in
               (match c_dtk with
               | Float -> Block([Vdecl(c_dtv,auto_var);
-                         Assign(auto_var,c_e3);
-                         Call(Ptr(Void), "put_num", 
-                         [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, auto_var))])])
+                         Assign(Id(c_dtv,auto_var),c_e3);
+                         Expr(Call(Ptr(Void), "put_num", 
+                         [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
               | Cstring -> Block([Vdecl(c_dtv,auto_var);
-                           Assign(auto_var,c_e3);
-                           Call(Ptr(Void), "put_string", 
-                           [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, auto_var))])])
+                           Assign(Id(c_dtv,auto_var),c_e3);
+                           Expr(Call(Ptr(Void), "put_string", 
+                           [c_e1; c_e2; Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
               | Node -> let auto_var2 = "v" ^ string_of_int(create_auto env "" dtk) in
                         Block([Vdecl(c_dtk,auto_var2);
-                        Assign(auto_var2,c_e2);
+                        Assign(Id(c_dtk,auto_var2),c_e2);
                         Vdecl(c_dtv,auto_var);
-                        Assign(auto_var,c_e3);
-                        Call(Ptr(Void), "put_node", 
-                        [c_e1; Cast(Ptr(Void),Ref(c_dtk, auto_var2)); Cast(Ptr(Void),Ref(c_dtv, auto_var))])])
+                        Assign(Id(c_dtv,auto_var),c_e3);
+                        Expr(Call(Ptr(Void), "put_node", 
+                        [c_e1; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))])
               | _ -> raise(Failure("unsupported dict type"))
               )
             else
@@ -847,6 +847,7 @@ let rec translate_stmt env = function
                 | _ -> raise(Failure("unsupported dict type"))
                 ) *)
         | _ -> raise(Failure("unsupported access"))
+      )
     | Sast.Return(e, dt) -> Translate.Return( translate_expr env e)           
     | Sast.NodeDef (id, s, dt) -> 
         let index = "v" ^ string_of_int(find_var id env.var_inds) in

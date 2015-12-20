@@ -1,0 +1,2 @@
+dict <num,string> x;
+x[10] = "hellow";
