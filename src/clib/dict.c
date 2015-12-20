@@ -105,122 +105,146 @@ void *get_other(entry_t **table, void *key) {
     return 0;
 }
 
-void put_string(entry_t **table, char *key, void *value) {
-    int k = hash_string(key);
-    entry_t *temp = table[k];
-    if(!temp) {
-        table[k] = (entry_t *) malloc(sizeof(entry_t));
-        table[k]->next = NULL;
-        table[k]->value = value;
-        table[k]->key = key;
-    } else {
-        while(temp->next) {
+entry_t **put_string(entry_t **table, char *key, void *value) {
+    if(table) {
+        int k = hash_string(key);
+        entry_t *temp = table[k];
+        if(!temp) {
+            table[k] = (entry_t *) malloc(sizeof(entry_t));
+            table[k]->next = NULL;
+            table[k]->value = value;
+            table[k]->key = key;
+        } else {
+            while(temp->next) {
+                if(!strcmp((char *) temp->key, key)) {
+                    temp->value = value;
+                    return table;
+                }
+                temp = temp->next;
+            }
             if(!strcmp((char *) temp->key, key)) {
                 temp->value = value;
-                return;
+                return table;
             }
+            temp->next = (entry_t *) malloc(sizeof(entry_t));
             temp = temp->next;
-        }
-        if(!strcmp((char *) temp->key, key)) {
+            temp->key = key;
             temp->value = value;
-            return;
+            temp->next = NULL;
         }
-        temp->next = (entry_t *) malloc(sizeof(entry_t));
-        temp = temp->next;
-        temp->key = key;
-        temp->value = value;
-        temp->next = NULL;
+    } else {
+        table = init_dict();
+        put_string(table, key, value);
     }
+    return table;
 }
 
-void put_num(entry_t **table, float key, void *value) {
-    int k = hash_num(key);
-    entry_t *temp = table[k];
-    if(!temp) {
-        table[k] = (entry_t *) malloc(sizeof(entry_t));
-        table[k]->next = NULL;
-        table[k]->value = value;
-        table[k]->key = malloc(sizeof(float));
-        *((float *) table[k]->key) = key;
-    } else {
-        while(temp->next) {
+entry_t **put_num(entry_t **table, float key, void *value) {
+    if(table) {
+        int k = hash_num(key);
+        entry_t *temp = table[k];
+        if(!temp) {
+            table[k] = (entry_t *) malloc(sizeof(entry_t));
+            table[k]->next = NULL;
+            table[k]->value = value;
+            table[k]->key = malloc(sizeof(float));
+            *((float *) table[k]->key) = key;
+        } else {
+            while(temp->next) {
+                if(float_equals(*(float *) temp->key, key)) {
+                    temp->value = value;
+                    return table;
+                }
+                temp = temp->next;
+            }
             if(float_equals(*(float *) temp->key, key)) {
                 temp->value = value;
-                return;
+                return table;
             }
+            temp->next = (entry_t *) malloc(sizeof(entry_t));
             temp = temp->next;
-        }
-        if(float_equals(*(float *) temp->key, key)) {
+            temp->key = malloc(sizeof(float));
+            *((float *) temp->key) = key;
             temp->value = value;
-            return;
+            temp->next = NULL;
         }
-        temp->next = (entry_t *) malloc(sizeof(entry_t));
-        temp = temp->next;
-        temp->key = malloc(sizeof(float));
-        *((float *) temp->key) = key;
-        temp->value = value;
-        temp->next = NULL;
+    } else {
+        table = init_dict();
+        put_num(table, key, value);
     }
+    return table;
 }
 
-void put_graph(entry_t **table, graph_t *key, void *value) {
-    int k = hash_graph(key);
-    entry_t *temp = table[k];
-    if(!temp) {
-        table[k] = (entry_t *) malloc(sizeof(entry_t));
-        table[k]->next = NULL;
-        table[k]->value = value;
-        table[k]->key = graph_copy(key);
-    } else {
-        while(temp->next) {
+entry_t **put_graph(entry_t **table, graph_t *key, void *value) {
+    if(table) {
+        int k = hash_graph(key);
+        entry_t *temp = table[k];
+        if(!temp) {
+            table[k] = (entry_t *) malloc(sizeof(entry_t));
+            table[k]->next = NULL;
+            table[k]->value = value;
+            table[k]->key = graph_copy(key);
+        } else {
+            while(temp->next) {
+                if(graph_equals((graph_t *) temp->key, key)) {
+                    temp->value = value;
+                    return table;
+                }
+                temp = temp->next;
+            }
             if(graph_equals((graph_t *) temp->key, key)) {
                 temp->value = value;
-                return;
+                return table;
             }
+            temp->next = (entry_t *) malloc(sizeof(entry_t));
             temp = temp->next;
-        }
-        if(graph_equals((graph_t *) temp->key, key)) {
+            temp->key = graph_copy(key);
             temp->value = value;
-            return;
+            temp->next = NULL;
         }
-        temp->next = (entry_t *) malloc(sizeof(entry_t));
-        temp = temp->next;
-        temp->key = graph_copy(key);
-        temp->value = value;
-        temp->next = NULL;
+    } else {
+        table = init_dict();
+        put_graph(table, key, value);
     }
+    return table;
 }
 
-void put_other(entry_t **table, void *key, void *value) {
-    int k = hash_other(key);
-    entry_t *temp = table[k];
-    if(!temp) {
-        table[k] = (entry_t *) malloc(sizeof(entry_t));
-        table[k]->next = NULL;
-        table[k]->value = value;
-        table[k]->key = key;
-    } else {
-        while(temp->next) {
+entry_t **put_other(entry_t **table, void *key, void *value) {
+    if(table) {
+        int k = hash_other(key);
+        entry_t *temp = table[k];
+        if(!temp) {
+            table[k] = (entry_t *) malloc(sizeof(entry_t));
+            table[k]->next = NULL;
+            table[k]->value = value;
+            table[k]->key = key;
+        } else {
+            while(temp->next) {
+                if(temp->key == key) {
+                    temp->value = value;
+                    return table;
+                }
+                temp = temp->next;
+            }
             if(temp->key == key) {
                 temp->value = value;
-                return;
+                return table;
             }
+            temp->next = (entry_t *) malloc(sizeof(entry_t));
             temp = temp->next;
-        }
-        if(temp->key == key) {
+            temp->key = key;
             temp->value = value;
-            return;
+            temp->next = NULL;
         }
-        temp->next = (entry_t *) malloc(sizeof(entry_t));
-        temp = temp->next;
-        temp->key = key;
-        temp->value = value;
-        temp->next = NULL;
+    } else {
+        table = init_dict();
+        put_other(table, key, value);
     }
+    return table;
 }
 
-void put_node(entry_t **table, node_t *key, void *value) {
-    put_other(table, (void *) key, value); 
+entry_t **put_node(entry_t **table, node_t *key, void *value) {
+    return put_other(table, (void *) key, value); 
 }
 
 static void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b)) {
