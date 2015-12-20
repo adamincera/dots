@@ -410,7 +410,7 @@ let rec translate_expr env = function
             let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
             let v_type = dt_to_ct dt in
             Block([
-                      Vdecl(Ptr(dt_to_ct dt), result_var);
+                      Vdecl(Ptr(v_type), result_var);
                       Expr(Assign(Id(Ptr(v_type), result_var), Ref(Ptr(v_type), Id(v_type, index) )))
                   ])
     | Sast.Binop(e1, op, e2, dt) ->
@@ -567,11 +567,11 @@ let rec translate_expr env = function
                                   *)
                                 [
                                  For(Assign(Id(elem_type, auto_var), print_expr),
-                                     Id(Ptr(List(elem_type)), auto_var),
-                                     Assign(Id(elem_type, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
+                                     Id(List(elem_type), auto_var),
+                                     Assign(Id(elem_type, auto_var), Member(List(dt_to_ct dt), auto_var, "next")),
                                      [Expr(Call(Void, "f1", [Deref(elem_type, Member(elem_type, auto_var, "data"))]))]
                                  );
-                                 Vdecl(Ptr(List(dt_to_ct dt)), auto_var)
+                                 Vdecl(List(dt_to_ct dt), auto_var)
                                 ]
                                @ elems
                             )
@@ -693,9 +693,9 @@ let rec translate_expr env = function
         let c_e2 = translate_expr env e2 in (* translate e2 to c *)
           let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e2's translation *)
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-        let result_decl = Vdecl(c_dt, result_var) in (* declare this expr's result var *)
+        let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
         let args = [Id(dt_to_ct e1_dt, result_e1); Id(dt_to_ct e2_dt, result_e2)] in (* specific to access function calls *)
-        let call = (match e1_dt with
+        let access_call = (match e1_dt with
                       | List(dt) -> 
                               Call(Ptr(Void), "list_access", args)
                       | Dict(dtk, dtv) ->
@@ -710,8 +710,10 @@ let rec translate_expr env = function
                       | _ -> raise(Failure("unsupported access"))
                     ) in (* evaluate an Access expression *)
         Block([
+                 c_e1;
+                 c_e2;
                  result_decl;
-                 Assign(Id(c_dt, result_var), call) (* store the result of Access in our result_var *)
+                 Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Cast(Ptr(c_dt), access_call))(* store the result of Access in our result_var *)
               ])
 
         (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
@@ -743,7 +745,7 @@ let rec translate_expr env = function
                     | _ -> raise (Failure("can not enqueue this datatype"))) in
                     (match e with 
                       | NumLiteral(s, dt) | StrLiteral(s, dt) | Id(s, dt) -> 
-                            Block([Expr(Assign(ce, Call((Ptr(List(c_e_list_type))), func_name, [ce; Block(cel)])))])
+                            Block([Expr(Assign(ce, Call((List(c_e_list_type)), func_name, [ce; Block(cel)])))])
                       | _ -> raise (Failure("not enqueue")))
               | "dequeue" | "pop" -> 
                let e_list_type = (get_list_type e_dt) in
@@ -819,7 +821,7 @@ let rec translate_stmt env = function
                                Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])))
                               ]) *) (* C: node_t *x = init_node(""); *)
                         Block([Vdecl(Ptr(Node), index);])
-              | List(dt) -> Vdecl(Ptr(List(dt_to_ct dt)), index) (* C: list_t *x; *)
+              | List(dt) -> Vdecl(List(dt_to_ct dt), index) (* C: list_t *x; *)
               | Dict(dtk, dtv) -> Vdecl(Ptr(Ptr(Entry)), index) (* TODO *)
               | Void -> raise (Failure ("should not be using Void as a datatype"))
             )
@@ -978,10 +980,10 @@ let rec translate_stmt env = function
             @
             [
                 (match iter_type with
-                  | List(dt) -> Block([Vdecl(Ptr(List(dt_to_ct dt)), auto_var); 
-                      For(Assign(Id(dt_to_ct dt, auto_var), Id(Ptr(List(dt_to_ct dt)), auto_index)),
-                      Id(Ptr(List(dt_to_ct dt)), auto_var),
-                      Assign(Id(dt_to_ct dt, auto_var), Member(Ptr(List(dt_to_ct dt)), auto_var, "next")),
+                  | List(dt) -> Block([Vdecl(List(dt_to_ct dt), auto_var); 
+                      For(Assign(Id(dt_to_ct dt, auto_var), Id(List(dt_to_ct dt), auto_index)),
+                      Id(List(dt_to_ct dt), auto_var),
+                      Assign(Id(dt_to_ct dt, auto_var), Member(List(dt_to_ct dt), auto_var, "next")),
                       csl
                       )
                                        ])

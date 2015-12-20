@@ -55,7 +55,7 @@ let rec type_to_str = function
 | Long -> "long"
 | Cstring -> "char *"
 | Array(dt) -> type_to_str dt ^ "[]"
-| List(dt) -> "list_t"
+| List(dt) -> "list_t *"
 | Node -> "node_t"
 | Graph -> "graph_t"
 | Ptr(dt) -> type_to_str dt ^ "*"
