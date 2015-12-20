@@ -272,10 +272,10 @@ access_expr:
 
 term : 
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | term PLUS   atom { Binop($1, Add,   $3) }
-  | term MINUS  atom { Binop($1, Sub,   $3) }
-  | term TIMES  atom { Binop($1, Mult,  $3) }
-  | term DIVIDE atom { Binop($1, Div,   $3) }
+  | term PLUS   term { Binop($1, Add,   $3) }
+  | term MINUS  term { Binop($1, Sub,   $3) }
+  | term TIMES  term { Binop($1, Mult,  $3) }
+  | term DIVIDE term { Binop($1, Div,   $3) }
   | atom             { $1 }
 
 atom:

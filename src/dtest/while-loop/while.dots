@@ -1,0 +1,6 @@
+bool x = true;
+while(x == true) {
+    #print("Hello World", x);
+    #x = false;
+    print(122);
+} 

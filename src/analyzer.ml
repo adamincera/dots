@@ -397,7 +397,17 @@ in
     sprintf (string,"%d.%02u", (int) number, (int) ((number - (int) number ) * precision) );
 *)
 
-let rec translate_expr env = function 
+
+let rec build_args args = function
+| [] -> args
+| hd :: tl ->
+    let arg_cstmts = translate_expr env hd in
+    let arg_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of arg translation *)
+    let arg_type = dt_to_ct (get_sexpr_type hd) in
+    build_args ((arg_cstmts, Deref(arg_type, Id(Ptr(arg_type), arg_result))) :: args) tl
+and
+
+translate_expr env = function 
     | Sast.NumLiteral(l, dt) -> 
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
         Block([   Vdecl(Ptr(Float), result_var);
@@ -405,6 +415,19 @@ let rec translate_expr env = function
                          Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
                          ));
                   Expr(Assign( Deref(Float, Id( Ptr(Float), result_var)), Literal(Float, l)))
+              ])
+    | Sast.Boolean(b, dt) -> 
+        let bool_val = if b = Ast.True then Literal(Int, "1") else Literal(Int, "0") in
+
+        let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
+        Block([    Vdecl(Ptr(Int), result_var);
+                    Expr(Assign(Id(Ptr(Int), result_var), 
+                         Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "int")] ) ])
+                         ));
+                  Expr(Assign(Deref(Int, Id( Ptr(Int), result_var)), 
+                       bool_val
+                      )
+                  )
               ])
     | Sast.StrLiteral(l, dt) ->
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
@@ -485,8 +508,6 @@ let rec translate_expr env = function
     | Sast.DictLiteral(kvl, dt) ->  
         DictLiteral(dt_to_ct dt, 
                     List.map (fun f -> (translate_expr env (fst f), translate_expr env (snd f))) kvl)(* TODO *)
-    | Sast.Boolean(b, dt) -> 
-        if b = Ast.True then Literal(Int, "1") else Literal(Int, "0")
     | Sast.Id(v, dt) -> 
             let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in
             let index = "v" ^ string_of_int(find_var v env.var_inds) in (* see if id exists, get the num index of the var *)
@@ -854,14 +875,6 @@ let rec translate_expr env = function
                      
                     )
             | _ -> 
-                let rec build_args args = function
-                | [] -> args
-                | hd :: tl ->
-                    let arg_cstmts = translate_expr env hd in
-                    let arg_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of arg translation *)
-                    let arg_type = dt_to_ct (get_sexpr_type hd) in
-                    build_args ((arg_cstmts, Deref(arg_type, Id(Ptr(arg_type), arg_result))) :: args) tl
-                in
                 let c_args = build_args [] el in
                 let c_stmts = List.map (fun t -> (fst t)) c_args in
                 let result_params = List.map (fun t -> (snd t)) c_args in
@@ -916,15 +929,6 @@ let rec translate_expr env = function
                  result_decl;
                  Assign(Id(Ptr(c_dt), result_var), Expr(Cast(Ptr(c_dt), access_call)))(* store the result of Access in our result_var *)
               ])
-
-        (*     let index = "v" ^ string_of_int(find_var v env.var_inds) in
-            let ce = translate_expr env e in
-            Access(dt_to_ct dt, index, ce)
-            list_t *l3; //
-            g2[1];
-
-            l3 = (num_add_back(l3, 1.24));
-             *)
     | Sast.MemberCall(e, f, el, dt) -> 
         let c_dt = dt_to_ct dt in
         
@@ -1086,62 +1090,12 @@ translate_stmt env = function
             let e_type = get_sexpr_type e in
             let v_type = get_sexpr_type v in
             let var_type = dt_to_ct v_type in
-            (*let index = "v" ^ string_of_int(find_var v  = get_sexpr_type KEYYY HOSANNA
-            ) in*)
-            (*let auto_var = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in*)
-            (*(match var_type with
-              figure out what the expr actually is if
-              its a binop then we get the automatic variable it returns and set that equal to your 
-              current variable. Var find Max index which will the last automatic variable
-              (find_max_index !(List.hd env.var_inds)+1)
-            e --> block (Binop --> translate --> find max -> index =  autovar )
-            Expr(Assign(
-                     Id(Int, auto_var), 
-                     Id(Int, auto_var))
-            | Num | String | Bool | Node | Void -> Expr(Assign(Id((dt_to_ct var_type), index), ce))
-            | List(dt) -> Expr(Assign(Id((dt_to_ct var_type), index), ce)) (* TODO *)   
-            | Dict(dtk, dtv) -> Expr(Assign(Id((dt_to_ct var_type), index), ce)) (* TODO *)
-            | Graph -> Expr(Assign(Id((dt_to_ct var_type), index), Call(Graph, "copy", [ce]))) 
-            ) *)
-(*
-            ( match e with 
-              | Binop(e1, op, e2, dt) -> 
-                  Block([ce;
-                         (*Expr(Assign(Id((dt_to_ct var_type), index), Id((dt_to_ct var_type), auto_var)))]) *)
-                         Expr(Assign(cv, Id((dt_to_ct var_type), auto_var)))])
-              | StrLiteral(s1, dt) | NumLiteral(s1, dt) | Id(s1, dt) -> (* Expr(Assign(Id((dt_to_ct var_type), index), ce)) *)
-                  Expr(Assign(cv, ce))
-              | DictLiteral(tl, dt) -> Expr(Assign(cv, Id(Void, "NULL"))) (* TODO *)
-              | _ -> raise (Failure("Assign don't work like that ")))
-*)
-(*
-            (match var_type with
-            | Dict(dtk, dtv) -> 
-                    Block([
-                        ce;
-                        cv;
-                        Assign(Id(var_type, v_result), Call(var_type,
-                        "init_dict", []))
-                    ])
-
-            | _ ->
-                    *)
+            
                 Block([
                     ce; (* translation of assignment *)
                     cv; (* translation of asignee *)
                     Expr(Assign(Deref(var_type, Id(Ptr(var_type), v_result)), Deref(var_type, Id(Ptr(var_type), e_result))))
                   ])
-
-            
-                    (*         if not( (find_var v env.var_types) = get_sexpr_type e)
-        then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) ))
-        else (translate_expr env (Sast.Id(v, dt))) ^ " = " ^ (translate_expr env e) *)
-
-                    (* | Sast.AssignList(v, el) -> Expr(Noexpr)
-                    | Sast.DictAssign(k, v) -> Expr(Noexpr) 
-           Block([Vdecl(Ptr(dt_to_ct dt), auto_var);
-           Cast(Ptr(var_type), Call("malloc", [Call("sizeof", type_to_str var_type)]))
-                         ]) *)
     | Sast.AccessAssign(e1, e2, e3, dt) -> (* check access first *)
         let e1_dt = get_sexpr_type e1 in
         let e2_dt = get_sexpr_type e2 in
@@ -1220,14 +1174,6 @@ translate_stmt env = function
                               raise(Failure("accessassign: expr right of = is not dict value type"))
                           else
                             raise(Failure("accessassign: assign expr on left for dict is wrong"))
-                (*                 let c_dtk = dt_to_ct dtk in
-                                (match c_dtk with
-                                | Float -> Call(Ptr(Void), "get_num", args)
-                                | Cstring -> Call(Ptr(Void), "get_string", args)
-                                | Graph -> Call(Ptr(Void), "get_graph", args)
-                                | Node -> Call(Ptr(Void), "get_node", args)
-                                | _ -> raise(Failure("unsupported dict type"))
-                                ) *)
                         | _ -> raise(Failure("unsupported access"))
                     ) in
         Block([
@@ -1269,8 +1215,19 @@ translate_stmt env = function
         Block(graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl)  
     | Sast.While (cond, sl) -> 
         let c_cond = translate_expr env cond in
-        let csl = List.map (translate_stmt env) sl in
-        While(c_cond, csl)                                    
+        let cond_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+        let deref_cond = Deref(Int, Id(Ptr(Int), cond_result)) in
+        (* convert body *)
+        (*
+        let sl_builder = build_args [] sl in
+        let c_stmts = List.map (fun t -> (fst t)) c_args in
+        let result_params = List.map (fun t -> (snd t)) c_args in
+        *)
+        let c_stmts = List.map (translate_stmt env) sl in
+
+        Block([c_cond;
+               While(deref_cond, c_stmts) 
+        ])                                   
     | Sast.If (cond, s1, s2) ->
         let c_cond = translate_expr env cond in 
         let c_s1 =  translate_stmt env s1 in
