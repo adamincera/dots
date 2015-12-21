@@ -3,4 +3,8 @@ node y;
 graph g1 = {
 #	x -->[1] y,
 	y -->[2] x
-}; 
+};
+dict<node, num> temp = y.oute();
+dict<node, num> temp2 = y.ine();
+print(temp, "\n");
+print(temp2, "\n");
