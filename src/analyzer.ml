@@ -645,8 +645,12 @@ translate_expr env = function
                       (match e2_cdt with
                         | Graph -> 
                                 (match op with 
-                                | Equal -> Call(Int, "graph_equals", [Id(e1_cdt, result_e1); Id(e2_cdt, result_e2)])
-                                | Neq -> Translate.Binop(Int, Call(Int, "graph_equals", [ce1; ce2]), op, Literal(Int, "1"))
+                                | Equal -> Call(Int, "graph_equals", [Deref(Ptr(Graph), Id(e1_cdt, result_e1)); Deref(Ptr(Graph), Id(e2_cdt, result_e2))])
+                                | Neq -> Translate.Binop(Int, Call(Int, "graph_equals", 
+                                                                   [Deref(Ptr(Graph), Id(e1_cdt, result_e1)); 
+                                                                    Deref(Ptr(Graph), Id(e2_cdt, result_e2))
+                                                                   ]), 
+                                                          op, Literal(Int, "1")) 
                                 | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                                 ) 
 
