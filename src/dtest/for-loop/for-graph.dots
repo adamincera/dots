@@ -1,0 +1,9 @@
+graph g1; 
+node x("miami");
+node y("maine");
+
+g1 = x + y;
+
+for (n in g1) {
+    print(n);
+}
