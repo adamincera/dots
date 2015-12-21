@@ -1,0 +1,48 @@
+#breadth first search
+
+def bool has_node (list<node> l, node x) {
+	for (n in l) {
+	    if (n == x) {
+	       return true;
+	    }
+	}
+	return false;
+}
+
+graph g;
+
+node x;
+node y;
+node z;
+
+g = x + y;
+g = g + z;
+
+x -->[2] y;
+z -->[4] y;
+
+list<node> queue;
+list<node> seen;
+dict<node, num> dist;
+
+dist = 
+
+node start;
+start = x;
+
+num curr_dist;
+curr_dist = 0;
+
+for (n in x.oute()){
+    curr_dist = curr_dist + 1;
+    
+	if (has_node(seen, n) == false) {
+	    seen.enqueue(x);
+	    queue.enqueue(n);
+	    dist[n] = curr_dist;
+	}
+	x = queue.peek();
+	x = queue.dequeue();
+}
+
+print(dist);
