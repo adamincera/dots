@@ -91,7 +91,13 @@ int main() {
     entry_t **other = init_dict();
     put_other(other, n, n2);
     node_t *g = get_other(other, n);
-    printf("got node containing %s\n", g->data);
+    int size = dict_len(other);
+    printf("got node containing %s, size = %d\n", g->data, size);
+    node_dict_remove(other, n);
+    size = dict_len(other);
+    g = get_other(other, n);
+    printf("got node containing %x\n, size = %d\n", (unsigned long) g, size);
+
 
     return 0;
 }

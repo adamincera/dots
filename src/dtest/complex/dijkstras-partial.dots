@@ -6,14 +6,14 @@
 
 def dict<node, num> relax (node u, dict<node, num> w) {
         for (v in u.oute()) { 
-        if (w[v] > 1 /* > u.oute()[v] */) {
-                 /* w[v] = u.oute()[v]; */
+        if (w[v] > u.oute()[v]) {
+                 w[v] = u.oute()[v]; 
             } 
             
         }
         return w;
 }
-/*
+
 def dict<node, num> dijkstra (graph G, node source){
     dict<node, num> S;
     dict<node, num> Q;
@@ -22,19 +22,22 @@ def dict<node, num> dijkstra (graph G, node source){
         Q[n] = INF;
     }
     Q[source] = 0;
-    
+   
     while (len(Q) != 0) {
-        node u;
-        u = min(Q);
+        node x;
+        /*
+        x = min(Q);
         num w;
-        w = Q[u];
+        w = Q[x];
         Q.remove(u);
-        S[u] = w;
-        Q = relax(u, Q);
+        S[x] = w;
+        Q = relax(x, Q);
+        */
     }
+
     return S;
 }
-*/
+
 /* Graph set-up */
 node x("dc");
 node y("chicago");

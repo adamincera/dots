@@ -444,7 +444,8 @@ translate_expr env = function
              ); (* *result = malloc(strlen(literal)) *)
              Expr(Assign(Deref(Cstring, Id(Ptr(Cstring), result_var)), 
                          Call(Ptr(Void), "malloc", 
-                              [ Call(Int, "strlen", [Literal(Cstring, l)]) ]
+                              [ Binop(Int, Call(Int, "strlen", [Literal(Cstring,
+                              l)]), Add, Literal(Int, "1")) ]
                              )
                        )
               ); (* strcpy( *result, literal) *)
@@ -630,10 +631,10 @@ translate_expr env = function
               | Equal | Neq -> 
               (* This one isn't complete, dict maps to what c type? confusion *)
                 (match e1_cdt with
-                  |  Float -> Translate.Binop(Float, 
+                  |  Float -> Translate.Binop(Int, 
                                                   Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
                                               op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
-                  |  Int -> Translate.Binop(Float, 
+                  |  Int -> Translate.Binop(Int, 
                                                   Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
                                               op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
                   |  Cstring -> 
@@ -642,14 +643,22 @@ translate_expr env = function
                          Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
                   |  Graph -> 
                       (match e2_cdt with
-                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                        | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | Graph -> 
+                                (match op with 
+                                | Equal -> Call(Int, "graph_equals", [Deref(Ptr(Graph), Id(e1_cdt, result_e1)); Deref(Ptr(Graph), Id(e2_cdt, result_e2))])
+                                | Neq -> Translate.Binop(Int, Call(Int, "graph_equals", 
+                                                                   [Deref(Ptr(Graph), Id(e1_cdt, result_e1)); 
+                                                                    Deref(Ptr(Graph), Id(e2_cdt, result_e2))
+                                                                   ]), 
+                                                          op, Literal(Int, "1")) 
+                                | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                                ) 
+
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                       )
                   |  Node -> 
                       (match e2_cdt with
-                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                        | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | Node -> Translate.Binop(cdt1, ce1, op, ce2)
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                       )
                   |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
@@ -682,7 +691,8 @@ translate_expr env = function
                  ce2;
                  result_decl;
                  Expr(Assign(Id(Ptr(c_dt), result_var),
-                             Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
+                             Call(Ptr(Void), "malloc", [ Call(Int, "sizeof",
+                             [Id(c_dt, result_var)] ) ])
                  ));
                  Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Assoc(binop_func)
                  ))(* store the result of Access in our result_var *)
@@ -710,10 +720,10 @@ translate_expr env = function
                                         tl
                       | Node ->
                            print_builder (Block([ print_expr;
-                                                  Expr(Call(Void, "printf", [ Literal(Cstring, "N-")] ));
-                                                  Expr(Call(Void, "printf", [ Cast(Int, deref_print_var) ] ));
-                                                  Expr(Call(Void, "printf", [Literal(Cstring, "(\\\"")]));
-                                                  Expr(Call(Void, "printf", [Cast(Cstring, Member(Ptr(Void), deref_print_var, "data"))]
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "%s"); Literal(Cstring, "N-")] ));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "%d"); Cast(Int, deref_print_var) ] ));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "%s"); Literal(Cstring, "(\\\"")]));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "%s"); Cast(Cstring, Member(Ptr(Void), deref_print_var, "data"))]
                                                   ));
                                                   Expr(Call(Void, "printf", [Literal(Cstring, "\\\")")]))
                                                 ]) :: elems)
@@ -1095,7 +1105,7 @@ translate_expr env = function
                               result_decl; 
                               Expr(Call(Void, func_name, 
                                                  [Deref((dt_to_ct e_dt), c_id); 
-                                                  arg_id])
+                                                  Deref(key_dt, arg_id)])
                               );
                                    (* store the result of Access in our result_var *)
                               ]) 
@@ -1272,7 +1282,8 @@ translate_stmt env = function
                                           Expr(Assign(Id(c_dtv,auto_var), e3_deref));
                                           Expr(Assign(e1_deref, 
                                                       Call(Ptr(Void), "put_node", 
-                                                           [e1_deref; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))
+                                                           [e1_deref;
+                                                           Cast(Node, Id(c_dtk,auto_var2)); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))
                                           )
                                        ])
                               | _ -> raise(Failure("unsupported dict type"))
