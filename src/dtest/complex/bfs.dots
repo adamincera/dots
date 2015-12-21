@@ -25,7 +25,6 @@ list<node> queue;
 list<node> seen;
 dict<node, num> dist;
 
-dist = 
 
 node start;
 start = x;
@@ -42,7 +41,7 @@ for (n in x.oute()){
 	    dist[n] = curr_dist;
 	}
 	x = queue.peek();
-	x = queue.dequeue();
+	queue.dequeue();
 }
 
 print(dist);
