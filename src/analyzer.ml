@@ -645,11 +645,11 @@ translate_expr env = function
                       (match e2_cdt with
                         | Graph -> 
                                 (match op with 
-                                | Equal -> Call(Int, "graph_equals", [Id(e1_cdt,
-                         result_e1); Id(e2_cdt, result_e2)])
+                                | Equal -> Call(Int, "graph_equals", [Id(e1_cdt, result_e1); Id(e2_cdt, result_e2)])
                                 | Neq -> Translate.Binop(Int, Call(Int, "graph_equals", [ce1; ce2]), op, Literal(Int, "1"))
                                 | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                                )
+                                ) 
+
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                       )
                   |  Node -> 
@@ -687,7 +687,8 @@ translate_expr env = function
                  ce2;
                  result_decl;
                  Expr(Assign(Id(Ptr(c_dt), result_var),
-                             Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
+                             Call(Ptr(Void), "malloc", [ Call(Int, "sizeof",
+                             [Id(c_dt, result_var)] ) ])
                  ));
                  Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Assoc(binop_func)
                  ))(* store the result of Access in our result_var *)
