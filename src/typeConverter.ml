@@ -274,7 +274,7 @@ let rec expr env = function
         let len = List.length el in 
           if (len = 1) then
              (match data_type with 
-                Sast.List(dt) -> Sast.Call(f, s_el, dt)
+                | Sast.List(dt) -> Sast.Call(f, s_el, dt)
                 | Sast.Dict(dtk, dtv) -> Sast.Call(f, s_el, dtk) 
                 | _ -> raise(Failure("member call failed")))
           else 
