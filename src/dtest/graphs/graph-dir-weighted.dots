@@ -1,3 +1,4 @@
 node x;
 node y;
 x -->[0.8] y;
+print(x);

@@ -1,3 +1,4 @@
 node x;
 node y;
 x --> y;
+print(x);

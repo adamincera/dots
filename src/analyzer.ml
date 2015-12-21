@@ -1040,7 +1040,6 @@ translate_expr env = function
                              (* store the result of Access in our result_var *)
                         ])
                   | "ine" -> 
-                  let dict = Ptr(Ptr(Entry)) in 
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                       let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *) 
                       let final_result = Id(dt_to_ct e_dt, result_var) in
@@ -1054,13 +1053,18 @@ translate_expr env = function
                              (* store the result of Access in our result_var *)
                         ])
                   | "oute" -> 
-                      let dict = Ptr(Ptr(Entry)) in
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                       let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
                       let final_result = Id(dt_to_ct e_dt, result_var) in
                       Block([
                              c_e;
-                             Vdecl(dict, result_var);
+                             Expr(Assign(
+                                     final_result, 
+                                     Call(Ptr(Void), 
+                                          "malloc", 
+                                         [Call(Int, "sizeof", [Id(Void, "Entry *")]
+                                       )])
+                              ));
                              Expr(Assign(
                                       Id(Ptr(c_dt), result_var), 
                                       Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "out")))
@@ -1134,8 +1138,9 @@ translate_expr env = function
             let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
             let w_c = translate_expr env w in
             let w_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
-            let w_deref = Deref(dt_to_ct (get_sexpr_type w), Id(Ptr(dt_to_ct
-            (get_sexpr_type w)), w_result)) in
+            let w_deref = Deref(dt_to_ct (get_sexpr_type w), 
+                                Id(Ptr(dt_to_ct (get_sexpr_type w)), 
+                                       w_result)) in
 
             Block([
                 w_c;
