@@ -1,5 +1,5 @@
 dict<string, string> d;
 d["foo"] = "blah";
 for (key in d) {
-    key;
+    print(key);
 }

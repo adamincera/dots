@@ -155,19 +155,22 @@ let rec enum stride n = function
 let string_map_pairs map pairs =
     List.fold_left (fun m (i, n) -> StringMap.add n i m) map pairs
 
+(*
 let cvar_cnt = ref 0 
 let find_max_index map = 
   cvar_cnt := !cvar_cnt + 1;
    !cvar_cnt  
+ *)
+ 
 
-(*let find_max_index map = 
+let find_max_index map = 
     let bindings = StringMap.bindings map in
     let rec max cur = function
         | [] -> cur
         | hd :: tl -> if snd hd > cur then max (snd hd) tl else max cur tl
     in
     max 0 bindings
-  *)
+  
 
     (* 
     returns the value associated with a given key,
@@ -1598,7 +1601,7 @@ translate_fdecl env func = (
     let map_builder fmls m = (List.map (fun f -> m := (StringMap.add (snd f) (fst f) !m); "") formals) in
     let types_map = ref StringMap.empty in
       ignore (map_builder formals types_map);
-    let fml_inds = enum 1 1 (List.map (fun f -> (snd f)) formals) in
+    let fml_inds = enum 1 (find_max_index !(List.hd env.var_inds)) (List.map (fun f -> (snd f)) formals) in
     let inds_map = ref (string_map_pairs StringMap.empty fml_inds) in
 
     let func_env = {
