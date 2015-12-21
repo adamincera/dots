@@ -631,11 +631,9 @@ translate_expr env = function
               | Equal | Neq -> 
               (* This one isn't complete, dict maps to what c type? confusion *)
                 (match e1_cdt with
-                  |  Float -> Translate.Binop(Int, 
-                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
-                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
-                  |  Int -> Translate.Binop(Int, 
-                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                |  Float -> Call(Int, "float_equals", [Id(e1_cdt, result_e1);
+                                                         Id(e2_cdt, result_e2)])
+                  |  Int -> Translate.Binop(Int, Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
                                               op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
                   |  Cstring -> 
                         (* (strcmp(check,input) = 0) *)
