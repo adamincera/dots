@@ -1,0 +1,7 @@
+def num foo(num s) {
+	return (s + 4.5);
+}
+num x = 6;
+
+num y = foo(x);
+print(y);

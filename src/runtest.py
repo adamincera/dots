@@ -45,7 +45,7 @@ for directory in os.walk(path):
             comp_success = False
             try:
                 return_code = call(['./gdc', filepath, os.path.join(directory[0], dir_entry[:-5] + '.exec')], 
-                    timeout=30)
+                    timeout=15)
                 if return_code == 0:
                     print 'COMPILATION SUCCESSFUL'
                     comp_success = True

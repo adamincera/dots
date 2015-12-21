@@ -589,16 +589,19 @@ translate_expr env = function
                   |  Graph -> 
                       (match e2_cdt with
                         | Node -> 
+                            (*
                             let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
                             let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
                             Vdecl(Ptr(Graph), index);
-
+                            
                             Block([Vdecl(Ptr(Graph), index);
                                    Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])));
                                    Expr(Call(Void, "add_node", [Id(Graph, index); ce2]));
                                    Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
 
                             ])
+                            *)
+                            Call(Void, "add_node", [Id(Graph, result_var); ce2])
                         | Graph -> 
                             (* g1 = plus(g2, g3); *)
                             let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
@@ -608,7 +611,7 @@ translate_expr env = function
 
                                  ])
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                      )
+                    )  
                   |  Node -> 
                       (match e2_cdt with
                         | Node -> (*
@@ -617,7 +620,9 @@ translate_expr env = function
                         let result_decl = Vdecl(Ptr(c_dt), result_var) in  
                           Translate.Binop(cdt1, ce1, op, ce2)*) (*TODO*)
                             
-                            Call(Graph, "node_plus_node", args)
+                          Call(Graph, "node_plus_node", [Deref(Node, Id(e1_cdt,
+                          result_e1));
+                          Deref(Node, Id(e2_cdt, result_e2))])
                                                            (*Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2))*)
 
                         | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
@@ -718,7 +723,7 @@ translate_expr env = function
                  ));
                  Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Assoc(binop_func)
                  ))(* store the result of Access in our result_var *)
-            ]) 
+            ])  
     | Sast.Call(func_name, el, dt) -> 
             let return_type = dt_to_ct dt in
             (match func_name with
@@ -1556,7 +1561,8 @@ translate_stmt env = function
                                       Id(List(Node), loop_var),
                                       Assign(Id(List(Node), loop_var),
                                       Member(List(Node), Id(Void, loop_var), "next")),
-                                      csl
+                                      Expr(Assign(Id(Node, key_var), Cast(Node, Member(Node,
+                                      Id(List(Node), loop_var), "data")))) :: csl
                                       )
                                    ])
                   | _ -> raise (Failure("for loop iter is not iterable"))
