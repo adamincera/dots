@@ -617,7 +617,9 @@ translate_expr env = function
                         let result_decl = Vdecl(Ptr(c_dt), result_var) in  
                           Translate.Binop(cdt1, ce1, op, ce2)*) (*TODO*)
                             
-                            Call(Graph, "node_plus_node", args)
+                          Call(Graph, "node_plus_node", [Deref(Node, Id(e1_cdt,
+                          result_e1));
+                          Deref(Node, Id(e2_cdt, result_e2))])
                                                            (*Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2))*)
 
                         | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
@@ -1514,7 +1516,8 @@ translate_stmt env = function
                                       Id(List(Node), loop_var),
                                       Assign(Id(List(Node), loop_var),
                                       Member(List(Node), Id(Void, loop_var), "next")),
-                                      csl
+                                      Expr(Assign(Id(Node, key_var), Cast(Node, Member(Node,
+                                      Id(List(Node), loop_var), "data")))) :: csl
                                       )
                                    ])
                   | _ -> raise (Failure("for loop iter is not iterable"))
