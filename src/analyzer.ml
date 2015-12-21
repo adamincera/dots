@@ -444,7 +444,8 @@ translate_expr env = function
              ); (* *result = malloc(strlen(literal)) *)
              Expr(Assign(Deref(Cstring, Id(Ptr(Cstring), result_var)), 
                          Call(Ptr(Void), "malloc", 
-                              [ Call(Int, "strlen", [Literal(Cstring, l)]) ]
+                              [ Binop(Int, Call(Int, "strlen", [Literal(Cstring,
+                              l)]), Add, Literal(Int, "1")) ]
                              )
                        )
               ); (* strcpy( *result, literal) *)
@@ -630,10 +631,10 @@ translate_expr env = function
               | Equal | Neq -> 
               (* This one isn't complete, dict maps to what c type? confusion *)
                 (match e1_cdt with
-                  |  Float -> Translate.Binop(Float, 
+                  |  Float -> Translate.Binop(Int, 
                                                   Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
                                               op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
-                  |  Int -> Translate.Binop(Float, 
+                  |  Int -> Translate.Binop(Int, 
                                                   Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
                                               op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
                   |  Cstring -> 
@@ -642,14 +643,18 @@ translate_expr env = function
                          Assign(Id(Int, auto_var), (Call(Int, "strcmp", [ce1;ce2])));
                   |  Graph -> 
                       (match e2_cdt with
-                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                        | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | Graph -> 
+                                (match op with 
+                                | Equal -> Call(Int, "graph_equals", [Id(e1_cdt,
+                         result_e1); Id(e2_cdt, result_e2)])
+                                | Neq -> Translate.Binop(Int, Call(Int, "graph_equals", [ce1; ce2]), op, Literal(Int, "1"))
+                                | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
+                                )
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                       )
                   |  Node -> 
                       (match e2_cdt with
-                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
-                        | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | Node -> Translate.Binop(cdt1, ce1, op, ce2)
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                       )
                   |  List(dt) -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
