@@ -274,6 +274,7 @@ id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
     (match dt with
      | Ptr(Ptr(Entry)) -> type_to_str dt ^ " " ^ id ^ " = NULL;"
      | List(vdt) -> type_to_str dt ^ " " ^ id ^ " = NULL;"
+     | Graph -> type_to_str dt ^ " " ^ id ^ " = NULL;"
      | _ -> type_to_str dt ^ " " ^ id ^ ";"
     )
     

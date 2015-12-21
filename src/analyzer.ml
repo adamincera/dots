@@ -601,15 +601,18 @@ translate_expr env = function
 
                             ])
                             *)
-                            Call(Void, "add_node", [Id(Graph, result_var); ce2])
+                            Call(Graph, "graph_plus_node", [Deref(Graph, Id(e1_cdt, result_e1));
+                                                          Deref(Node, Id(e2_cdt, result_e2))])
                         | Graph -> 
-                            (* g1 = plus(g2, g3); *)
+                            (* g1 = plus(g2, g3); 
                             let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
-                            let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
-                            Block([Vdecl(Ptr(Graph), index);
-                                   Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
+                            let index = "v" ^ string_of_int(find_var auto_var
+                            env.var_inds) in 
+                            Block([Vdecl(Ptr(Graph), result_var);
+                                   Expr(Assign(Id(Graph, result_var), Call(Graph, "plus", [ce1;ce2])));
 
                                  ])
+                      *) Nostmt
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                     )  
                   |  Node -> 
@@ -719,7 +722,7 @@ translate_expr env = function
                  result_decl;
                  Expr(Assign(Id(Ptr(c_dt), result_var),
                              Call(Ptr(Void), "malloc", [ Call(Int, "sizeof",
-                             [Id(c_dt, result_var)] ) ])
+                             [Id(Void, Translate.type_to_str c_dt)] ) ])
                  ));
                  Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Assoc(binop_func)
                  ))(* store the result of Access in our result_var *)
