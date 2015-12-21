@@ -1,0 +1,23 @@
+node x;
+node y;
+node z;
+
+x -->[2] y;
+y -->[2] x;
+z -->[3.4] x;
+z -->[5.3] y;
+
+dict<node, num> x_out;
+x_out  = x.oute();
+dict<node, num> x_in;
+x_in = x.ine();
+
+print("x out edges: \n", x_out, "\n");
+print("x in edges: \n", x_in, "\n");
+
+dict<node, num> y_out;
+y_out = y.oute();
+dict<node, num> y_in;
+y_in = y.ine();
+print("y out edges: \n", y_out, "\n");
+print("y in edges: \n", y_in, "\n");

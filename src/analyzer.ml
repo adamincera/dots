@@ -1049,6 +1049,7 @@ translate_expr env = function
                                 ))
                              (* store the result of Access in our result_var *)
                         ])
+                           (*
                   | "ine" -> 
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                       let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *) 
@@ -1062,7 +1063,14 @@ translate_expr env = function
                                       Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "in") ))
                              (* store the result of Access in our result_var *)
                         ])
-                  | "oute" -> 
+*)
+                  | "oute" | "ine" -> 
+                      let func_name = 
+                          (match f with 
+                            | "oute" -> "out"
+                            | "ine" -> "in"
+                            | _ -> raise (Failure ("unexpected out/in func name"))
+                          ) in
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                       let result_decl = Vdecl(Ptr(Ptr(Ptr(Entry))), result_var) in (* declare this expr's result var *)
                       let final_result = Id(Ptr(Entry), result_var) in
@@ -1072,7 +1080,7 @@ translate_expr env = function
                         
                               Expr(Assign(
                                   final_result, 
-                                  Ref(Ptr(Ptr(Ptr(Entry))), Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "out"))
+                                  Ref(Ptr(Ptr(Ptr(Entry))), Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), func_name))
                               ))
                         ])
                   | "remove" -> 
