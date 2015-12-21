@@ -100,9 +100,13 @@ list_t *node_add_back(list_t *l, node_t *data) {
 }
 
 list_t *pop(list_t *l) {
+		printf("l is null");
+	if(!l) {
+		return NULL;
+	}
     list_t *head = l->next;
 	if(head)
-    head->previous = NULL;
+    	head->previous = NULL;
     return head;
 }
 
