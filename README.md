@@ -1,12 +1,11 @@
-Authors:
+# H1 Authors:
 
 Hosanna Fuller, manager
 Rachel Gordon, language guru
 Adam Incera, system architect
 Yumeng Liao, yl2908, tester
 
-
-INSTALLATION INSTRUCTIONS:
+# H2 INSTALLATION INSTRUCTIONS:
 
 Add the following line to your .bash_profile:
     export DOTS=/Users/rcgordon/code/class/coms4115-plt/dots/src/clib
@@ -21,13 +20,14 @@ In your dots compiler folder, run:
     make setup
     make
 
-COMPILATON INSTRUCTIONS:
+# H2 COMPILATON INSTRUCTIONS:
 
 In order to compile the ./dotc compiler you must run:
-    make  clean; make
+```unix syntax highlighting ```
+   ```make  clean; make```
 
 Then to test specific files you can either run the file directly with the ./dotc compiler ie:
-    ./dotc dtest/example.dots
-    ./exec example.dots.c
+  ``` ./dotc dtest/example.dots```
+   ```./exec example.dots.c```
 Or if you want to execute the file in one fell swoop:
-    ./gdc dtest/example.dots
+   ```./gdc dtest/example.dots```
