@@ -1,0 +1,4 @@
+graph g1;
+for(n in g1) {
+    print(n);
+}

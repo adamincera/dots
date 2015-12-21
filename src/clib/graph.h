@@ -19,7 +19,7 @@ void free_graph(graph_t * graph);
 
 int contains(graph_t *graph, void *data, int (* comp)(void *a, void *b));
 
-void add_node(graph_t *graph, const node_t *node);
+graph_t *add_node(graph_t *graph, const node_t *node);
 
 int remove_node(graph_t *graph, node_t *node);
 

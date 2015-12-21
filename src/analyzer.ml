@@ -67,7 +67,16 @@ let get_list_type = function
 let rec stmt_sifter sifted = function
 | [] -> sifted
 | hd :: tl -> (match hd with
-               | Sast.Vdecl(dt, id) -> stmt_sifter {s_globals = hd :: sifted.s_globals; 
+               | Sast.Vdecl(dt, id) -> 
+               (*
+                   let assign = 
+                      (match dt with
+                      | Graph -> [Sast.Assign(Id(id, dt), Call("init_graph", [], Graph), Void)]
+                      | _ -> []
+                      ) 
+                   in
+                 *)
+                   stmt_sifter {s_globals = hd :: sifted.s_globals; 
                                                s_main = sifted.s_main; 
                                                s_funcs = sifted.s_funcs} tl
                | Sast.Assign(v, e, dt) -> 
@@ -528,17 +537,24 @@ translate_expr env = function
                   ])
     | Sast.Binop(e1, op, e2, dt) ->
         let c_dt = dt_to_ct dt in
+        
         let ce1 = translate_expr env e1 in
           let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
           let e1_cdt = dt_to_ct (get_sexpr_type e1) in    (*gets is the c data type of the expression*)
+          let e1_deref = Deref( e1_cdt, Id(Ptr( e1_cdt), result_e1)) in
+
         let ce2 = translate_expr env e2 in
           let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
           let e2_cdt = dt_to_ct (get_sexpr_type e2) in 
+          let e2_deref = Deref( e2_cdt, Id(Ptr( e2_cdt), result_e2)) in
+
         let cdt1 = Translate.get_cexpr_type ce1 in
         let cdt2 = Translate.get_cexpr_type ce2 in 
+        
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-        let args = [Id(cdt1, result_e1); Id(cdt2, result_e2)] in
+        let args = [e1_deref; e2_deref] in
         let result_decl = Vdecl(Ptr(c_dt), result_var) in                (* declare this expr's result var *)
+        
         let binop_func = 
             (match op with
               | Add -> 
@@ -595,7 +611,15 @@ translate_expr env = function
                       )
                   |  Node -> 
                       (match e2_cdt with
-                        | Node -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
+                        | Node -> (*
+                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                        let args = [Id(cdt1, result_e1); Id(cdt2, result_e2)] in
+                        let result_decl = Vdecl(Ptr(c_dt), result_var) in  
+                          Translate.Binop(cdt1, ce1, op, ce2)*) (*TODO*)
+                            
+                            Call(Graph, "node_plus_node", args)
+                                                           (*Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2))*)
+
                         | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                       )
@@ -631,11 +655,9 @@ translate_expr env = function
               | Equal | Neq -> 
               (* This one isn't complete, dict maps to what c type? confusion *)
                 (match e1_cdt with
-                  |  Float -> Translate.Binop(Int, 
-                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
-                                              op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
-                  |  Int -> Translate.Binop(Int, 
-                                                  Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
+                |  Float -> Call(Int, "float_equals", [Id(e1_cdt, result_e1);
+                                                         Id(e2_cdt, result_e2)])
+                  |  Int -> Translate.Binop(Int, Deref(e1_cdt, Id(Ptr(e1_cdt), result_e1)), 
                                               op, Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2)))
                   |  Cstring -> 
                         (* (strcmp(check,input) = 0) *)
@@ -964,12 +986,15 @@ translate_expr env = function
         let c_dt = dt_to_ct dt in
         let e1_dt = get_sexpr_type e1 in
         let e2_dt = get_sexpr_type e2 in
+        
         let c_e1 = translate_expr env e1 in (* translate e1 to c *)
           let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
           let e1_deref = Deref(dt_to_ct e1_dt, Id(Ptr(dt_to_ct e1_dt), result_e1)) in
+        
         let c_e2 = translate_expr env e2 in (* translate e2 to c *)
           let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e2's translation *)
           let e2_deref = Deref(dt_to_ct e2_dt, Id(Ptr(dt_to_ct e2_dt), result_e2)) in
+        
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
         let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
         let args = [e1_deref; e2_deref] in (* specific to access function calls *)
@@ -1388,8 +1413,8 @@ translate_stmt env = function
         in
         let node_add_calls = find_vars [] sl in
         (* let graph_list = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in *)
-        Block(
-          edge_ops @ node_add_calls
+        Block( (Expr(Assign(Id(Graph, index), Call(Void, "init_graph", []))) :: edge_ops) 
+                @ node_add_calls
         )
 
     | Sast.While (cond, sl) -> 
@@ -1504,10 +1529,12 @@ translate_stmt env = function
                   | Graph -> 
                       let iter_deref = Deref(Graph, Id(Ptr(Graph), iter_result)) in
                       Block([Vdecl(Node, key_var);
-                                    Vdecl(Entry, loop_var); 
-                                    For(Assign(Id(Entry, loop_var), Member(Entry, Id(Void, "*" ^ iter_result), "nodes")),
-                                      Id(Entry, loop_var),
-                                      Assign(Id(Entry, loop_var), Member(Entry, Id(Void, loop_var), "next")),
+                                    Vdecl(List(Node), loop_var); 
+                                    For(Assign(Id(List(Node), loop_var),
+                                    Member(List(Node), Id(Void, "*" ^ iter_result), "nodes")),
+                                      Id(List(Node), loop_var),
+                                      Assign(Id(List(Node), loop_var),
+                                      Member(List(Node), Id(Void, loop_var), "next")),
                                       csl
                                       )
                                    ])
