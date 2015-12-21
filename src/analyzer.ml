@@ -1467,10 +1467,12 @@ translate_stmt env = function
                   | Graph -> 
                       let iter_deref = Deref(Graph, Id(Ptr(Graph), iter_result)) in
                       Block([Vdecl(Node, key_var);
-                                    Vdecl(Entry, loop_var); 
-                                    For(Assign(Id(Entry, loop_var), Member(Entry, Id(Void, "*" ^ iter_result), "nodes")),
-                                      Id(Entry, loop_var),
-                                      Assign(Id(Entry, loop_var), Member(Entry, Id(Void, loop_var), "next")),
+                                    Vdecl(List(Node), loop_var); 
+                                    For(Assign(Id(List(Node), loop_var),
+                                    Member(List(Node), Id(Void, "*" ^ iter_result), "nodes")),
+                                      Id(List(Node), loop_var),
+                                      Assign(Id(List(Node), loop_var),
+                                      Member(List(Node), Id(Void, loop_var), "next")),
                                       csl
                                       )
                                    ])
