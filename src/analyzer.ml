@@ -710,10 +710,10 @@ translate_expr env = function
                                         tl
                       | Node ->
                            print_builder (Block([ print_expr;
-                                                  Expr(Call(Void, "printf", [ Literal(Cstring, "N-")] ));
-                                                  Expr(Call(Void, "printf", [ Cast(Int, deref_print_var) ] ));
-                                                  Expr(Call(Void, "printf", [Literal(Cstring, "(\\\"")]));
-                                                  Expr(Call(Void, "printf", [Cast(Cstring, Member(Ptr(Void), deref_print_var, "data"))]
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "%s"); Literal(Cstring, "N-")] ));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "%d"); Cast(Int, deref_print_var) ] ));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "%s"); Literal(Cstring, "(\\\"")]));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "%s"); Cast(Cstring, Member(Ptr(Void), deref_print_var, "data"))]
                                                   ));
                                                   Expr(Call(Void, "printf", [Literal(Cstring, "\\\")")]))
                                                 ]) :: elems)

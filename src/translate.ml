@@ -238,6 +238,7 @@ let rec translate_stmt = function
 | Assign(target, e) -> (translate_stmt target) ^ " = " ^  translate_stmt e
 | Call(dt, id, el) -> 
     
+    (*
     (match id with
         | "printf" -> 
             (* fmt is all the format types so far: ex. %s%f%f *)
@@ -251,12 +252,16 @@ let rec translate_stmt = function
             in
             if fmts = [] then ""
             else 
+
               "printf(" ^  
               "\"" ^ String.concat "" (List.map (fun t -> fst t) fmts) ^ "\", " ^ (* format string *)
               String.concat ", " (List.map (fun t -> translate_stmt (snd t)) fmts) ^ (* comma separated inputs to fmt string *)
               ")"
        | _ -> id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")" 
      )
+*)
+id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
+
 | Access(dt, id, e) -> (translate_stmt id) ^ "[" ^ (translate_stmt e) ^ "]"
 (* | Member(dt, id, m) -> id ^ "->" ^ m *)
 | Member(dt, id, m) -> (translate_stmt (Assoc(id))) ^ "->" ^ m 
