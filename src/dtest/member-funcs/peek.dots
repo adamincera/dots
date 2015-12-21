@@ -1,0 +1,4 @@
+list<num> l;
+l.enqueue(3);
+l.enqueue(4);
+print(l.peek());
