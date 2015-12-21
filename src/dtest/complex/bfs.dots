@@ -32,10 +32,14 @@ start = x;
 num curr_dist;
 curr_dist = 0;
 
+bool node_seen;
+
 for (n in x.oute()){
     curr_dist = curr_dist + 1;
-    
-	if (has_node(seen, n) == false) {
+   
+    node_seen = has_node(seen, n);
+  
+	if (node_seen == false) {
 	    seen.enqueue(x);
 	    queue.enqueue(n);
 	    dist[n] = curr_dist;

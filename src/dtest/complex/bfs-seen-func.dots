@@ -1,0 +1,25 @@
+def bool has_node (list<node> l, node x) {
+        for (n in l) {
+            if (n == x) {
+               return true;
+            }
+        }
+        return false;
+}
+
+node x;
+node y;
+node z;
+
+#list<node> nl = [x, y];
+list<node> nl;
+nl.enqueue(x);
+nl.enqueue(y);
+
+bool b1;
+b1 = has_node(nl, x);
+
+bool b2;
+b2 = has_node(nl, z);
+
+print(b1, "\n", b2, "\n");
