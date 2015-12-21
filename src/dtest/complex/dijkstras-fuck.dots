@@ -30,8 +30,15 @@ def dict<node, num> dijkstra (graph G, node source){
         
        # Q.remove(u);
         S[u] = w;
-       # Q = relax(u, Q);
-    }
+       #Q = relax(u, Q);
+		
+        for (v in u.oute()) {
+            if (Q[v] > u.oute()[v]) {
+                Q[v] = u.oute()[v];
+            }
+        }
+	}
+   
     return S;
 }
 

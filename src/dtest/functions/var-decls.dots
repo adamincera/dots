@@ -1,0 +1,14 @@
+def num func (node x, node y) {
+    dict <node, num> d;
+    d[x] = 3;
+    d[y] = 3.2;
+
+    node u;
+    u = min(d);
+
+    num j = 5;
+    while(j == 5) {
+      num q = 2;
+      j = 3;
+    }
+}
