@@ -1,7 +1,6 @@
 # D.O.T.S 
-
-## a graphical programming language
-
+ 
+Create a versatile language to allow simple implementation of graph data structures and algorithms.
 
 ### Authors:
 
