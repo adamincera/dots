@@ -39,41 +39,27 @@ list<node> queue;
 list<node> seen;
 dict<node, num> dist;
  
-queue.enqueue(x);
 
 node cur_node;
-#cur_node = x;
+cur_node = x;
 
 num curr_dist;
 curr_dist = 0;
 
-num l;
-l = len(queue);
-	dict<node, num> d;
-while (l > 0) {
+for (n in cur_node.oute()){
+    print("current node: ", n, "\n", "\n");
+
+    #print("Number of outgoing edges: ", len(cur_node.oute()));
+
+    curr_dist = curr_dist + 1;
+    
+	if (has_node(seen, n) == false) {
+	    seen.enqueue(x);
+	    queue.enqueue(n);
+	    dist[n] = curr_dist;
+	}
 	cur_node = queue.peek();
 	queue.dequeue();
-    #print("current node: ", cur_node, "\n", "\n");
-	curr_dist = curr_dist + 1;
-
-	d = cur_node.oute();
-print("running\n");
-    for (n in d){
-    print("foo\n");
-        #print("Number of outgoing edges: ", len(cur_node.oute()));
-    
-		if (has_node(seen, n) == false) {
-		    seen.enqueue(n);
-		    queue.enqueue(n);
-		    dist[n] = curr_dist;
-		}
-		
-	
-	}
-	
-
-	l = len(queue);	
-
 }
 
 print(dist);
