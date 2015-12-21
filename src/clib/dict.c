@@ -250,6 +250,7 @@ entry_t **put_node(entry_t **table, node_t *key, void *value) {
 
 static void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b)) {
     entry_t *row = *table;
+    printf("inside dict_remove\n");
 
     if(!table || !row)
         return;
@@ -262,6 +263,7 @@ static void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b
         }
     } else {
         if(key == row->key) {
+            printf("freed first element in row\n");
             *table = row->next;;
             free(row);
             return;
@@ -278,6 +280,7 @@ static void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b
             }
         } else {
             if(key == row->next->key) {
+                printf("freed other element in row\n");
                 row->next = row->next->next;
                 free(row->next);
                 return;

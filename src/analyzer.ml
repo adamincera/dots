@@ -1101,7 +1101,7 @@ translate_expr env = function
                               result_decl; 
                               Expr(Call(Void, func_name, 
                                                  [Deref((dt_to_ct e_dt), c_id); 
-                                                  arg_id])
+                                                  Deref(key_dt, arg_id)])
                               );
                                    (* store the result of Access in our result_var *)
                               ]) 
