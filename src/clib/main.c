@@ -26,7 +26,7 @@ int main() {
     printf("%o\n", (int) b);
     printf("%o\n", (int) c);
 
-    g = add_node(g, n);
+    g = graph_plus_node(g, n);
     add_node(g, m);
     add_node(h, o);
 
