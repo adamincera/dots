@@ -1027,7 +1027,11 @@ translate_expr env = function
                         c_e;
                         elem_c;
                         result_decl; 
-                        Expr(Assign(final_result, 
+                        Expr(Assign(final_result,
+                                    Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, Translate.type_to_str c_dt)] ) ])
+                             ) 
+                        );
+                        Expr(Assign(Deref((dt_to_ct e_dt), c_id),
                                 Call(c_dt, func_name, 
                                            [Deref((dt_to_ct e_dt), c_id); 
                                             arg_id])
@@ -1063,7 +1067,24 @@ translate_expr env = function
                                       Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "in") ))
                              (* store the result of Access in our result_var *)
                         ])
+                  |
 *)
+                  | "peek" ->
+                    let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                    let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
+                    let final_result = Id(dt_to_ct e_dt, result_var) in
+
+                    Block([
+
+                            c_e;
+                            result_decl; 
+                            Expr(Assign(final_result, 
+                                    Call(c_dt, "peek", 
+                                               [Deref((dt_to_ct e_dt), c_id)])
+                            ))
+                             (* store the result of Access in our result_var *)
+                        ])
+
                   | "oute" | "ine" -> 
                       let func_name = 
                           (match f with 
