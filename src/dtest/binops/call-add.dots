@@ -1,4 +1,0 @@
-list<num> x = [3, 2, 3];
-list<num> y = [1, 8];
-
-len(x) + len(y);

@@ -1277,7 +1277,8 @@ translate_stmt env = function
                                           Expr(Assign(Id(c_dtv,auto_var), e3_deref));
                                           Expr(Assign(e1_deref, 
                                                       Call(Ptr(Void), "put_node", 
-                                                           [e1_deref; Cast(Ptr(Void),Ref(c_dtk, Id(c_dtk,auto_var2))); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))
+                                                           [e1_deref;
+                                                           Cast(Node, Id(c_dtk,auto_var2)); Cast(Ptr(Void),Ref(c_dtv, Id(c_dtv,auto_var)))]))
                                           )
                                        ])
                               | _ -> raise(Failure("unsupported dict type"))
