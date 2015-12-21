@@ -139,9 +139,14 @@ int graph_equals(const graph_t *a, const graph_t *b) {
 }
 
 graph_t *graph_plus_node(const graph_t *g, const node_t *n) {
-    graph_t *copy = graph_copy(g);
+    graph_t *copy;
+    if(g)
+        copy = graph_copy(g);
+    else 
+        copy = init_graph();
     add_node(copy, n);
     return copy;
+
 }
 
 graph_t *node_plus_node(const node_t *n1, const node_t *n2) {
