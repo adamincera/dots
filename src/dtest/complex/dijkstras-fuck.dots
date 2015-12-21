@@ -50,7 +50,8 @@ node q("nyc");
 node r("boston");
 
 graph g1 = {
-    x --[2] z,
+    x -->[2] z,
+	z -->[2] x,
     z --[2] q,
     q --[3] r,
     z --[9] r,
