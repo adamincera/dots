@@ -1052,33 +1052,28 @@ translate_expr env = function
                   | "ine" -> 
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                       let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *) 
-                      let final_result = Id(dt_to_ct e_dt, result_var) in
+                      let final_result = Id(Ptr(dt_to_ct e_dt), result_var) in
 
                       Block([
                              c_e;
                              result_decl;
                              Expr(Assign(
                                       Id(Ptr(c_dt), result_var), 
-                                      Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "in")))
+                                      Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "in") ))
                              (* store the result of Access in our result_var *)
                         ])
                   | "oute" -> 
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-                      let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
-                      let final_result = Id(dt_to_ct e_dt, result_var) in
+                      let result_decl = Vdecl(Ptr(Ptr(Ptr(Entry))), result_var) in (* declare this expr's result var *)
+                      let final_result = Id(Ptr(Entry), result_var) in
                       Block([
                              c_e;
-                             Expr(Assign(
-                                     final_result, 
-                                     Call(Ptr(Void), 
-                                          "malloc", 
-                                         [Call(Int, "sizeof", [Id(Void, "Entry *")]
-                                       )])
-                              ));
-                             Expr(Assign(
-                                      Id(Ptr(c_dt), result_var), 
-                                      Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "out")))
-                             (* store the result of Access in our result_var *)
+                             result_decl;
+                        
+                              Expr(Assign(
+                                  final_result, 
+                                  Ref(Ptr(Ptr(Ptr(Entry))), Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "out"))
+                              ))
                         ])
                   | "remove" -> 
                       (match e_dt with
@@ -1114,7 +1109,15 @@ translate_expr env = function
                       )
                       
 
-      (* Node * n; returns value  snippet n= n.val() datamember of *t Node->data  *)
+      (* Node * n; returns value  snippet n= n.val() datamember of *t Node->data 
+       Expr(Assign(
+                                     final_result, 
+                                     Call(Ptr(Void), 
+                                          "malloc", 
+                                         [Call(Int, "sizeof", [Id(Void, "Entry")]
+                                       )])
+                          ));
+       *)
                   | "val" ->
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                       let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)

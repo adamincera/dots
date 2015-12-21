@@ -1,2 +1,2 @@
 node x("dc");
-x.val();
+print(x.val());

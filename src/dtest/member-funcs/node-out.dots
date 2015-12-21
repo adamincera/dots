@@ -2,5 +2,6 @@ node x;
 node y;
 x -->[2] y;
 y -->[2] x;
-dict<node, num> d = x.ine();
+dict<node, num> d;
+d  = x.oute();
 print(d);
