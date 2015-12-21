@@ -1,2 +1,3 @@
 node x;
-x.oute();
+dict<node, num> d = x.oute();
+print(d);

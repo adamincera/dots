@@ -1,0 +1,10 @@
+dict<node,num> weights;
+node x;
+node y;
+num j = 5;
+weights[x] = j;
+weights[y] = 3;
+
+node m;
+m = max(weights);
+print(m);
