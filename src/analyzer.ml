@@ -1415,6 +1415,7 @@ translate_stmt env = function
                        Expr(Call(Void, "add_node", [Id(Graph, index); Id(Node, n1_index)]));
                        Expr(Call(Void, "add_node", [Id(Graph, index); Id(Node, n2_index)]))
                     ]
+                 | _ -> raise (Failure ("unexpected type"))
                 ) 
             in
             find_vars ( calls @ stmts) tl
@@ -1461,10 +1462,30 @@ translate_stmt env = function
         *)
                                           
     | Sast.If (cond, s1, s2) ->
-        let c_cond = translate_expr env cond in 
-        let c_s1 =  translate_stmt env s1 in
-        let c_s2 =  translate_stmt env s2 in 
-        If (c_cond, [c_s1], [c_s2])
+
+        (match cond with
+         | Binop(e1, op, e2, dt) -> 
+             let c_e1 = translate_expr env e1 in
+             let e1_cdt = dt_to_ct (get_sexpr_type e1) in
+             let e1_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+             
+             let c_e2 = translate_expr env e2 in
+             let e2_cdt = dt_to_ct (get_sexpr_type e2) in
+             let e2_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+            
+             let then_stmts = translate_stmt env s1 in
+             let else_stmts = translate_stmt env s2 in
+             Block([c_e1; c_e2;
+                    If(Translate.Binop(Int, 
+                                          Deref(e1_cdt, Id(Ptr(e1_cdt), e1_result)), 
+                                          op, 
+                                          Deref(e2_cdt, Id(Ptr(e2_cdt), e2_result))
+                                         ), 
+                          [then_stmts],
+                          [else_stmts])
+             ])
+         | _ -> raise (Failure ("not a while loop condition expression"))
+        )
     | Sast.For (key, iter, sl) ->
             let iter_stype = get_sexpr_type iter in
             let iter_ctype = dt_to_ct iter_stype in
