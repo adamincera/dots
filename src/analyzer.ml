@@ -697,14 +697,25 @@ translate_expr env = function
                     let hd_type = get_sexpr_type hd in
                     let print_expr = translate_expr env hd in (* elem to print *)
                     let print_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of elem translation *)
+                    let deref_print_var = Deref(Node, Id(Ptr(Node), print_result)) in
                     let print_type = dt_to_ct hd_type in (* type of elem *)                    
 
                     (match hd_type with
-                      | Num | String | Bool | Node -> 
+                      | Num | String | Bool  -> 
                           print_builder (Block([print_expr;
                                                 Expr(Call(Void, "printf", [Literal(Cstring, get_fmt_str print_type); 
                                                                           Deref(print_type, Id(Ptr(print_type), print_result))
                                                                           ]))
+                                                ]) :: elems)
+                                        tl
+                      | Node ->
+                           print_builder (Block([ print_expr;
+                                                  Expr(Call(Void, "printf", [ Literal(Cstring, "N-")] ));
+                                                  Expr(Call(Void, "printf", [ Cast(Int, deref_print_var) ] ));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "(\\\"")]));
+                                                  Expr(Call(Void, "printf", [Cast(Cstring, Member(Ptr(Void), deref_print_var, "data"))]
+                                                  ));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "\\\")")]))
                                                 ]) :: elems)
                                         tl
                       | List(dt) -> 
@@ -868,40 +879,55 @@ translate_expr env = function
                     let arg_e = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
                     let arg_dt = get_sexpr_type (List.hd el) in 
                     let arg_id = Id((dt_to_ct arg_dt), arg_e) in
-                    
-                    let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-                    let result_decl = Vdecl(Ptr(Float), result_var) in
-                    let final_result = Id(Ptr(Float), result_var) in 
-
-                    let fname = 
+                                       
                      (match arg_dt with
                         | List(dt) -> 
+                            let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                              let e_list_type = (get_list_type arg_dt) in 
+                             let result_decl = Vdecl(Ptr(Float), result_var) in
+                             let final_result = Id(Ptr(Float), result_var) in
+ 
                               (match e_list_type with
-                                  | Num -> "num_list_" ^ func_name
+                                  | Num -> 
+                                      let fname = "num_list_" ^ func_name in
+                                      Block([
+                                            elem_c;
+                                            result_decl;
+                                            Expr(Assign(Id(Ptr(Float), result_var),
+                                                Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
+                                                ) 
+                                            );
+                          
+                                            Expr(Assign(  Deref(Float, final_result),
+                                                          Cast((Float), 
+                                                               Call(Float, fname, [ Deref((dt_to_ct arg_dt), arg_id) ])) 
+                                            ));
+                                         ])
                                   | _ -> raise (Failure ("cannot do min max ")))
                         | Dict(dtk, dtv) ->
-                              let d_k = (get_dict_type arg_dt) in
-                              (match d_k with
-                                  | Num -> "num_dict_" ^ func_name 
+                              (match dtv with
+                                  | Num -> 
+                                        let fname = "num_dict_" ^ func_name in
+                                        let d_k = dt_to_ct dtk in
+                                        let result_var = "v" ^ string_of_int(create_auto env "" (dtk)) in (* create a new auto_var to store THIS EXPR'S result *)
+                                        let result_decl = Vdecl(Ptr(d_k), result_var) in
+                                        let final_result = Id(Ptr(d_k), result_var) in 
+
+                                         Block([
+                                            elem_c;
+                                            result_decl;
+                                            Expr(Assign(Id(Ptr(d_k), result_var),
+                                                Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, Translate.type_to_str(d_k))] ) ])
+                                                ) 
+                                            );
+                          
+                                            Expr(Assign(Deref(d_k, final_result),
+                                                        Cast((d_k), 
+                                                        Call(Ptr(Void), fname, [ Deref((dt_to_ct arg_dt), arg_id) ])) 
+                                            ));
+                                         ])
                                   | _ -> raise (Failure ("cannot do min max ")))
                         | _ -> raise (Failure("can not enqueue this datatype")))
-                        in
-                        Block([
-                                elem_c;
-                                result_decl;
-                                Expr(Assign(Id(Ptr(Float), result_var),
-                                    Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, "float")] ) ])
-                                    ) 
-                                );
-              
-                                Expr(Assign(  Deref(Float, final_result),
-                                              Cast((Float), 
-                                                   Call(Float, fname, [ Deref((dt_to_ct arg_dt), arg_id) ])) 
-                                ));
-                             ])
-
-
             | _ -> 
                 let c_args = build_args [] el in
                 let c_stmts = List.map (fun t -> (fst t)) c_args in
@@ -965,10 +991,6 @@ translate_expr env = function
         let e_dt = get_sexpr_type e in 
         let c_id = Id(dt_to_ct e_dt, result_e) in  
 
-         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-         let result_decl = Vdecl(dt_to_ct e_dt, result_var) in (* declare this expr's result var *)
-         let final_result = Id(dt_to_ct e_dt, result_var) in
-
             (match f with
                   | "enqueue" | "push" ->
                    let e_list_type = (get_list_type e_dt) in
@@ -986,8 +1008,11 @@ translate_expr env = function
                       let arg_dt = get_cexpr_type elem_c in 
                       let arg_id = Id(arg_dt, arg_e) in 
                       
-
+                      let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                      let result_decl = Vdecl(Ptr(dt_to_ct e_dt), result_var) in (* declare this expr's result var *)
                            (*let e1_cdt = dt_to_ct (get_sexpr_type e1) in *)
+                      let final_result = Id(dt_to_ct e_dt, result_var) in
+
                       Block([
                         c_e;
                         elem_c;
@@ -1000,6 +1025,10 @@ translate_expr env = function
                              (* store the result of Access in our result_var *)
                         ]) 
                   | "dequeue" | "pop" -> 
+                      let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                      let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
+                      let final_result = Id(dt_to_ct e_dt, result_var) in
+
                            Block([
 
                                 c_e;
@@ -1011,27 +1040,71 @@ translate_expr env = function
                              (* store the result of Access in our result_var *)
                         ])
                   | "ine" -> 
-                  let dict = Ptr(Ptr(Entry)) in  
+                  let dict = Ptr(Ptr(Entry)) in 
+                      let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                      let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *) 
+                      let final_result = Id(dt_to_ct e_dt, result_var) in
+
                       Block([
                              c_e;
-                             Vdecl(dict, result_var);
+                             result_decl;
                              Expr(Assign(
-                                      Id(Ptr(Ptr(Entry)), result_var), 
+                                      Id(Ptr(c_dt), result_var), 
                                       Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "in")))
                              (* store the result of Access in our result_var *)
                         ])
                   | "oute" -> 
                       let dict = Ptr(Ptr(Entry)) in
+                      let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                      let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
+                      let final_result = Id(dt_to_ct e_dt, result_var) in
                       Block([
                              c_e;
                              Vdecl(dict, result_var);
                              Expr(Assign(
-                                      Id(Ptr(Ptr(Entry)), result_var), 
+                                      Id(Ptr(c_dt), result_var), 
                                       Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "out")))
                              (* store the result of Access in our result_var *)
                         ])
+                  | "remove" -> 
+                      (match e_dt with
+                       | Dict(dtk, dtv) -> 
+                            let func_name = 
+                            (match dtk with
+                            | Num -> "num_dict_remove"
+                            | String -> "string_dict_remove" 
+                            | Node -> "node_dict_remove" 
+                            | Graph -> "graph_dict_remove" 
+                            | _ -> raise (Failure("can not enqueue this datatype"))) in
+
+                            let key_c = (translate_expr env (List.hd el)) in 
+                            let key_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                            let key_dt = get_cexpr_type key_c in 
+                            let arg_id = Id(key_dt, key_result) in 
+                            
+                            let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                            let result_decl = Vdecl(Ptr(Void), result_var) in (* declare this expr's result var *)
+                                 (*let e1_cdt = dt_to_ct (get_sexpr_type e1) in *)
+                            Block([
+                              c_e;
+                              key_c;
+                              result_decl; 
+                              Expr(Call(Void, func_name, 
+                                                 [Deref((dt_to_ct e_dt), c_id); 
+                                                  arg_id])
+                              );
+                                   (* store the result of Access in our result_var *)
+                              ]) 
+
+                       | _ -> raise (Failure ("not a dict"))
+                      )
+                      
+
       (* Node * n; returns value  snippet n= n.val() datamember of *t Node->data  *)
                   | "val" ->
+                      let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                      let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
+                      let final_result = Id(dt_to_ct e_dt, result_var) in
                       Block([
                          c_e;
                          Vdecl(Ptr(Cstring), result_var);
@@ -1100,7 +1173,7 @@ translate_stmt env = function
               | Num -> Vdecl(Float, index)
               | String -> Vdecl(Cstring, index)
               | Bool -> Vdecl(Int, index)
-              | Graph -> Block([Vdecl(Ptr(Graph), index);
+              | Graph -> Block([Vdecl(Graph, index);
                                (*  Expr(Assign(Id(Graph, index), Call(Void, "init_graph", []))) *)
                                ]) (* C: graph_t *g1 = init_graph(); *)
               | Node -> (* Block([Vdecl(Ptr(Node), index); 
@@ -1240,9 +1313,36 @@ translate_stmt env = function
         )     
     | Sast.GraphDef(id, sl) ->
         let index = "v" ^ string_of_int(find_var id env.var_inds) in
-        let graph_shit = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in
+        let edge_ops = List.map (fun f -> Expr(translate_expr env f)) sl in
+
+        let rec find_vars stmts = function
+        | [] -> stmts
+        | hd :: tl -> 
+            let calls = 
+                (match hd with
+                 | Undir(n1, n2, dt) | Dir(n1, n2, dt)-> 
+                    let n1_index = "v" ^ string_of_int(find_var n1 env.var_inds) in 
+                    let n2_index = "v" ^ string_of_int(find_var n2 env.var_inds) in 
+                    [
+                     Expr(Call(Void, "add_node", [Id(Graph, index); Id(Node, n1_index)]));
+                     Expr(Call(Void, "add_node", [Id(Graph, index); Id(Node, n2_index)]))
+                   ]
+                 | DirVal(n1, n2, w, dt) | UndirVal(n1, n2, w, dt) -> 
+                    let n1_index = "v" ^ string_of_int(find_var n1 env.var_inds) in 
+                    let n2_index = "v" ^ string_of_int(find_var n2 env.var_inds) in 
+                    [
+                       Expr(Call(Void, "add_node", [Id(Graph, index); Id(Node, n1_index)]));
+                       Expr(Call(Void, "add_node", [Id(Graph, index); Id(Node, n2_index)]))
+                    ]
+                ) 
+            in
+            find_vars ( calls @ stmts) tl
+        in
+        let node_add_calls = find_vars [] sl in
+        (* let graph_list = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in *)
         Block(
-          graph_shit @ List.map (fun f -> Expr(translate_expr env f)) sl)
+          edge_ops @ node_add_calls
+        )
 
     | Sast.While (cond, sl) -> 
         (*

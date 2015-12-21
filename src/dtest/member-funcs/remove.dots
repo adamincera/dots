@@ -1,0 +1,9 @@
+dict<node, num> d;
+node x;
+node y;
+
+d[x] = 5;
+d[y] = 3;
+
+d.remove(y);
+print(d);

@@ -274,7 +274,7 @@ let rec expr env = function
         let len = List.length el in 
           if (len = 1) then
              (match data_type with 
-                Sast.List(dt) -> Sast.Call(f, s_el, dt)
+                | Sast.List(dt) -> Sast.Call(f, s_el, dt)
                 | Sast.Dict(dtk, dtv) -> Sast.Call(f, s_el, dtk) 
                 | _ -> raise(Failure("member call failed")))
           else 
@@ -358,6 +358,15 @@ let rec expr env = function
     | "val" ->
         if num_args != 0 then raise (Failure ("val requires 0 args"))
         else Sast.MemberCall(s_e, m, s_el, String)
+    | "remove" -> 
+        if num_args != 1 then raise (Failure ("remove requires 1 arg"))
+        else   
+            ignore((match e_dt with
+             | Dict(_) -> ignore()
+             | _ -> raise (Failure ("remove error: not a dict"))
+            ));
+            ignore(check_list env (fst (get_dict_type e_dt)) s_el); (* check that the arg is the type in the list *)
+            Sast.MemberCall(s_e, m, s_el, Sast.Void)
     | _ -> raise (Failure ("no member function: " ^ m))
 )
 (*
