@@ -1,4 +1,9 @@
-# H1 Authors:
+# D.O.T.S 
+
+## a graphical programming language
+
+
+### Authors:
 
 Hosanna Fuller, manager
 Rachel Gordon, language guru
