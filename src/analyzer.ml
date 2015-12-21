@@ -697,14 +697,25 @@ translate_expr env = function
                     let hd_type = get_sexpr_type hd in
                     let print_expr = translate_expr env hd in (* elem to print *)
                     let print_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* result of elem translation *)
+                    let deref_print_var = Deref(Node, Id(Ptr(Node), print_result)) in
                     let print_type = dt_to_ct hd_type in (* type of elem *)                    
 
                     (match hd_type with
-                      | Num | String | Bool | Node -> 
+                      | Num | String | Bool  -> 
                           print_builder (Block([print_expr;
                                                 Expr(Call(Void, "printf", [Literal(Cstring, get_fmt_str print_type); 
                                                                           Deref(print_type, Id(Ptr(print_type), print_result))
                                                                           ]))
+                                                ]) :: elems)
+                                        tl
+                      | Node ->
+                           print_builder (Block([ print_expr;
+                                                  Expr(Call(Void, "printf", [ Literal(Cstring, "N-")] ));
+                                                  Expr(Call(Void, "printf", [ Cast(Int, deref_print_var) ] ));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "(\\\"")]));
+                                                  Expr(Call(Void, "printf", [Cast(Cstring, Member(Ptr(Void), deref_print_var, "data"))]
+                                                  ));
+                                                  Expr(Call(Void, "printf", [Literal(Cstring, "\\\")")]))
                                                 ]) :: elems)
                                         tl
                       | List(dt) -> 

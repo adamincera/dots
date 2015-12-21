@@ -137,6 +137,26 @@ let get_fmt_str = function
 let cvar_cnt = ref 0
 
 (*
+
+     let get_fmt_val expr = 
+                let expr_type = get_cexpr_type expr in
+                (match expr_type with
+                  | Float -> [("%.3f", translate_stmt expr)]
+                  | Int -> [("%d", translate_stmt expr)]
+                  | Long -> [("%l", translate_stmt expr)]
+                  | Cstring -> [("%s", translate_stmt expr)]
+                  | Node -> 
+                      let addr = translate_stmt(Cast(Long, expr)) in
+                      let expr_val = translate_stmt(Member(Cstring, translate_stmt expr, "data")) in
+                      [("%s", "\"N-\""); ("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
+                  | Entry | Graph -> raise (Failure "type requires iterable print handling")
+                  | List(dt) | Array(dt) -> raise (Failure "type requires iterable print handling")
+                  | Void -> raise (Failure ("can't directly print Void (expr type: " ^ (stmt_type_to_str expr)))
+                  | Ptr(dt) -> raise (Failure "can't directly print pointer")
+                )
+            in
+
+
 let rec translate_expr = function
 | Literal(dt, v) ->
    (match dt with
@@ -217,46 +237,26 @@ let rec translate_stmt = function
   translate_stmt e1  ^ " " ^ op_to_str(op) ^ " " ^ translate_stmt e2
 | Assign(target, e) -> (translate_stmt target) ^ " = " ^  translate_stmt e
 | Call(dt, id, el) -> 
-    (*
+    
     (match id with
-        | "f1" -> 
+        | "printf" -> 
             (* fmt is all the format types so far: ex. %s%f%f *)
             (* vals is what will be put into the format vals: ex. "foo", 8.3, 8,3 *)
             (* takes expr to translate, data type of expr *)
-            let get_fmt_val expr = 
-                let expr_type = get_cexpr_type expr in
-                (match expr_type with
-                  | Float -> [("%.3f", translate_stmt expr)]
-                  | Int -> [("%d", translate_stmt expr)]
-                  | Long -> [("%l", translate_stmt expr)]
-                  | Cstring -> [("%s", translate_stmt expr)]
-                  | Node -> 
-                      let addr = translate_stmt(Cast(Long, expr)) in
-                      let expr_val = translate_stmt(Member(Cstring, translate_stmt expr, "data")) in
-                      [("%s", "\"N-\""); ("%x", addr); ("%s", "\"(\""); ("%s", expr_val); ("%s", "\")\"")]
-                  | Entry | Graph -> raise (Failure "type requires iterable print handling")
-                  | List(dt) | Array(dt) -> raise (Failure "type requires iterable print handling")
-                  | Void -> raise (Failure ("can't directly print Void (expr type: " ^ (stmt_type_to_str expr)))
-                  | Ptr(dt) -> raise (Failure "can't directly print pointer")
-                )
-            in
-
             let rec build_str fmt_val_list = function
             | [] -> fmt_val_list
-            | hd :: tl -> build_str ((get_fmt_val hd) @ fmt_val_list) tl
+            | hd :: tl -> build_str ((get_fmt_str (get_cexpr_type hd), hd) :: fmt_val_list) tl
             in
-
             let fmts = build_str [] el
             in
-
             if fmts = [] then ""
             else 
               "printf(" ^  
               "\"" ^ String.concat "" (List.map (fun t -> fst t) fmts) ^ "\", " ^ (* format string *)
-              String.concat ", " (List.map (fun t -> snd t) fmts) ^ (* comma separated inputs to fmt string *)
+              String.concat ", " (List.map (fun t -> translate_stmt (snd t)) fmts) ^ (* comma separated inputs to fmt string *)
               ")"
-        *)
-        id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")"
+       | _ -> id ^ "(" ^ (String.concat ", " (List.map translate_stmt el)) ^ ")" 
+     )
 | Access(dt, id, e) -> (translate_stmt id) ^ "[" ^ (translate_stmt e) ^ "]"
 (* | Member(dt, id, m) -> id ^ "->" ^ m *)
 | Member(dt, id, m) -> (translate_stmt (Assoc(id))) ^ "->" ^ m 
