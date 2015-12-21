@@ -15,7 +15,7 @@ Add the following line to your .bash_profile:
     in order to get the latest changes, run:
     make clean;
     make library
-This turn the clib dependnecies into a library archive that the dots compiler uses.
+This turns the clib dependnecies into a library archive that the dots compiler uses.
 
 In your dots compiler folder, run:
     make setup
@@ -25,6 +25,7 @@ COMPILATON INSTRUCTIONS:
 
 In order to compile the ./dotc compiler you must run:
     make  clean; make
+
 Then to test specific files you can either run the file directly with the ./dotc compiler ie:
     ./dotc dtest/example.dots
     ./exec example.dots.c
