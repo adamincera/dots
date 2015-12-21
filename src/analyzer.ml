@@ -589,16 +589,19 @@ translate_expr env = function
                   |  Graph -> 
                       (match e2_cdt with
                         | Node -> 
+                            (*
                             let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
                             let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
                             Vdecl(Ptr(Graph), index);
-
+                            
                             Block([Vdecl(Ptr(Graph), index);
                                    Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])));
                                    Expr(Call(Void, "add_node", [Id(Graph, index); ce2]));
                                    Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
 
                             ])
+                            *)
+                            Call(Void, "add_node", [Id(Graph, result_var); ce2])
                         | Graph -> 
                             (* g1 = plus(g2, g3); *)
                             let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
@@ -608,7 +611,7 @@ translate_expr env = function
 
                                  ])
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
-                      )
+                    )  
                   |  Node -> 
                       (match e2_cdt with
                         | Node -> (*
@@ -720,7 +723,7 @@ translate_expr env = function
                  ));
                  Expr(Assign(Deref(c_dt, Id(Ptr(c_dt), result_var)), Assoc(binop_func)
                  ))(* store the result of Access in our result_var *)
-            ]) 
+            ])  
     | Sast.Call(func_name, el, dt) -> 
             let return_type = dt_to_ct dt in
             (match func_name with
