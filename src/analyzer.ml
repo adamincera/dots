@@ -1076,6 +1076,40 @@ translate_expr env = function
                                       Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "out")))
                              (* store the result of Access in our result_var *)
                         ])
+                  | "remove" -> 
+                      (match e_dt with
+                       | Dict(dtk, dtv) -> 
+                            let func_name = 
+                            (match dtk with
+                            | Num -> "num_dict_remove"
+                            | String -> "string_dict_remove" 
+                            | Node -> "node_dict_remove" 
+                            | Graph -> "graph_dict_remove" 
+                            | _ -> raise (Failure("can not enqueue this datatype"))) in
+
+                            let key_c = (translate_expr env (List.hd el)) in 
+                            let key_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
+                            let key_dt = get_cexpr_type key_c in 
+                            let arg_id = Id(key_dt, key_result) in 
+                            
+                            let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
+                            let result_decl = Vdecl(Ptr(Void), result_var) in (* declare this expr's result var *)
+                                 (*let e1_cdt = dt_to_ct (get_sexpr_type e1) in *)
+                            Block([
+                              c_e;
+                              key_c;
+                              result_decl; 
+                              Expr(Call(Void, func_name, 
+                                                 [Deref((dt_to_ct e_dt), c_id); 
+                                                  arg_id])
+                              );
+                                   (* store the result of Access in our result_var *)
+                              ]) 
+
+                       | _ -> raise (Failure ("not a dict"))
+                      )
+                      
+
       (* Node * n; returns value  snippet n= n.val() datamember of *t Node->data  *)
                   | "val" ->
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
