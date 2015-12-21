@@ -5,7 +5,6 @@ def bool has_node (list<node> l, node x) {
 	    if (n == x) {
 	       return true;
 	    }
-		
 	}
 	return false;
 }
@@ -26,6 +25,7 @@ list<node> queue;
 list<node> seen;
 dict<node, num> dist;
 
+dist = 
 
 node start;
 start = x;
@@ -33,20 +33,16 @@ start = x;
 num curr_dist;
 curr_dist = 0;
 
-bool node_seen;
-
 for (n in x.oute()){
     curr_dist = curr_dist + 1;
-   
-    node_seen = has_node(seen, n);
-  
-	if (node_seen == false) {
+    
+	if (has_node(seen, n) == false) {
 	    seen.enqueue(x);
 	    queue.enqueue(n);
 	    dist[n] = curr_dist;
 	}
 	x = queue.peek();
-	queue.dequeue();
+	x = queue.dequeue();
 }
 
 print(dist);

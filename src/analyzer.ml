@@ -155,13 +155,19 @@ let rec enum stride n = function
 let string_map_pairs map pairs =
     List.fold_left (fun m (i, n) -> StringMap.add n i m) map pairs
 
+let cvar_cnt = ref 0 
 let find_max_index map = 
+  cvar_cnt := !cvar_cnt + 1;
+   !cvar_cnt  
+
+(*let find_max_index map = 
     let bindings = StringMap.bindings map in
     let rec max cur = function
         | [] -> cur
         | hd :: tl -> if snd hd > cur then max (snd hd) tl else max cur tl
     in
     max 0 bindings
+  *)
 
     (* 
     returns the value associated with a given key,
@@ -969,7 +975,7 @@ translate_expr env = function
                                   | _ -> raise (Failure ("cannot do min max ")))
                         | _ -> raise (Failure("can not enqueue this datatype")))
             | _ -> 
-                let c_args = build_args [] el in
+                let c_args = List.rev (build_args [] el) in
                 let c_stmts = List.map (fun t -> (fst t)) c_args in
                 let result_params = List.map (fun t -> (snd t)) c_args in
                 let func_index = "f" ^ string_of_int(find_var func_name env.func_inds) in
@@ -1067,7 +1073,7 @@ translate_expr env = function
                         Expr(Assign(Deref((dt_to_ct e_dt), c_id),
                                 Call(c_dt, func_name, 
                                            [Deref((dt_to_ct e_dt), c_id); 
-                                            arg_id])
+                                            Deref((arg_dt), arg_id)])
                         ))
                              (* store the result of Access in our result_var *)
                         ]) 
@@ -1080,7 +1086,7 @@ translate_expr env = function
 
                                 c_e;
                                 result_decl; 
-                                Expr(Assign(final_result, 
+                                Expr(Assign(Deref((dt_to_ct e_dt), c_id), 
                                         Call(c_dt, "pop", 
                                                    [Deref((dt_to_ct e_dt), c_id)])
                                 ))
