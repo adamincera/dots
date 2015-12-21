@@ -24,9 +24,9 @@ In your dots compiler folder, run:
 COMPILATON INSTRUCTIONS:
 
 In order to compile the ./dotc compiler you must run:
-   make  clean; make
+    make  clean; make
 Then to test specific files you can either run the file directly with the ./dotc compiler ie:
-   ./dotc dtest/example.dots
-   ./exec example.dots.c
+    ./dotc dtest/example.dots
+    ./exec example.dots.c
 Or if you want to execute the file in one fell swoop:
-   ./gdc dtest/example.dots
+    ./gdc dtest/example.dots
