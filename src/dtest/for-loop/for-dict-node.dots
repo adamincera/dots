@@ -1,0 +1,12 @@
+node x;
+node v;
+v -->[2] x;
+x -->[3] v;
+
+dict<node, num> d;
+d = x.oute();
+
+for (key in d) {
+	print("here");
+    print(key, "\n");
+}

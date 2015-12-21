@@ -252,8 +252,13 @@ static void dict_remove(entry_t **table, void *key, int (*comp)(void *a, void *b
     entry_t *row = *table;
     printf("inside dict_remove\n");
 
-    if(!table || !row)
+    if(!table || !row) {
+        if(!table)
+            printf("table == NULL\n");
+        if(!row)
+            printf("row == NULL");
         return;
+    }
 
     if(comp) {
         if(comp(key, row->key)) {

@@ -20,13 +20,13 @@ int main() {
     node_t *n = init_node((void *) a);
     node_t *m = init_node((void *) b);
     node_t *o = init_node((void *) c);
-    graph_t *g = init_graph();
+    graph_t *g = NULL; // = init_graph();
     graph_t *h = init_graph();
     printf("%o\n", (int) a);
     printf("%o\n", (int) b);
     printf("%o\n", (int) c);
 
-    add_node(g, n);
+    g = add_node(g, n);
     add_node(g, m);
     add_node(h, o);
 
