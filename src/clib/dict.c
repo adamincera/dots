@@ -394,6 +394,10 @@ void *string_dict_max(entry_t **table) {
 }
 
 int dict_len(entry_t **table) {
+	if(!table)
+		return -1;
+	if(!*table)
+		return -1;
     int i;
     entry_t *temp;
     int len = 0;

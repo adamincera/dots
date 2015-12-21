@@ -101,6 +101,7 @@ list_t *node_add_back(list_t *l, node_t *data) {
 
 list_t *pop(list_t *l) {
     list_t *head = l->next;
+	if(head)
     head->previous = NULL;
     return head;
 }

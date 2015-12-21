@@ -98,6 +98,9 @@ int main() {
     g = get_other(other, n);
     printf("got node containing %x\n, size = %d\n", (unsigned long) g, size);
 
+	entry_t **empty = init_dict();
+	int len = dict_len(empty);
+
 
     return 0;
 }
