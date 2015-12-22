@@ -1,0 +1,65 @@
+#breadth first search
+
+print("Searching\n");
+
+def bool has_node (list<node> l, node x) {
+	for (n in l) {
+	    if (n == x) {
+	       return true;
+	    }
+	}
+	return false;
+}
+
+graph g;
+
+node x("x");
+node y("y");
+node z("z");
+
+node a("a");
+node b("b");
+node c("c");
+
+g = x + y;
+g = g + z;
+
+x -->[2] y;
+x -->[1.5] z;	
+z -->[4] y;
+y -->[2] c;
+z -->[2.5] b;
+c -->[.5] b;
+x -->[333] a;
+z -->[15] a; 
+
+print("Graph Initialized\n");
+
+list<node> queue;
+list<node> seen;
+dict<node, num> dist;
+ 
+
+node cur_node;
+cur_node = x;
+
+num curr_dist;
+curr_dist = 0;
+
+for (n in cur_node.oute()){
+    print("current node: ", n, "\n", "\n");
+
+    #print("Number of outgoing edges: ", len(cur_node.oute()));
+
+    curr_dist = curr_dist + 1;
+    
+	if (has_node(seen, n) == false) {
+	    seen.enqueue(x);
+	    queue.enqueue(n);
+	    dist[n] = curr_dist;
+	}
+	cur_node = queue.peek();
+	queue.dequeue();
+}
+
+print(dist, "\n\n");
