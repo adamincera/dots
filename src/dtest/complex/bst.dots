@@ -62,4 +62,4 @@ for (n in cur_node.oute()){
 	queue.dequeue();
 }
 
-print(dist);
+print(dist, "\n\n");
