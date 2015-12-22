@@ -1,0 +1,7 @@
+graph g;
+
+node x("node x");
+node y("node y");
+
+g = g + x;
+g = g + y;
