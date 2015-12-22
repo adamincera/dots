@@ -1,0 +1,3226 @@
+commit 9a32082c6edab4f17fcdc72c34350de433b91cc4
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 22 11:22:46 2015 -0500
+
+    cleaned up code
+
+commit 5eb8a0527a529fbaea3cfcacbb0eefd7177ffa52
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 22 10:58:39 2015 -0500
+
+    got rid of unused rules by having fdecls use the alternate stmt rule that doesn't include fdecl (no nested fdecls)
+
+commit 4bf1c9acced90a35bd1607b6a2638f45c4b6502c
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 22 10:50:00 2015 -0500
+
+    cleaned up runtest.py
+
+commit 154e9dad2d9f7da88caad984a68e73ce678662e6
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 22 01:22:55 2015 -0500
+
+    removed commented out code. added clean to the setup reule in Makefile
+
+commit 78869c4034340a6aeba668c523863bd58262897d
+Merge: 12b7090 8bd68d1
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Tue Dec 22 01:00:46 2015 -0500
+
+    merge
+
+commit 12b7090680d61ae64d2c2941fc7d2e9e47ccf416
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Tue Dec 22 00:59:58 2015 -0500
+
+    cleaning out src directory
+
+commit f5c9d3d34302c5b9246c0a79419b2f6065484e04
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Tue Dec 22 00:55:07 2015 -0500
+
+    cleaned up translator and analyzer
+
+commit 8bd68d157e51c8113e1142142fd4bfba58f0bf4e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 22 00:23:34 2015 -0500
+
+    added some image files for our report. removed extraneous file from src
+
+commit ff9b8a16d22bb9746428d21ed4671f588f8bbdf4
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 19:58:05 2015 -0500
+
+    put copies of our example code in src/sample-code to make it easier for TAs to find
+
+commit aed9f26d63082bf69f78afac27cc36248110fbeb
+Merge: 4b89c4b e4008a6
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 19:53:46 2015 -0500
+
+    Merge branch 'compile'
+    
+    merged current compile branch into master
+
+commit e4008a6284d765a2b50e777e83e0e7721f9682f0
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 19:53:20 2015 -0500
+
+    minor changes to make output prettier
+
+commit 4b89c4be9e2fde92ab5dfdd4bd3ec5960090d6df
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 09:12:02 2015 -0500
+
+    text
+
+commit 31315eed5b12031f7676c19a00d8d4a53bc566c3
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 09:11:17 2015 -0500
+
+    format
+
+commit 5cb160fe68a92a85e81f240effe6a13893b960b1
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 08:56:00 2015 -0500
+
+    syntax highlighting
+
+commit 8c373b266992ceddf06e472d22f5f6f82f65d00a
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 08:53:34 2015 -0500
+
+    syntax high lighting
+
+commit 19f843182137359f2c74f881e32d22a90afaa0f8
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 08:49:14 2015 -0500
+
+    hosanna
+
+commit 2d91001030f8c7894832725679f337621fafbc57
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 08:48:04 2015 -0500
+
+    format changes
+
+commit 170dfcf384ec1d664e3a5b0c92adf224d5e3f290
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 08:47:06 2015 -0500
+
+    compilation in structions
+
+commit f04a58b268747796d6cee19e412c736ac2035da1
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 08:41:39 2015 -0500
+
+    duplicate readme
+
+commit e3d9cc6f6ee456521bb80de8f199745359d42ae8
+Author: Hosanna Fuller <Miramonte23@gmail.com>
+Date:   Mon Dec 21 08:41:13 2015 -0500
+
+    update to readme.md
+
+commit 0324e8834ffc893f5a4ce97c22b3aade004d68fe
+Merge: 4ab2577 10d6dd8
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 06:06:50 2015 -0500
+
+    mergeMerge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 4ab2577fd7105c852adbfe57aa9b6bc136d6f95e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 06:06:48 2015 -0500
+
+    sample files
+
+commit 1cccafbb5739cf8999458ac8cad837461cf664cf
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 06:04:46 2015 -0500
+
+    sample algors
+
+commit 10d6dd880f532a8845a08a2b77a82625ff6e3201
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 05:43:49 2015 -0500
+
+    working bst
+
+commit 6b9ce3d237c0a804e63dc665a8eac2becb9391cc
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 05:13:44 2015 -0500
+
+    pushing
+
+commit 95012f41c8dd6fbcd6009a0238b5483721c9522e
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 03:51:19 2015 -0500
+
+    fixes for the segfault on values
+
+commit 6a5bd4d61d1bb78c23ecf25030e5bd571f4fad98
+Merge: 72ea472 51954bb
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 02:36:10 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 72ea47227eacf44d9d89d0e52ba255a35ce7ba4c
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 02:36:00 2015 -0500
+
+    temp
+
+commit 51954bb6e94fff2185f5df86ce8dd8401bb48c4a
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 21 02:35:25 2015 -0500
+
+    took out free
+
+commit 28ed5d5ba4cd10c20dd8054e86b80e04c41f9f56
+Merge: 9e7d310 31c2276
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 21 02:06:17 2015 -0500
+
+    merge
+
+commit 9e7d3101cc7f6df5a13d4be36b27e1587aad460c
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 21 02:06:08 2015 -0500
+
+    graph + node
+
+commit 31c2276f761cc4fd9afeeabc8c9a8457b7a797d7
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 01:53:09 2015 -0500
+
+    adds
+
+commit fdcbc66caa0a13dcd68b19afb77707b2be9171e0
+Merge: eea7a53 791c1c4
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 01:11:21 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+    
+    merge
+
+commit eea7a53717a4ad32398b707b43cd9d7afc756f4b
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 01:11:04 2015 -0500
+
+    fixed bfs error. altered if stmt handling in analyzer.ml
+
+commit 791c1c406a5b771d9f1bf8c4e97467baf359d572
+Merge: 5b462e1 67a35d2
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 21 01:03:38 2015 -0500
+
+    merge
+
+commit 5b462e119334f4494063df1d9a865a0685046cb6
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 21 01:03:30 2015 -0500
+
+    pulling
+
+commit 67a35d2d96d5f08715a706bcd471fe8965697a2d
+Merge: 88995a8 df268e8
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 00:39:04 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 88995a86b22cc34353fd99c3377496a7d3fb493d
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 21 00:38:49 2015 -0500
+
+    alterations
+
+commit df268e835a18e20963be66daa9b995875c0fa03e
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 00:31:36 2015 -0500
+
+    rcg and hosanna added breadth first search example
+
+commit 5c51b503c5d694af5d448e3e419e73d7f1b4f5dc
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 00:29:59 2015 -0500
+
+    test cases
+
+commit 4b53058ddc80d55cdfb9240ab0c8608b613ed813
+Merge: 705c5ae ef256a2
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 00:27:27 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+    
+    merge
+
+commit 705c5aef630cbda9b5e731a8b6e03d7d591e9360
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 21 00:27:10 2015 -0500
+
+    rachel & hosanna fixed enqueue call
+
+commit 241eff4d6ab8d73bf27c7bed5ed0d5f132055ad5
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 23:48:09 2015 -0500
+
+    Test case
+
+commit ef256a2dcadcf54609620fd2e6a931c5768bee09
+Merge: 2a4799f 84cdfcc
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 23:32:33 2015 -0500
+
+    merge
+
+commit 2a4799f32cfb6373200ba89f66863d813b6f7b7a
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 23:32:08 2015 -0500
+
+    pulling
+
+commit e73a862e8e193c77ea0bb656792d93412396a973
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 23:31:24 2015 -0500
+
+    added initialization into graph_plus_node()
+
+commit 84cdfcceda948f345ce831a5ef3ed892afac8ca4
+Merge: a706f7a fcc869e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 23:27:09 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit a706f7af90e14bcb7888b27185db9e849bb618da
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 23:26:49 2015 -0500
+
+    fixed node + node
+
+commit fcc869ed89263b5a581c5465a510455ddf48b492
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 23:23:59 2015 -0500
+
+    simplified dijkstra
+
+commit 02fdef29963dc95b880a803562300346a14290cb
+Merge: 83f7c1a 9be880b
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 23:12:47 2015 -0500
+
+    mergin
+
+commit 83f7c1aef9741b6f7c4b6a2295c0e810417508bc
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 23:12:18 2015 -0500
+
+    test for initializing graph in add_node
+
+commit e3101e2ca2cbdeed3fd9089d6935db0352d36b69
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 23:10:12 2015 -0500
+
+    pulling
+
+commit 4e2321b2d7f9cf7714fa871317ab0e93b578d0d3
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 23:09:46 2015 -0500
+
+    integrated init_graph() into add_node
+
+commit 9be880b6e2fef401c493e7f175963989920e125b
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 23:03:19 2015 -0500
+
+    fleshed out test case for ine and oute
+
+commit 099c99b9c483fe5cfef5c479267e9f15ec78a859
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 22:55:49 2015 -0500
+
+    fixed oute
+
+commit f8e5bc6865ef92f974a2bf69b831d2e9f930f51b
+Merge: 8b0f6ec 90d7f7a
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 22:08:08 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 8b0f6ecdf831c11b473684a00de355e229fa8598
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 22:08:02 2015 -0500
+
+    progress
+
+commit 90d7f7ae1613ce5a2a1e7a66d0bfdb1818a616e1
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 22:03:47 2015 -0500
+
+    fixed dict removal
+
+commit 25078894c0fe748dd256351977831b062958d6ef
+Merge: db88290 6ef44bb
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 21:41:09 2015 -0500
+
+    merge
+
+commit db88290ae4748a9c653e4d7ceb9151eff2861d72
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 21:41:00 2015 -0500
+
+    pulling again
+
+commit 6ef44bbbc8c554e15d9d59b7c344a6705fd6f402
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 21:38:27 2015 -0500
+
+    fixed the printing of random % fmt strings
+
+commit 58f36f41fece18aaf675cde201abbc8660e5c34c
+Merge: 65adba5 9dc3ce2
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 21:23:16 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 65adba5ff62c2456cd8d9939eaafbf3a8db68075
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 21:23:15 2015 -0500
+
+    partial dijkstras
+
+commit 9dc3ce2c5d95d27db9ae37e916c9bcc3cc62de83
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 21:21:02 2015 -0500
+
+    all the dots tests pushed
+
+commit 44c60b245827fb250f833c4e210abc6beff488f3
+Merge: cd03369 a4cc926
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 21:13:48 2015 -0500
+
+    merge
+
+commit cd0336936b5253f8c3c22c0d6a56a51be73e393c
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 21:13:32 2015 -0500
+
+    pulling rachoho
+
+commit a4cc9269a942b684c1c50e6df40ceb7720f0d605
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 21:12:59 2015 -0500
+
+    remove
+
+commit 1a703e81a775bc1c07cf3f29ef40c0687e52a640
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 21:12:28 2015 -0500
+
+    ll
+
+commit a67f79e5da30ca9698a1745313eedfeff221f6e6
+Merge: 4233073 69c734c
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 20:35:49 2015 -0500
+
+    pulling double pointer fix
+
+commit 69c734c29fcedf721b256454f5caa15fae14c63c
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 20:35:18 2015 -0500
+
+    fixes to graph_t declarations. min/max handling
+
+commit 4233073102750450d5bb9cf816c942ba36bfd528
+Merge: b6b6b9a bf565c1
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 20:27:56 2015 -0500
+
+    pulled
+
+commit b6b6b9ada1b889d8b7778a79ac72639e67303ed9
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 20:27:43 2015 -0500
+
+    pulling
+
+commit f5747f4e7da7c1e4a9929979d0239d631cce0093
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 19:59:53 2015 -0500
+
+    pulling
+
+commit bf565c1d7942792142eabe736d874b167217e379
+Merge: 13361e6 d6cbe16
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 19:01:46 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 13361e61fbbf66a2c322514efa9c32153e61d16c
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 19:01:30 2015 -0500
+
+    print for node fixed
+
+commit d6cbe167bb7c6977e395681b7fb7bc8181c21400
+Merge: 284e2c2 73d4116
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 18:17:25 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 284e2c23e9d7eaf3289bee478245513f4be361d9
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 18:17:15 2015 -0500
+
+    fixed while loop condition handling
+
+commit 73d411672a58631cd732538115a4eaa4cbc5d26d
+Merge: a2460fd 07a6a1c
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 18:04:47 2015 -0500
+
+    fixed merge conflict
+
+commit a2460fd848e4a4f981fec65e6e6698dae7083a08
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 18:03:01 2015 -0500
+
+    fancy graph assignment, fixing other stuff
+
+commit 07a6a1c5c82d1f150774e9322428fef0d69d2c04
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 16:43:21 2015 -0500
+
+    fixes to while loop
+
+commit 865461a8da1968319b11ab30937d9d49e0d150dc
+Merge: c860bcf ed05ff9
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 16:25:47 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit c860bcf73d07e1ff68dc321d3698859bd290ebba
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 16:25:41 2015 -0500
+
+    initial work on making while loops conform to the reference variable standard
+
+commit ed05ff936228e4915f64e2e9feb6cd491916acf9
+Merge: e7f6ecd 8d099f2
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 16:13:28 2015 -0500
+
+    mergin
+
+commit e7f6ecd98d222bc6bc0f45c5ac146f1de06e48e4
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 16:12:57 2015 -0500
+
+    dict printing, fixed some C bugs
+
+commit a9f74572627467da5896c9b20f528de5634ad67d
+Merge: e2c76ee 8d099f2
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 13:55:38 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merg
+
+commit 8d099f23c7f63e32abe657af12dd359a057c2caa
+Merge: f81bf59 e493890
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 13:55:19 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit f81bf5908eb8c4c6854f7a26dae4cb0330328982
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 13:55:09 2015 -0500
+
+    fully tested len built in function
+
+commit e2c76ee717353dc4acfe3d65229b3fbbda2ecf62
+Merge: f0301b4 e493890
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 13:19:28 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit f0301b4664e506a244cf21979b9c515127fd82bd
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 13:19:22 2015 -0500
+
+    moved call rule into the term rule
+
+commit e493890422a6c12fdf88400b44b51a9eb4004c59
+Merge: e81fc67 1d469e7
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sun Dec 20 13:16:27 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit e81fc67922be63cdd1687dd640a5b26715ad587c
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sun Dec 20 13:16:10 2015 -0500
+
+    fixed function args not taking in types problem
+
+commit 05f5d928d69e486b407bc8f8db06740d16398a0f
+Merge: a769efc 1d469e7
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 12:51:32 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit a769efcbf69b5722b6b9c1817aecb053576d2664
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 12:51:30 2015 -0500
+
+    minor change
+
+commit 1d469e7be1d99a34f134d30ad702572e75049f5e
+Merge: 235e792 e94b8cd
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 12:46:03 2015 -0500
+
+    hoho and ratchel and adamame to the rescue
+
+commit 235e7929cb7b3ab9004679c6dcc276a0cca4f1da
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 12:43:50 2015 -0500
+
+    progress
+
+commit e94b8cd2e90d17521c7ecd6918ad04be746409ac
+Merge: 3ec97b9 2d60a71
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 11:26:57 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 3ec97b973f2ed99f7b68d76ef35ef78c24e4bb6b
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 11:26:39 2015 -0500
+
+    implemented c translation for generic function call. i.e. implemented handling of dealing with result vars
+
+commit 2d60a71f17b0c4a206fc686c10f27e93cd289bd1
+Merge: 1f09692 56edcb2
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Dec 20 11:08:48 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 1f09692c505abba250a022e78cee6b4379409598
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Dec 20 11:08:21 2015 -0500
+
+    gotta print stderr too... in case of segfault yayaya
+
+commit 56edcb2bdd8c6e3e30da00769330b3e873ee375a
+Merge: 160aa51 1a2112f
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 11:01:02 2015 -0500
+
+    merge conflicts for handled
+
+commit 160aa51ee47faad64be92a4aebe0433412d2613f
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 10:58:42 2015 -0500
+
+    all member call functions working
+
+commit 1a2112fdbbe3cb4ea579080942417bab83109094
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 10:11:36 2015 -0500
+
+    made fixes to AccessAssign. it looks like maybe the underlying C function is broken
+
+commit 0f82e8be1bd8d2595127fc27124d3b07630ec988
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 09:52:05 2015 -0500
+
+    fixed list access translation
+
+commit 04f82b6d6b68598ced75040c953979360d161db6
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 09:39:26 2015 -0500
+
+    fixed list printing
+
+commit da3b51f9fbdfa0665c488d640ef3174cbf398f90
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 08:26:58 2015 -0500
+
+    for dict progress
+
+commit fcbf505f9efc0570cd323cd3a7f1e538700b1136
+Merge: 41dae0d 8ebd9f0
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 06:45:59 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 8ebd9f023c68b6d6bcb22b7858556b4591443a43
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 06:45:47 2015 -0500
+
+    put init_dict() into put_whatever
+
+commit 41dae0de4b8546337d42082b5e1e1d45d08097e3
+Merge: b6613da 8a6401c
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 06:45:09 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit b6613da54f020c9f7d82564607c07bfcc40906fa
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 06:45:06 2015 -0500
+
+    altered Dict declaration to initialize it to NULL. more work on for dict
+
+commit 1fc17dda95c9758cf0fc549791b98111fda62573
+Merge: 6883e45 8a6401c
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 06:25:28 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 6883e458cdf0a6665a31b1934a02fc8b52dfaad9
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 06:25:21 2015 -0500
+
+    out member f in progress
+
+commit 8a6401c5d02064248edfb8c1ad41cf240f721158
+Merge: e7fd4b1 fbbacd3
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 06:22:57 2015 -0500
+
+    pulled pork
+
+commit e7fd4b101010146d7c684068be8192b76bbbebba
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 06:22:28 2015 -0500
+
+    implemented edgeops! ~meaningful 6am commit message~
+
+commit fbbacd3f43bf3c9eb2b8c64e81699e089956accf
+Merge: 1214dda e588611
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 05:54:59 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 1214ddacf8206a801ebf958d33f01722d7b63dcb
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 05:54:53 2015 -0500
+
+    fixing For loop translation over dict
+
+commit e588611356c7e187fe99a25dbe4c0312a8848a75
+Merge: 90c7b04 df7e52f
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 05:53:59 2015 -0500
+
+    to: ratchel from: adamame
+
+commit 90c7b04d1f3df63ddb5d8dd036dc0502f3338702
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 05:47:30 2015 -0500
+
+    sending things to ratchel
+
+commit df7e52f1a695d7f3c5648c334e015f1152a647c1
+Merge: e085ef5 b8d46bb
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 05:44:18 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit e085ef5958acabc963c4b9806dcf42b3bf7bfb64
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 05:44:04 2015 -0500
+
+    pop and enqueue implemented and tested
+
+commit ab376d38b61c3b1ada36f3076a00256433d66ac5
+Merge: 98c6f89 b8d46bb
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 02:46:48 2015 -0500
+
+    pulled
+
+commit 98c6f89dba91ea866d8dde397412084089c7b33e
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 20 02:46:23 2015 -0500
+
+    tryna pull
+
+commit b8d46bb4ae5e93c70cba74dbc2defc5fa01bcf05
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 01:48:35 2015 -0500
+
+    fixed list literal translation
+
+commit cc2e019aa2216ca68b8e607456717b8153c86bb4
+Merge: a9b78cc 3f8550b
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 01:38:32 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit a9b78cc4750cd930ecafd96cdf25d77df7942a64
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 01:38:23 2015 -0500
+
+    progress
+
+commit 3f8550b283135b9b3ed874cdffbce0e10db90bc1
+Merge: 9632c38 e561b42
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 01:37:57 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 9632c38ce43fe3a97507161fb8bdac3add94b28e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 01:37:54 2015 -0500
+
+    improvements to implementation of list literal
+
+commit e561b4200c73246d33236525a2c2fd85bffff5ed
+Merge: a793e08 bd4b52d
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 01:18:13 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit a793e08c4e462d89d32378c5249cb2d7800a297b
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 01:18:00 2015 -0500
+
+    binop working for ints, longs, and floats
+
+commit bd4b52d0a8f7192c529346e32bff0f49f6898b02
+Merge: a33cdbf ea84af7
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 00:24:13 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit a33cdbfcf712ec6ff104aa9f670e472f9ab56664
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 20 00:24:02 2015 -0500
+
+    implemented list literal translation. still needs to be tested
+
+commit ea84af7421f25ebb4cca048c839ad66e3fab196c
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 20 00:14:07 2015 -0500
+
+    added the strliteral and numliteral to add auto var return
+
+commit 1ef7378189f7c538b212eb5cb64a9e58091de457
+Merge: f5883a8 eecfae5
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 23:35:18 2015 -0500
+
+    pulled
+
+commit f5883a848ffc187d0dc5da618946d4050e72a4b9
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 23:35:00 2015 -0500
+
+    tryna pull
+
+commit eecfae5f97be97343e39c7663ea5d22431929cbf
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 22:31:46 2015 -0500
+
+    added printf that works
+
+commit 04560b6f4c49ae87a8e95c991f60fd65a70291a7
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 22:05:08 2015 -0500
+
+    altered Access translation to deal with pointers
+
+commit 95232deef2443bd398c9c5e03c580ec6062bc33f
+Merge: d1eff43 5e3b9d7
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 21:49:30 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+    
+    g
+
+commit d1eff431c4f45e7cb13fb9d9651e8b14c49c9b93
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 21:49:14 2015 -0500
+
+    Changed handling of Id, NumLiteral to work with pointers for result vars
+
+commit 5e3b9d73500a515dc14c44fe655ecab91278112e
+Merge: d8872c3 f3cc977
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 21:27:10 2015 -0500
+
+    merging
+
+commit d8872c3719212c7663e966e8a813d1056307c4d5
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 21:25:04 2015 -0500
+
+    added len to analyzer
+
+commit f3cc977205d01e00ec7073fe6e74591420280d39
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 21:11:39 2015 -0500
+
+    added comment explanation for how to do automatic result variable handling. implemented Access with result_var handling
+
+commit 5e45c5a5ed585a29e32f0facfa1d65f19ac69f3e
+Merge: f50676f a7e3012
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 20:40:30 2015 -0500
+
+    merge handled
+
+commit f50676f1026d14e2d016bfc4526c2d060e0f22e4
+Merge: 7e7b70d f40e18a
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 20:38:49 2015 -0500
+
+    altered function names for sexpr_type
+
+commit a7e30128936e2fb244fed5372219f968787ab86d
+Merge: eabe61b 341af15
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 20:28:34 2015 -0500
+
+    pulling
+
+commit eabe61b26c43c729ad80fe52ab2268f6be3d96ee
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 20:28:15 2015 -0500
+
+    compiling version of let function
+
+commit 341af15e60a0eef1636db0ccca852f6ba3b04df5
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Dec 19 20:19:57 2015 -0500
+
+    tried to fix it
+
+commit 4e1856e072accb6056760e8a9111250e4b1f01be
+Merge: 5adcae3 277f28f
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 19 19:24:29 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 5adcae380eb8553f4c7ffbf25cfb00938701bd67
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 19 19:24:15 2015 -0500
+
+    analyzer accessassign
+
+commit 277f28f12fad566351b4669d16ff0abcf55f3eaf
+Merge: 466f003 f40e18a
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 18:57:21 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 466f00306d2170d47708e38a4fab26293f51d002
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 18:57:12 2015 -0500
+
+    fixed For loop declaration of auto var
+
+commit 7e7b70d343737b97b84e29b9940d7ab282d4cbe3
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 18:15:40 2015 -0500
+
+    prgress
+
+commit f40e18a56ef3c56cc01c0b09a81901ac3a350164
+Merge: f371a5e 7013610
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 18:11:38 2015 -0500
+
+    pulling
+
+commit f371a5e7ab65420c306bf05729e78992d364e316
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 18:11:24 2015 -0500
+
+    added tests for len functions
+
+commit 70136107c0e8f271430cd1e9ab76e2144acfa56b
+Merge: b89f332 3b1a8c1
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 18:10:05 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit b89f3326d4164c3d9b929f1eaf471401f5f96d2a
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 18:09:55 2015 -0500
+
+    implemented translation of custom function definitions. includes: updating the environment variables to include names of functions and local scope to add parameters to variable mappings
+
+commit 3b1a8c1f27fe3a8516ed10121cdfb1c86ceb3c92
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 18:08:19 2015 -0500
+
+    changed nodelist_t to regular old list_t
+
+commit 4b4dffc02af854d22d747bf1ff4c1e2a7c92edbf
+Merge: 6ddeab2 4208526
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 17:54:17 2015 -0500
+
+    pulling
+
+commit 6ddeab22c40c3629715dae31cd1dc96588c78bc2
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 17:53:52 2015 -0500
+
+    redefined node->in and out as dict<node, num>
+
+commit 4208526b73136e528e0c00ffd9d53ad0027ba172
+Merge: 3b27467 e9088b5
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Dec 19 17:40:23 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 3b27467513345eff99f4bcaac423d6842d8a40e9
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Dec 19 17:40:06 2015 -0500
+
+    typo in analyzer, wrote access assign simple test
+
+commit e9088b5cb869d9b848257b60d4262023a9e714ba
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 17:36:11 2015 -0500
+
+    snippet for list access assignment
+
+commit 65462b8ba7c881b7dc1170d7b8dbd5977e3bc78e
+Merge: 0537c03 e4a73d7
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 17:04:34 2015 -0500
+
+    pulling
+
+commit 0537c0396d902278efbaa76b570826ab7edc65ca
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 17:04:22 2015 -0500
+
+    access and accessAssign
+
+commit e4a73d780e1f539aac90701754ea20910159e38a
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 15:57:45 2015 -0500
+
+    dequeue
+
+commit 66f7fd1f2883aad57e5895fe0ddc55fdb324173e
+Merge: d5a9b1f c8f68d1
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 15:35:15 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit d5a9b1f4f50a60bd47a606ef04a625334e7e7921
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 15:35:08 2015 -0500
+
+    preliminary dequeue
+
+commit c8f68d191159cdaa8567bed6f97e5507430a3762
+Merge: 27dbd80 aad6167
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 15:14:26 2015 -0500
+
+    pulleen
+
+commit 27dbd80db0edca2295a55ca7351b33e79cf00732
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 15:11:42 2015 -0500
+
+    fixed pop
+
+commit aad6167ee56d4b0092a4b0ac09e95d32b5ef8674
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 14:49:17 2015 -0500
+
+    revert list of list impossible
+
+commit 42693e07d5f981d0feca7c838f04518ddfa986fe
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 14:47:18 2015 -0500
+
+    added enqueue dequeue for all types
+
+commit 9320b9b55abe1add54aef69daf81770f0423971a
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 14:39:20 2015 -0500
+
+    add back add front
+
+commit 0a29c22fc86d26bbc336906ed50b3bc86de9e31c
+Merge: d87d96f 5ec5a53
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 12:51:05 2015 -0500
+
+    merge conflicts handled
+
+commit d87d96f0a2a49a689c21731034733fd25eaf7cd4
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 12:48:29 2015 -0500
+
+    added MemberCall for enqueue in Analyzer
+
+commit 5ec5a5349989cd4034a012d2a883784d9d16541e
+Merge: dcc692a a8627f5
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 12:47:06 2015 -0500
+
+    pulling
+
+commit dcc692a10bfc2d77545c78f7e2d9e5aa6fbab4bb
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 12:46:48 2015 -0500
+
+    added min and max for dicts and lists and tests and snippets
+
+commit a8627f565d7d331f7155c72fff6358dd8186d7ec
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 12:29:30 2015 -0500
+
+    removed references to MemberVar
+
+commit c9015f18b637c11471d4aca5a97577218ffbe4ed
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 12:01:32 2015 -0500
+
+    moved old memberVar handling into memberCall. adjusted memberCall
+
+commit d8cb810123e4a9aaf436780e24d44754e10f128f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 11:00:08 2015 -0500
+
+    fixed parsing rules so that dijkstra's example now compiles. and no shift/reduce conflicts
+
+commit 74dc455d12d305d21f661b79dcb61ecabe6201e4
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 19 05:06:30 2015 -0500
+
+    ok doing better... uncommented assign
+
+commit b5d9e045dd4835d7a0f9c823ed923a395bf6a60e
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 19 04:58:37 2015 -0500
+
+    separated logical exprs
+
+commit a75b7a7665cdacb4dc786812c8cc18c3a0e4c854
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 19 04:50:40 2015 -0500
+
+    fixes
+
+commit f53f3f1961b1b7cfd4e24fcd0b4253262fe07e30
+Merge: 72f7c7a f0098c6
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 03:06:57 2015 -0500
+
+    pulling
+
+commit 72f7c7a402b104a26d3a2ebb6e03e06dac4e8eca
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 03:06:45 2015 -0500
+
+    added dict remove and snippets for adding nodes and graphs
+
+commit f0098c68235cf4406cf76bbe040119d4bf893d45
+Merge: 8a12b32 d3d684e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 03:02:25 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 8a12b323c0fa4d193f442a54461ffaef38ae184d
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 19 03:02:16 2015 -0500
+
+    old versions of expr parse rule added in comments. additional test files. some menhir test cases
+
+commit d3d684e89bd97728138d5424a5edfbb2be83e741
+Merge: b114ceb 5b60c2e
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 02:01:22 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit b114ceb92722b48c99a585a420f610c298823b01
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 19 02:01:07 2015 -0500
+
+    added the binop add string cases and LEQ for strings
+
+commit 0eab6f18a1bf3af3668e6aefb2cd3d591955f374
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 01:52:12 2015 -0500
+
+    node plus node, graph plus node
+
+commit 5b60c2eb2860ed48a4ca5435ca7fc84bc758a9d6
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 19 00:58:48 2015 -0500
+
+    modified graph subtraction and fixed list concatenation
+
+commit bebccacad0eaac2f48e913143feae44bf394bab8
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 23:45:28 2015 -0500
+
+    mango and I fixed the conversion of For loops to string * expr
+
+commit 38229fd51277f91a81043cff9f445e13438e75d4
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Fri Dec 18 22:38:08 2015 -0500
+
+    have to add the node case
+
+commit ce5a2232279f14689b1e5463da0c75ac3446cdf4
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Fri Dec 18 22:06:08 2015 -0500
+
+    first attempt at fixing for loops to do 'for x in expr'
+
+commit 7f2c428b09230fcdfc8a5011c4ccd4cd63447183
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 20:42:01 2015 -0500
+
+    fixed dict printing
+
+commit 7d2cc33083eb5e5ec1322e916a44eecd6840d6fc
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 20:33:08 2015 -0500
+
+    fixed library includes
+
+commit eda2688ce9d5f6a9f53e861142f209a42e02a07a
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 20:31:53 2015 -0500
+
+    actually fixed merge conflict
+
+commit 553be92fa6ef346c51e8b4b08ba1dc39687ceb9b
+Merge: dc20867 9368ba3
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 20:29:18 2015 -0500
+
+    addressed merge conflict
+
+commit dc20867f5b3db6135abe6f7226d1416694f5388f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 20:28:11 2015 -0500
+
+    implemented dict printing
+
+commit 9368ba3fd266f03b0e466f043dbb3219a32cdaf5
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Fri Dec 18 20:27:59 2015 -0500
+
+    it compiles now
+
+commit d9c6dc28398cdbe536de16c4fd0ccc38d592d923
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 20:24:41 2015 -0500
+
+    pusheen
+
+commit 2a82bcc6767e84204c5ca47e8842f4ad7f9c3c0d
+Merge: f8da6b5 5d1c173
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 19:01:18 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit f8da6b5a0eb61f4b966f20ecf9a8885f5854dea0
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 19:01:02 2015 -0500
+
+    fixed it
+
+commit 5d1c173f9f8bb80eb6ed534bd0871c3386404aaa
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Fri Dec 18 18:57:34 2015 -0500
+
+    fixed for node in graph snippet
+
+commit 2b3e8af41f3c75152b44f83a4e544c87e3e68b6d
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Fri Dec 18 18:42:15 2015 -0500
+
+    list access and corresponding test
+
+commit 20e843f0ac4f11a93ce94c731e796e43de5996dd
+Merge: 3af0cd9 677b93f
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Fri Dec 18 18:31:05 2015 -0500
+
+    pulling once again
+
+commit 3af0cd9c9e0752d9f3806071bb4c2df931ca96ab
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Fri Dec 18 18:30:37 2015 -0500
+
+    generalized list insertion/copying and added corresponding tests
+
+commit 677b93fb5889e409be466fdd57f0a7a6ead98289
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Fri Dec 18 18:28:48 2015 -0500
+
+    fixed some missing pattern matches, bug with nostmt
+
+commit 8c007cf5af7e89c5eadd6883b9e86df9eb6f5127
+Merge: 5520037 19e32cf
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Fri Dec 18 18:20:50 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 5520037c35e4c065084cd6629782ca3c2ff1f8c6
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Fri Dec 18 18:20:39 2015 -0500
+
+    AccessAssign first attempt
+
+commit 19e32cf5fdb7d7a9d0161987a4107127503a2832
+Merge: 7c86f44 efa7018
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 17:52:58 2015 -0500
+
+    merge conflicts handled
+
+commit 7c86f44b0d363730e8619c7345a8e6ba003b05fe
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 17:51:47 2015 -0500
+
+    string of stmt
+
+commit efa70180554b314eef0c75e0035b707aba6675a0
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Fri Dec 18 16:51:50 2015 -0500
+
+    snippets for peek and pop
+
+commit 7d1f7d08195b8038ee07da074b2febce69edcaae
+Merge: 06348ce 63eb56b
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Fri Dec 18 16:46:43 2015 -0500
+
+    merging
+
+commit 06348cee49562728265008e4b74a711af585a42d
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Fri Dec 18 16:46:21 2015 -0500
+
+    moar snippets
+
+commit 63eb56b60685e849c785e4803502a41e6466d883
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Fri Dec 18 16:30:35 2015 -0500
+
+    fancy graph decl tests
+
+commit c8677a40abc7a7fe512283b7cd0947ea161247cd
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Fri Dec 18 15:11:31 2015 -0500
+
+    some list issues let's see if this works
+
+commit c05f35dbd12858f34fd6c5651fcdc29737459833
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Fri Dec 18 15:09:37 2015 -0500
+
+    forgot to look for the variable in symbol table
+
+commit 62e66d575d7fac990b620d61ca09a8aff12771fe
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Fri Dec 18 15:07:47 2015 -0500
+
+    trying to translate fancy graph declaration with braces
+
+commit cb6a6faefe58e54da94567f181e435b6932c02d9
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 14:23:55 2015 -0500
+
+    pattern match graphdef
+
+commit b29dc5b9690a215b1c419e7f01f3deab276dde48
+Merge: 34204ac d0465a3
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 14:19:33 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 34204ac2f3234d0b7d6df45605801419d531adb5
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 14:19:18 2015 -0500
+
+    changed member var 'in' to 'ine' and 'out' to 'oute' because in was being read as 'in' token keyword
+
+commit d0465a3478259112395bcaf0347d16638894ab8c
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 14:19:00 2015 -0500
+
+    fixed list printing to list the node->data field
+
+commit 25d7ab88fae08bc30a66a26e4d2182eb6813d717
+Merge: 67ae323 236cc64
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 14:03:44 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge`
+
+commit 67ae32326f3fa51935aa5b7b133121ab8be8491e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 14:03:34 2015 -0500
+
+    implemented list printing
+
+commit 236cc644fd1481f20044d65ce60e82136e5dda06
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 13:57:36 2015 -0500
+
+    Mango and Hosanna added graphdef to parser, ast, sast, and typeconverter
+
+commit 5e058c9668d8749e6243fd3fd050451ae2cc87a2
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 18 12:26:38 2015 -0500
+
+    new parser rule to get rid of the shift reduce conflicts
+
+commit 625f85060a04a0349a23491337320c8e9df29c27
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 18 11:39:21 2015 -0500
+
+    added (expr) rule in parser
+
+commit 22e2643b022c60544037b3bf971c8f092dbf6b7a
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Thu Dec 17 21:11:38 2015 -0500
+
+    hoho and mangy fixed the Member Expr calls
+
+commit d30201c3e9da6751dcc1262f5eb3fde9249132d6
+Merge: fad31c4 24fbbd0
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Thu Dec 17 20:17:57 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit fad31c402c8cf7c80ca6ed403e52c6d021bbf6f2
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Thu Dec 17 20:17:37 2015 -0500
+
+    started changing access, membervar, membercall to expr * expr
+
+commit 24fbbd0202ed9842dcfef014c78af1e2f9d4ece4
+Merge: 0f7027a ccf099a
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Wed Dec 16 23:47:59 2015 -0500
+
+    pulling
+
+commit 0f7027ade07a9cf860c76ab1ba8bb566bd6a2ce8
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Wed Dec 16 23:47:25 2015 -0500
+
+    changed TABLE_SIZE from 1024 to 256
+
+commit fc1977814060823577d3ab59adb9b68038104b33
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Wed Dec 16 23:47:00 2015 -0500
+
+    fixed graph hashing
+
+commit ccf099ab93d611c311cdefb5df559c256f92d740
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 15:35:58 2015 -0500
+
+    tried to fix it so node_init function is called not in the global scope
+
+commit ebec4ee3168d3c2ca0d15f31faf3742c25a82d4d
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 05:07:18 2015 -0500
+
+    Well, sometimes you accidentally delete everything and then have to fix
+    it.
+
+commit 20654aef7e511e390636ce961a6d0df5b0df9fe8
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Wed Dec 16 04:48:10 2015 -0500
+
+    debugged testing script, all tests should run but there might be some issues....
+
+commit ee2701fb0addc027b61e1203395d62c919b0a832
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 04:35:44 2015 -0500
+
+    moved tests around into folders
+
+commit e2884a90f7038565f26ec541e46ebd41c6df9f38
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 04:20:47 2015 -0500
+
+    modified testing script to allow for different folders of tests
+
+commit c3b3e03c674555e0f497fe1d09cd2f6ddc1a7747
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Wed Dec 16 03:50:38 2015 -0500
+
+    debugged analyzer.ml for binop... added a bunch of cases to suppress warnings even though in theory they should never be reached
+
+commit 63a20ce5e217b712c968ff617c6433429726f83b
+Merge: d5534df 080a55e
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 03:39:03 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit d5534dfd1c2a630136012aa36cfc4d21c1652e79
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 03:38:29 2015 -0500
+
+    rest of binops completed as much as I can right now
+
+commit 15010a4ad9dbd60c3794f57f0bcd7dbde31be121
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 03:14:02 2015 -0500
+
+    just realized a ton of binop rules could be condensed....
+
+commit e4a66524e64c4bccbc057f790036ac35584c1c6d
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 03:09:34 2015 -0500
+
+    condensed an Ast to Sast rule
+
+commit e71901f3e0a7d4f561f99a5229e550849be6274d
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 03:08:16 2015 -0500
+
+    in analyzer, add + subtract of binop first draft
+
+commit 080a55e28293764b3cbe9baee90a953664164bf1
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Wed Dec 16 02:29:55 2015 -0500
+
+    added gitignore for .o and .a files in clib from setting up
+
+commit 68ba704aeabceda7eaeebaef1d8ae65ac1139daf
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Wed Dec 16 02:16:50 2015 -0500
+
+    node decl fixes compile, let's see if it passes tests...
+
+commit 34dd071a40d688f88183cc72ece80b606863a350
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 02:11:45 2015 -0500
+
+    first attempt at fixing nodes to not call init in global scope
+
+commit a3326346b15821010d64e6e091f9bcd4df4c1614
+Merge: 827726a e86213f
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Dec 16 01:45:11 2015 -0500
+
+    fixing merge conflict
+
+commit 827726a942872556f34340274bfe1c7c8755885c
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 15 23:15:49 2015 -0500
+
+    mango and I semi-finished separating globals from regular statements and finagling the Sast tree into something more suited to C ast
+
+commit 44a07ec1d6b0847f4fb5b6563fd36f2e29a13ec6
+Merge: 128de36 cebc5a4
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Tue Dec 15 19:34:16 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 128de3614a7e1d3c8050905394cbe8b87cb96c26
+Merge: 189717c fe792c1
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Tue Dec 15 19:33:59 2015 -0500
+
+    merge conflicts handled
+
+commit cebc5a456db42ec0fa0a239cb7ebb3c1d0c5b04f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 15 19:25:49 2015 -0500
+
+    removed extra inclusion of graph.h
+
+commit 189717c584cc1aeabc3c89e9e6a6e27b4d090351
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Tue Dec 15 17:15:42 2015 -0500
+
+    program intermediate object update
+
+commit fe792c17922d2232367c21f235c4beb328ac2039
+Merge: e548ab6 3ccc4cb
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 15 16:24:40 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit e548ab68675c528d1e8764a1af5ff21cc67d6a08
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 15 16:24:30 2015 -0500
+
+    changed Cast to only have stmts (no longer has exprs). moved the handling of print back into the translate_expr function in analyzer.ml -- this works because translate_expr now outputs things of type cstmt
+
+commit 3ccc4cb7bae92a07041c703091feccc9545c08ac
+Merge: 2179f4f a70354b
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Tue Dec 15 15:59:21 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 2179f4fae180032b9f2bd31477526da0c5680df4
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Tue Dec 15 15:58:58 2015 -0500
+
+    tests for member functions and variables
+
+commit a70354b6048bf771e10070790ed868deedde6bd4
+Merge: 1e0d332 badb885
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Tue Dec 15 15:42:25 2015 -0500
+
+    pulling so i can push
+
+commit 1e0d3329b41ab1dd68a8c364c0866c3316dc81c1
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Tue Dec 15 15:40:46 2015 -0500
+
+    UNTESTED clib stuff. graph copy constructor/comparison have been tested and work. everything else compiles but that's it
+
+commit badb8852ff83ee0bf3c3fb8d4cb6e936db430b40
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 15 00:53:31 2015 -0500
+
+    added more verbose error message for parsing error. made fixes to dijkstras test case. added stub rule for fancy graph declaration notation
+
+commit c9bacf8bcdc014e77566fd5aad1afe8db40e44d8
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 15 00:30:26 2015 -0500
+
+    Altered assign to take 2 cexprs which led to changes in how Assign is being called in analyzer.ml. also added 'N-' to the beginning of node printouts. fixed test files
+
+commit 1cdd25222998f75ae20e400d51f5847f907ff594
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 14 23:47:21 2015 -0500
+
+    removed the *.out line in the root's .gigignore file. DO NOT PUT *.out IN .gitignore --- WE WANT TO TRACK .OUT FILES IN dtest. added all the missing .out files
+
+commit 93df1a2968a928d343cdf8eb86645b733b4835ae
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 14 23:44:45 2015 -0500
+
+    -- Altered automatic variables to behave like normal variables, including
+       adding them to the symbol table so they can be referenced later
+    -- Restricted float printing to 3 decimal places
+    -- Added function to convert Sast datatype to string.
+    -- Added declaration checking to Ast.Id -> Sast.Id
+    -- Implemented type checking and variable checking for Ast.For -> Sast.For
+
+commit 363d2be5be1deb8308075497ea80049aaf8c2a93
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 13 17:39:17 2015 -0500
+
+    enqueue dequeue remove min max implemented
+
+commit 6c9ec9750e9d7d93fc5a6b4f2483feae6e3fe934
+Merge: 4efcd4a 148bd83
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 13 15:58:40 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 4efcd4aeea9a0be999c896a743c5647c7e58dd8b
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 13 15:58:35 2015 -0500
+
+    added handling for checking types of print call
+
+commit db899a5a079ce327c5a69b7ee1a5834dc4a634d0
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 13 15:55:31 2015 -0500
+
+    updated readme with install instructs
+
+commit 148bd83ba1965c9d41199b5c7ecc3ba1bd9e8cf9
+Merge: 45deb11 9d92232
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 13 15:48:18 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 45deb119ca6df2f359b898e8522655ce906e487b
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 13 15:48:01 2015 -0500
+
+    all warnings are done
+
+commit 9d9223243a4b6527e2f7cd9264ca2a8d570f95da
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 13 15:47:21 2015 -0500
+
+    snippets for printing list, and for adding strings
+
+commit 6e4007b68e9fbeae4c1a0490b95d0ed8a77a0bba
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Dec 13 15:02:08 2015 -0500
+
+    snippet for printing dicts
+
+commit 414869db83a3ecd47883b3ed0b241f706422c5c7
+Merge: 058b610 0c9a2d5
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Dec 13 14:18:14 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 058b6100fc9189bee8f857f3772bf734372d3f94
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Dec 13 14:17:51 2015 -0500
+
+    forgot to add dijstras test
+
+commit 0c9a2d5bc22f567075fe1ceb53a52ade633aee8d
+Merge: 412f6f8 80d5136
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 13 14:11:19 2015 -0500
+
+    merge
+
+commit 412f6f857d6bf3f98ac6c4805059ec51819a4d93
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 13 14:10:26 2015 -0500
+
+    new test case and splitting up types different in get_fmt_val funct
+
+commit 80d51367159b8e619a4febf3f9078266e5ebf55c
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 12 23:40:56 2015 -0500
+
+    tests to call range function in for loop
+
+commit 0d7048f5e04d1fe7cae8623cf3b2dcbc045c9d3e
+Merge: 718adb1 80b44ce
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 19:34:26 2015 -0500
+
+    pulling again again
+
+commit 718adb1b52436c2b14dc809bd9256ce3249991d3
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 19:34:03 2015 -0500
+
+    implemented for in dict c translation
+
+commit 80b44cebf9fbb4b476d82a4ac0419eaa98c62a28
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Dec 12 18:56:14 2015 -0500
+
+    tests for calling range function with 1 or 2 args
+
+commit 65e260796a356dde93d242e8947c358567733ddb
+Merge: 6ee720b 8640189
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 12 19:02:40 2015 -0500
+
+    call works changed fdecl
+
+commit 6ee720b1987cb993554ebb4d4550e5469d12ad62
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 12 19:01:25 2015 -0500
+
+    call working with functions ya bish
+
+commit 8640189a12d55691cd003153cc0727b906a45670
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 18:35:42 2015 -0500
+
+    translated for key in dict
+
+commit 404f898340b17f73e3f789ddd0daeca5771db5d1
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 12 16:58:26 2015 -0500
+
+    fixed printing of nodes. adding setup rule to Makefile that will run 'make library' inside clib. altered print statement in runtest.py
+
+commit cedb611e9038ef21304b76736bfa0eb229796837
+Merge: edf0a2b 5460531
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 14:49:23 2015 -0500
+
+    pulling again again
+
+commit edf0a2b1cbf67312aae7806b21b649aaf4e66511
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 14:48:58 2015 -0500
+
+    tested other dicts
+
+commit 5460531569dddf342c1d3f488725a3a52462873b
+Merge: 00aeabe d309f87
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 12 14:46:25 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 00aeabe20d67e08e2faa6b2c947256692f5fdfc4
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 12 14:46:08 2015 -0500
+
+    fdecl working thanks Ratchel:
+
+commit d309f873f74597366614069cf1ede69018feaaf2
+Merge: edbe506 1659bbe
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 14:39:51 2015 -0500
+
+    pulling again
+
+commit edbe506355854ec845405f5fd819a3e06403f70d
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 14:39:23 2015 -0500
+
+    fixed num putting
+
+commit 1659bbe1f355600c1649536861ae0f11c9b9e022
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Dec 12 14:36:25 2015 -0500
+
+    Fixed wrong folder name, now works as intended
+
+commit a9995dcac8e4472fc296037d668118885834a059
+Merge: 0013e30 aa3e2f6
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Dec 12 14:31:28 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 0013e302c3ac80301d65bad6575fefedba8f61bd
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Dec 12 14:30:50 2015 -0500
+
+    applied test script changes to the right branch this time....
+
+commit aa3e2f6d778ef950a6fd8fba8fbafcc9fa1b9be5
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 14:24:53 2015 -0500
+
+    fixed snippets typo
+
+commit e86213f47aa084a3af79284131f2df6159400ae4
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 12 14:12:34 2015 -0500
+
+    added handling of negative tests to testing script, deleted old one
+
+commit 4337dd1276c9ed89ea3f26233989e4a61e119a79
+Merge: d2580fe eaa8d76
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 13:52:06 2015 -0500
+
+    pulling
+
+commit d2580fe4e745049ffa2f72bcc0957734802ebf7f
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Dec 12 13:51:14 2015 -0500
+
+    added snippets for dicts
+
+commit eaa8d761e5fbba8a8215b9bde8385be1ce7f9a5f
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 12 13:40:35 2015 -0500
+
+    node def
+
+commit ab98dd2657da84ae08f08a81de58b8409cc79180
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 11 23:39:38 2015 -0500
+
+    fixed parser rules
+
+commit 0132432d45b41b2f3638e70ee63ae34b5e615558
+Merge: 6495cd7 f9212da
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 11 23:24:55 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 6495cd712f46e616f18586c4ccd3e3cf7e314408
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 11 23:24:52 2015 -0500
+
+    merger
+
+commit f9212da61a12ab722e11e15434916b74ca1c1df1
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 11 23:24:03 2015 -0500
+
+    mango added initial work for new type NodeDef
+
+commit 16fcf935f07906a69977b41b20728c7218e73bd8
+Merge: 3d6bcd0 224155e
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 11 23:14:35 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 3d6bcd07de58e260113b08852ca0b295351617da
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 11 23:02:49 2015 -0500
+
+    finished typeconvertergit statusgit statusgit statusgit statusgit status! maybe
+
+commit 224155e98e695103f09bbbc935871c63ca69783d
+Merge: 060a7ea 2c546ac
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 11 21:09:13 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 060a7ead3c5fad95bfc0a5c13896b67b905abc49
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 11 21:09:04 2015 -0500
+
+    altered the way print translation works
+
+commit 2c546ac6f00ed8753fb6f4b7d6ee65c3d9458abe
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 11 14:00:49 2015 -0500
+
+    s_expr done
+
+commit 702d94d4e6c9ce2c2a2ecfea18d6a5d33534e902
+Merge: bc0e6df 804f95a
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 11 11:03:05 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit 804f95a8fd7049d432d83c9622bd29ad6c6c3fb5
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Tue Dec 8 03:58:15 2015 -0500
+
+    dict is working for string keys. more testing needed for floats and void *
+
+commit bc0e6df34c3790fbb356f070d4158a8b24109a47
+Merge: be0075e 56c1b47
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 23:56:28 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit be0075e4cae5d69915ab1f29fc41ec2ef63a2300
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 23:56:10 2015 -0500
+
+    Ast.MemberVar complete
+
+commit 56c1b47f0ff3caf276976ef7cbb381ac998698a5
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 7 23:04:29 2015 -0500
+
+    removed commented out code from gdc
+
+commit c1542b69ae6eadc5b43b17cbece31ea7868c1d12
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 7 22:54:32 2015 -0500
+
+    added library and objects target to makefile
+
+commit b45353a3ec488af3e3e9c45c60283091147e65a0
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 7 22:46:07 2015 -0500
+
+    adam fixed the c linking for gcc
+
+commit c6342f0b2a23def1678e63351ab293ba2debf3cb
+Merge: cff0152 5b9ba2b
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 7 21:55:21 2015 -0500
+
+    pulling
+
+commit cff0152ceb09be447200da744efe2ff661ad8d19
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 7 21:54:48 2015 -0500
+
+    changed node data type to char *
+
+commit 5b9ba2beaa776a7542123a479003cb6b3e095d91
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 7 21:37:15 2015 -0500
+
+    fixed type used in Id to C translation. fixed include headers for clib files. removed extra line from gdc. added some new test cases
+
+commit 56816a18501f8e88ee8102d533fe6030b231e256
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 21:09:29 2015 -0500
+
+    parser changes to DictLiteral
+
+commit 17b558d35693777638a4c3dd3272424c10c6e33f
+Merge: 5abd029 0930670
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 21:06:42 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+    
+    merge
+
+commit 5abd0294bedb10de374cbc1a2a5b9f849e7ecb61
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 21:06:25 2015 -0500
+
+    made functions part of statements and fixed compilation issues
+
+commit 093067066d1d9b27985a3f8d45ea5a3988fcca30
+Merge: 7854be5 9c5fafc
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 7 20:37:43 2015 -0500
+
+    merge
+
+commit 9c5fafc94348891b932070f64a05b2784cd5fb57
+Merge: d538667 3534164
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 20:28:14 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit d538667eb8eedd8190cf797a36a3ea96b88c40c2
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 20:27:55 2015 -0500
+
+    rachel fixed dict literal kvl
+
+commit 7854be57e956bd97b624ebe57a33dbf915164bfe
+Merge: e23e4ff 3534164
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 7 20:18:39 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit e23e4ff78cdac6c9d0c4362cdd9bc85f10f29f6a
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Dec 7 20:18:24 2015 -0500
+
+    added new clib include libraries. made for n in node expr translation simpler
+
+commit 353416473c41baca89e78d95469e76fffbe20d46
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Dec 7 20:16:47 2015 -0500
+
+    renamed translations.c/h to something more useful, list.c/h
+
+commit a5b5365831a1e4c372890a4fc84d2940f21f2c3b
+Merge: 76ef60f 7f12856
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 19:25:35 2015 -0500
+
+    you used to you used to
+
+commit 76ef60f591f9c92117be7436c8b843d0ec7ce6f3
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Dec 7 19:17:55 2015 -0500
+
+    you used to you used to
+
+commit 7f12856fa664c8237d18f982f77948a94aa3d33f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 20:31:02 2015 -0500
+
+    added ListLiterals as a type to Ast and Sast. moved check_list handling to occur at the ListLiteral level. removed (commented out) AssignList type of Ast and Sast and moved all handling into just simple Assign type. (possible b/c of the new ListLiteral type)
+
+commit a7ded13546fc3ec12ff8323d652f4238a55d9b75
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 19:55:28 2015 -0500
+
+    implemented block to C. other small implementations
+
+commit 474550cdadd1259037320beae65cf1018abd02b6
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 19:33:46 2015 -0500
+
+    fixed Assign def in parser (didn't end in a SEMI). moved the addition of 'v' and 'f' for func and var names to be added in analyzer instead of translate (so that you can call specific function names / var names as well). implemented node declaration.
+
+commit a6474d213ab3b621ec7cea7425eae043d3571367
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 19:07:09 2015 -0500
+
+    implemented rest of For loop to C except for 'dict' data type. implemented while loop to C. added some simple test cases (still need expected output files)
+
+commit 83570804fc36cef76890997df095a4418f2bf203
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 18:36:36 2015 -0500
+
+    added clib/graph.h to the list of includes
+
+commit 6c26461ac3e4e6bd2f381e18763c350c5a270624
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 01:57:18 2015 -0500
+
+    begin fleshing out for loops to c
+
+commit ec8d0fe6b2d00c844fd4e8823999814fb2123e2f
+Merge: 7e2c025 28e5c4f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 01:09:14 2015 -0500
+
+    pushed to wrong branch. fixing
+
+commit 7e2c0256afce14f33fd11e26c48c9e696831b429
+Merge: f51e890 caa274e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 01:07:18 2015 -0500
+
+    merge conflicts
+
+commit f51e89049dde73ead4ea9719c6c4c36c1edb6e45
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Dec 6 01:05:27 2015 -0500
+
+    parser rule for ListDecl was wrong
+
+commit caa274e0773697aae8dfb4c5652ba7224f5d989b
+Merge: a88b704 8ad664f
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 6 00:50:37 2015 -0500
+
+    fixed the merge conflict
+
+commit a88b7046b47f4cbf6357224307199ace0c553548
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sun Dec 6 00:30:32 2015 -0500
+
+    ratchel
+
+commit 8ad664fc79e6d32c9d9f45322742913721f89c39
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 5 23:44:11 2015 -0500
+
+    initial work on getting list to c translation
+
+commit d9636bba3a702decf5f94d8c181f20f497f785bb
+Merge: f4ffe22 4166f5e
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 5 22:16:49 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit f4ffe22de05f00ce2b2a49d5dd66f6eca4e6b2c4
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Sat Dec 5 22:16:41 2015 -0500
+
+    assignList
+
+commit 4166f5ea1f51a4acdf590e18f8ccfc8b7c99b48c
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Dec 5 21:27:00 2015 -0500
+
+    fixed various bugs in typeConverter
+
+commit 0aade866d412c9c180319ec808097a2bb688f38f
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 5 02:34:24 2015 -0500
+
+    added == semantic checking, fixed more spacing issues
+
+commit 0662952396a30e386eaf46e23667407fc57c53b3
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 5 02:20:57 2015 -0500
+
+    added some logical operations semantic checking (last commit meant to say checking, it's late), fixed spacing
+
+commit 6d177409debabd6f4baa9096cc892ff156b8a826
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Dec 5 02:10:07 2015 -0500
+
+    added subtraction semantic parsing, made error messages for semantic parsing more helpful
+
+commit 3eb962f34557f29865c099541a26b59bfa73a08a
+Merge: 9ecf51c bb6f307
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 4 22:04:38 2015 -0500
+
+    fixed merge conflicts. but it doesn't compile so we need to fix that
+
+commit 9ecf51c03c742b205dcd278a37cd960f0473e637
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Dec 4 22:00:53 2015 -0500
+
+    fleshed out the sast to cast translation. fixed the compile file and fixed the Makefile to actually use it
+
+commit bb6f30715f1b2d30cdf551763a1d9629f781ff6f
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 4 22:00:45 2015 -0500
+
+    pattern matching for type checking
+
+commit 9cac4d89a0623e6b819a9ea8db4777e52b75b517
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 4 19:27:05 2015 -0500
+
+    Mango placeholder types in analyzer to get it to compile
+
+commit 974efff87bff31cc6037411fe34ba91f35bad54a
+Merge: b75b609 369140f
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 4 17:43:29 2015 -0500
+
+    Merge branch 'compile' of github.com:adamincera/dots into compile
+
+commit b75b6091351fa126f8517ef91bc5aadda31dbc63
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Fri Dec 4 17:43:16 2015 -0500
+
+    comments on what needs to change
+
+commit 369140fecf094e261c270a5cf7956db7c20887ed
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Thu Dec 3 01:15:02 2015 -0500
+
+    Started fixing translate_stmt in analyzer.ml
+
+commit 1e77665dd8e4dcb297dccde534141321596c1736
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Thu Dec 3 00:04:52 2015 -0500
+
+    fixed translate.ml to take c statement lists rather than strings, next up is analyzer
+
+commit a7f90380bbf338a7412d402f00fc7eddd147679d
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Wed Dec 2 22:49:59 2015 -0500
+
+    added bit to translate whole program calling predefined functions, cleared up library stuf
+
+commit 4304b02a6fe0ab5cbd2672a091356ab58bfe36be
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Wed Dec 2 22:24:15 2015 -0500
+
+    added library translating function, still have to clarify it though
+
+commit 852dbf204844b55e0f9f6e72a6dcf7eddc7bcca5
+Merge: e038853 eda78c0
+Author: rgordon <rcgordon@umass.edu>
+Date:   Wed Dec 2 21:55:58 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit e03885327826c00a0e4f8829375f8140150ff544
+Author: rgordon <rcgordon@umass.edu>
+Date:   Wed Dec 2 21:55:47 2015 -0500
+
+    initial work on creating the C syntax tree
+
+commit eda78c06a1fb165251d6bd39fc9513ad6ccb6105
+Merge: aaeabf8 1517189
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Wed Dec 2 21:24:54 2015 -0500
+
+    merging
+
+commit aaeabf831de770eb3541ffc0c29a16edc73f3671
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Wed Dec 2 21:23:28 2015 -0500
+
+    added list things
+
+commit 151718960842f5c5fd54504c0a8dfa707a326296
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 1 17:47:06 2015 -0500
+
+    removed separate rules for LogAnd and LogOr and put them into regular Binops (added an operator for each of them)
+
+commit 9f80b6a3080dec6ae2291b33f92353856715c37e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 1 17:21:29 2015 -0500
+
+    fixed expected output for string literal and num literal test cases (should have been nothing since there is no print statement). added output file extensions to gitignore
+
+commit 4b8473972e9710f220803e5b7961b02683c8d56f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Dec 1 17:11:54 2015 -0500
+
+    the .gitignore incorrectly had 'gdc' inside. switched it to 'dotc'
+
+commit 5d0b6c889a2bf1a3430d659794525146a88cdf9b
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Tue Dec 1 16:27:45 2015 -0500
+
+    testing script now prints nice summary of passing tests in alphabetical order
+
+commit 2e62d11ec597c9e4cb31c54368288482ff510939
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Tue Dec 1 16:12:14 2015 -0500
+
+    added .out files for test script from tests written yesterday on simple list + dict decls
+
+commit 3da7cf18591da8b4df58010773b2f0454cd578a6
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Tue Dec 1 16:09:38 2015 -0500
+
+    made requirements.txt for testing script, updated test guide
+
+commit 81293310c62073cac8e1bdbeb545f85c7ebb5c88
+Merge: 99ac50b 42324b2
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Tue Dec 1 16:00:59 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+
+commit 99ac50b4a1de5ada95346b02715b6a109241a83a
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Tue Dec 1 15:54:32 2015 -0500
+
+    added test for list library functions
+
+commit 42324b22066955980dcc5a3e1a38fb7e47695481
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 30 21:59:53 2015 -0500
+
+    Mango removed dict decl and made dict declaration vdecl
+
+commit 8e2961054a9c38dbd2f2c2cc7734d61fb67f6e40
+Merge: b09db0b dc45603
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 30 21:22:54 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit b09db0bb0ff8ad88d7b3d101a238e13713472aee
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 30 21:22:29 2015 -0500
+
+    added code for translating a list declaration. BUT it still needs the C snippet. also changed permissions of runtest.py and testall.py to be executable. added new simple list test case. TODO: add expected output
+
+commit dc45603dc4d9bc5f81fa184b4c7d150f3097f834
+Merge: 3845a2c 0b4375a
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Nov 30 20:08:34 2015 -0500
+
+    rachel pushed stuff :(
+
+commit 3845a2c583314788279fb8d3f0d888c9494e3113
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Nov 30 20:07:53 2015 -0500
+
+    added snippet for copy
+
+commit 0b4375aa0a87d3171f472e525263268e40dad2ba
+Merge: 15ad512 a6542ab
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 30 20:00:04 2015 -0500
+
+    Merge branch 'compile' of https://github.com/adamincera/dots into compile
+    
+    merge
+
+commit 15ad51228551265137b92e09d8e02f8b8ce9c345
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 30 19:59:57 2015 -0500
+
+    added comments. changed DictAssign to contain 2 exprs
+
+commit a6542ab60c7924ca40c35ea96f64a57da7d98535
+Merge: fdf472e eba852f
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Nov 30 18:11:15 2015 -0500
+
+    pulling clib into compile
+
+commit fdf472e316bc4ba01d0ad1749488c52e788cedbd
+Merge: ed5e1bb 701c540
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Nov 30 18:10:40 2015 -0500
+
+    pulling compile
+
+commit 701c5404a5faad318a20b83bc3a3d40962f7460f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 30 12:22:43 2015 -0500
+
+    finished / fixed Vdecl handling in the new format
+
+commit 28e5c4f81a6bfc1996ccb7da8a33121f5509277a
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 30 11:38:50 2015 -0500
+
+    changed final report Makefile to refer to the correct file
+
+commit eba852f71c2a21b682eeef38c9f42c5da4e33207
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Nov 30 05:59:36 2015 -0500
+
+    added copy function, updated snippets
+
+commit a01fa3fb3978348009678cf9c15a59f69a926493
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Nov 30 05:20:26 2015 -0500
+
+    fixed plus and plus_equals functions
+
+commit c2c57edc6a152d5151369a746fda7a323dd0a7a9
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sat Nov 28 23:50:12 2015 -0500
+
+    Made folder final-report with rough draft .tex file with basic sections for our final report
+
+commit 91f6fc3860d7463cc424bd94924395ed7b3412b3
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 27 23:56:58 2015 -0500
+
+    removed last reference to old hard coded variable tables. removed extraneous comment
+
+commit b9c22a26e980fb8226119590bfbd542630a47d6c
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 27 23:47:46 2015 -0500
+
+    variable declaration now works with the new environment setup. the print function still doesn't work. unclear whether the scope variables are truly updated
+
+commit e263632981d5e3c38dba1a619ff6c7dd1e113fef
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 27 23:40:25 2015 -0500
+
+    altered analyzer.ml to add functions that convert the Ast to the Sast. Fixed incorrect types in Sast. Created a translation environment variable that can be used in semantic analysis.
+
+commit 02ef7cc396bd9e1f2606f5a6299b2c8206a148ab
+Merge: ad45044 92df7d0
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 27 10:54:24 2015 -0500
+
+    resolved merge conflict
+
+commit 92df7d0d9a148d74f1bef3db2b27cc63cbf18807
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Tue Nov 24 12:52:12 2015 -0500
+
+    env var integration:
+
+commit ad45044715a11abe389ebf0a6cdceff619a924f7
+Merge: 977cabb d495509
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Nov 24 11:18:20 2015 -0500
+
+    merged hosanna's changes
+
+commit 977cabb8367842f870a34b6b69572e3674d9b46b
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Nov 24 11:14:43 2015 -0500
+
+    additional work on creating env var. new test cases
+
+commit d49550956b2f133f35e1e96edcfd7424d6699d77
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Tue Nov 24 10:30:55 2015 -0500
+
+    files merged
+
+commit cf1e0bee61b1886bef74c2fb9c455d90305e7b67
+Merge: 1dc5b83 82761b5
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Nov 23 20:25:20 2015 -0500
+
+    merged all files
+
+commit 1dc5b8330463c839816e729b2f348cbe8fdfc262
+Author: hosannajfull <miramonte23@gmail.com>
+Date:   Mon Nov 23 20:11:25 2015 -0500
+
+    sast
+
+commit ed5e1bb5198f1657db9a6e939b25408e14c7dc17
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Nov 22 17:43:22 2015 -0500
+
+    wrote some snippets for translation
+
+commit 82761b54a30454e7502440490f92a0a034a37e24
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Nov 21 23:54:06 2015 -0500
+
+    added some dict tests
+
+commit 380ff23d6dfd8c7034fe5dc72d635fe79a245486
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Nov 21 21:38:48 2015 -0500
+
+    list declaration, assignment, access tests
+
+commit 3681084fcf74ef5086f559d476b917141f7072be
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 16 10:19:56 2015 -0500
+
+    changed num literal parsing in scanner to include floats. removed unnecessary comment from analayzer.ml. altered num-assign test to assign a negative float to the variable. renamed testdots.py -> runtest.py. renamed tests.py -> testall.py.
+
+commit d64c91c1d6cf8a245d1544a93a23f3890b74c881
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 16 01:06:14 2015 -0500
+
+    fixed parsing rule for assignment operator. added test case for assigning a num (which passes - yay). fleshed out translation of Assign expr
+
+commit 1e255c94d891c1f74a67c8433ab6db3fb462c72f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 16 00:46:45 2015 -0500
+
+    added placeholders for each case for translate_expr and translate_stmt to get rid of all those annoying warnings
+
+commit b280b35987fc3804ee2343f08e1dfeb7fa2d658b
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 16 00:30:57 2015 -0500
+
+    cleaned up print parsing a little by adding a function that figures out what format string type each expression is
+
+commit 1fdfb02362e6fffaf41709076176c49df8efea04
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 16 00:17:02 2015 -0500
+
+    altered .gitignore to only ignore those particular file extensions for filesi in the documentation folder. before it was ignoring .out files in dtest, which we DO want to be able to commit to the repo
+
+commit ae6f91880717bb83bafde40b418456c196af73be
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 16 00:13:06 2015 -0500
+
+    added check to testdots.py to make sure the .out file exists for a particular test case. altered way function call translation works: moved logic from translate.ml into analyzer.ml in the translate_expr function; changed it to printf with a format string so that things that aren't of type stirng can be printed
+
+commit 8bb993ec94c2e35fe89f29e8066cc18e25312c26
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 23:03:18 2015 -0500
+
+    altered variable declaration so that it maps local variables to indices and declares l1, l2, .... ln instead of using the original variable name
+
+commit 785c00c266bba9928af7d67f3ad49af2cb620a2b
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 22:42:37 2015 -0500
+
+    fixed adding variables to locals_indexes (involved turned locals_indexes into a ref). added placeholders for unhandled cases in ast.ml
+
+commit 5b95741260579dfa9ebed11534fcad55ab69c376
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 22:03:56 2015 -0500
+
+    changed it so that executables are compiled to files ending in '.exec' so that then the clean flag can properly remove those files. also changed it so that executables are compiled into the test directory instead of straight into src
+
+commit 3b3b362812a06df371599e7e24be4fd2daff1e26
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 21:56:04 2015 -0500
+
+    added rule to Makefile to delete *.outgdc files. changed argument parsing in testdots.py to use argparse module. fixed testdots.py so that it doesn't run the non-existent exeutable if compilation failed. fixed expected output for multi-hello-world.dots
+
+commit 704d7c3f3533b7c6cde378c877e1e9c60aac8fe1
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 21:30:24 2015 -0500
+
+    added rule to clean that removes all .c files in dtest
+
+commit c956fdd02fdc3667565233bba8af514674a4080d
+Merge: 84337d9 b40061d
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 21:29:10 2015 -0500
+
+    integrated parser branch into compile branch
+
+commit b40061d38da265f9a6fae510fde6948ac43d05ee
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 18:36:59 2015 -0500
+
+    got rid of random executables
+
+commit a5421a1c36064766427f6d458f94cf26120f1220
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 18:32:59 2015 -0500
+
+    added -B flag to diff command that fixes tests. changed testdots.py so that the flag -c will remove files; otherwise all output files are kept at the end of the test
+
+commit c3f960bccaccb99b933a56f9b89929dcd6286928
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Sun Nov 15 18:23:53 2015 -0500
+
+    wording change
+
+commit f4b3ed3c7890de962e8b8ee630a6269fbb0aada1
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Nov 15 18:21:32 2015 -0500
+
+    added range function in translations.h
+
+commit d99bc7ff95f490db2b12fb97ac5f88aaca2ee788
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Sun Nov 15 18:08:38 2015 -0500
+
+    set -e added
+
+commit 29f9e165d2b8074a6d5955a52c85bce12365345d
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sun Nov 15 17:44:09 2015 -0500
+
+    fixed testing script diff checking
+
+commit 84337d9cdd9545e043b480f08442b2354b46f60c
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Sun Nov 15 17:41:04 2015 -0500
+
+    progress on vdecl
+
+commit ff31564d51e4f26eab7d43f9a33df0023a161ac2
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sun Nov 15 17:32:01 2015 -0500
+
+    test harness works but output file is being poopy
+
+commit 0441d1ddb364bee8251369400784309e319c4af9
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sun Nov 15 16:48:35 2015 -0500
+
+    changed the makefile to NOT accidentally delete all of our c libraries.......
+
+commit 071e1ca4c36f2c73f2b8e385202d32ebbc1d28b6
+Merge: 3937078 b2044a2
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 16:47:06 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+    
+    pull merge
+
+commit b2044a278c7aa17c49b92a375ef0d2ba746d429a
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sun Nov 15 16:31:00 2015 -0500
+
+    accidentally deleted our shell script...
+
+commit 2cee4ced9cce0b744298aecfd99594c994c88f15
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sun Nov 15 16:13:23 2015 -0500
+
+    make clean removes executables too
+
+commit c3daddf6a5e209aa7fea1e743b212f13d97bca2a
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sun Nov 15 16:11:34 2015 -0500
+
+    made .gitignore more comprehensive
+
+commit fc1c7db32cdc94cfd8a45e23d23fd0aa6a80da53
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Sun Nov 15 15:42:10 2015 -0500
+
+    working built in funky funcs
+
+commit 3937078f2fafdd69590015df521c3366d9cc4d00
+Merge: ccb3212 f500303
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Nov 15 15:18:43 2015 -0500
+
+    Merge branch 'clib' into parser
+
+commit ccb3212c429b77717e9f176324f2bc003b20edf5
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Sun Nov 15 15:17:44 2015 -0500
+
+    deleted interpret microC copy
+
+commit 5a9dc78ab564eea5110b41969a5560b18e0b8dc2
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Nov 14 16:41:05 2015 -0500
+
+    fixes to shell script and hello world test files
+
+commit f5003033ddd4b56572f74e97343a332504ff7d3a
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Nov 14 16:39:43 2015 -0500
+
+    restructured node removal, added edge removal
+
+commit 8828505f14ec1db4cf282a1e039d9cf12837dab2
+Merge: bc82f3b 461e632
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Nov 14 16:11:03 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+    
+    aaaaahhhhh merges
+
+commit bc82f3bfd0f39a2183f69d7ed71ee7d6012dfacb
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Nov 14 16:10:47 2015 -0500
+
+    OMMMG HELLO WORLD WORKS
+
+commit 461e632be28d37408b8f14560d210bd284b2106f
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Nov 14 15:11:01 2015 -0500
+
+    test automation script and some tests and out files, option to print diff with -k flag
+
+commit fbdd4595a863649ea36f01ab0939510e3987e8ba
+Merge: 78b3b2a ca78e91
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Nov 14 14:58:19 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+    
+    whoops didn't pull
+
+commit 78b3b2a801723cf33e2014fdd8556e2a17915580
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Nov 14 14:58:09 2015 -0500
+
+    fixed function declaration parsing and pretty printing
+
+commit ca78e9192ff7440561213a32031c0465561f2f1d
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Sat Nov 14 14:38:27 2015 -0500
+
+    hello world endgame tests
+
+commit 1589aaae506dc06ec6be7d4204cbc46e81ae116c
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Nov 14 14:05:26 2015 -0500
+
+    fixed parser definition of an fdecl. started writing compiler
+
+commit 9077169727517d3c4ac94fe63e52cbc911b7fa65
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Nov 14 12:13:10 2015 -0500
+
+    added differentiation between string literals and num literals.
+
+commit 7b5cabcb0d45e47a0195f693b233315a4096e399
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Nov 14 12:01:01 2015 -0500
+
+    fixed string literal parsing
+
+commit 6bed058244e6c677d7348cbfdb9387bcfb461e75
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Nov 14 03:49:29 2015 -0500
+
+    fixed subtract! was actually just yet another bug with remove(). also deleted .swp file that snuck in the last commit.
+
+commit 88045d86d7d288a5d123d1f15749a34011fe5918
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Nov 14 03:39:53 2015 -0500
+
+    accidentally committed .o files and executable :(
+
+commit debb0afcd7f243fa0db73a8b88d138098a123f58
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sat Nov 14 03:34:01 2015 -0500
+
+    c library! all functions seem to be running without memory leaks except subtract
+
+commit 3bc1b163c9ce6093e95e2b3d5ba74b58517416d0
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 13 18:14:07 2015 -0500
+
+    removed vars field from program type
+
+commit fded5410d7d3f3cbf97c309c46cc60cc8d296985
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 13 18:00:39 2015 -0500
+
+    altered variable declaration so that it's now just another kind of statement. added types to ast.ml to support this change. fixes to pretty printer
+
+commit 12f44aed7f27792e86b30ebea79470c5e0911d74
+Merge: 08b8e03 0c28e1b
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 13 14:52:29 2015 -0500
+
+    Merge branch 'master' into parser
+    
+    integrating updates to lang-ref-man from master branch into parser branch
+
+commit 0c28e1bdfd2eb9bcfc74e051dd183465502cfbcd
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 13 14:50:38 2015 -0500
+
+    re-added the list and dict section to the lang ref manual. PLEASE don't overwrite/delete these changes again. --> proof of the need to double check git diff before committing
+
+commit 08b8e03718fae7421ee8b01c7bbb0b3beba84e0f
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Thu Nov 12 23:42:28 2015 -0500
+
+    pretty printer with types
+
+commit 2a6e5d26ddc27ac9be159f3c68cb6a232ac3c0d3
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Thu Nov 12 12:52:49 2015 -0500
+
+    commenting the parser so we know what we need tuples of
+
+commit 20f46314c2d4fbda1401438678da20d4a406eae2
+Author: rgordon <rcgordon@umass.edu>
+Date:   Wed Nov 11 11:54:38 2015 -0500
+
+    fixed Ast.expr / string error. fixed reduce / reduce conflict. can now feed dots files to ./dotc
+
+commit 6785a4f2cc625656664f9b805c9428835db4c79e
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Mon Nov 9 19:29:22 2015 -0500
+
+    added up to date compilation efforts
+
+commit ec029757f4f8f90110182fe4ec29fe82c063f583
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Mon Nov 9 18:02:35 2015 -0500
+
+    compiler
+
+commit b53b098c17fb51acdcbf4b5b7dc85f4487461d36
+Merge: 921f9b0 cf233e0
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 6 11:54:49 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+    
+    merge
+
+commit 921f9b06078ebddd7847cc72db32f6d1745ff4a9
+Author: rgordon <rcgordon@umass.edu>
+Date:   Fri Nov 6 11:54:36 2015 -0500
+
+    added an analyzer.ml file to act as our compiler file. fixed some syntax errors in Ast.ml.
+
+commit cf233e03b463ffad062fd243462b92c26bdcf470
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Wed Nov 4 14:36:04 2015 -0500
+
+    added a baseline interpreter
+
+commit bf58fd6c1e116697951f3bea33880f1daf0afdab
+Merge: c7de03b f94390c
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Wed Nov 4 14:29:18 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+
+commit c7de03b76bdc1b0d029249c8f6db856386d6f56f
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Wed Nov 4 14:29:00 2015 -0500
+
+    added microC version of our code
+
+commit f94390c2063798a81039588751208dcf44bfed93
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Mon Nov 2 22:34:44 2015 -0500
+
+    added method to write tests that should fail and print that it should have failed but passed
+
+commit df650eeddb0244037cb4291fa1bed7edeb8406e7
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Mon Nov 2 21:57:54 2015 -0500
+
+    worked out a few list and dict tests
+
+commit 29021b3f4c78356aa75b0634681295904022e597
+Merge: a2de0d7 aa14b69
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 2 21:50:46 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+    
+    merge
+
+commit a2de0d72728744b73412f9edbea98de147490761
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 2 21:50:32 2015 -0500
+
+    changed list decl assignment to require a actuals_list instead of formals_list, meaning that expressions can be assigned to lists.
+
+commit aa14b69aac7dae922f6596b5759476ef76ae8edb
+Merge: 683a340 a6549cc
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Mon Nov 2 20:40:38 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+
+commit 683a340ab4030fdd155d22942f3315047dbe4f42
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Mon Nov 2 20:39:50 2015 -0500
+
+    Tried to keep tests informative but ran into some issues with tokens, talk to Rachel
+
+commit a6549cce9f339bd298a8871848ee952cd460b7c4
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 2 18:42:35 2015 -0500
+
+    allowed key of assigned dict declaration to be a literal
+
+commit 0ef877da379e979c1383a67295798485737b6384
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Mon Nov 2 17:36:24 2015 -0500
+
+    improved testing script to use python subprocess and various useful flags, documented in test_guide.txt
+
+commit 9bb86de36eaeb5489b2861fb649499bebc1133ae
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Mon Nov 2 15:01:05 2015 -0500
+
+    Moved test scripts to upper directory
+
+commit 673062fe62cacc663258855efa1333225e605698
+Merge: 3c53ac7 e97c03c
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Mon Nov 2 11:21:16 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+
+commit 3c53ac74db4e3538b503f54f1bd3e7398ec5bdb0
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Mon Nov 2 11:20:52 2015 -0500
+
+    compiler and the C code equiv to byte code
+
+commit e97c03cebeae4a5378c98f44306537a2e322faac
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 2 10:52:29 2015 -0500
+
+    added syntax for && and || symbols. fixed FOR and WHILE loop syntax
+
+commit 1492a8856137a1f8ac5a79e9edb07716c1a8ecad
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Nov 2 10:24:28 2015 -0500
+
+    fixed syntax of FOR and WHILE loops. addressed all todo comments. added rule comments to the expr definition in ast.ml. fixed dict declaration assignment (now accepts id { id : expr, id : expr.... ) etc.
+
+commit 7059eccd39eab9075dadd63ea8b7e1e990abb428
+Merge: df03698 bb0ebb4
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Mon Nov 2 10:16:07 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+
+commit bb0ebb49bc4701ab9e58d6973f954245d59c232a
+Author: Yumeng Liao <yl2908@columbia.edu>
+Date:   Mon Nov 2 02:45:15 2015 -0500
+
+    after setting up VM and testing, fixed so testing system actually works now...
+
+commit 16930f181d84a284adf3f633f9724c661cc9d663
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Nov 1 23:39:58 2015 -0500
+
+    Wrote python shell script maker that combines tests from all 4 txt files into tests.sh to be run. See instructions inside .txt for acceptable input. Could possibly be used in other tests later.
+
+commit 4ed51c78e3607f83709cad061a50a1f06d7023d8
+Merge: fa153c1 b7d616d
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Nov 1 22:58:16 2015 -0500
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+
+commit fa153c19b5d438d0bd976c0775bae79bf431a79a
+Merge: bce2ffe e9cea73
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Nov 1 22:57:39 2015 -0500
+
+    Merge branch 'master' into parser
+
+commit b7d616d2a94bf2952f6c8fe11b1567a447b5c1b7
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sat Oct 31 11:52:23 2015 -0400
+
+    fixed dict and list declarations to require a *data_type* inside the type indicator (before it required ID's, which is wrong). also added member access for lists and dicts to the expr cateogry (i.e. random access for dicts and lists via brackets)
+
+commit df03698c0e146fca61e72e9c5e75a87b9f2c74a7
+Merge: 9d5cd99 2431ac5
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Wed Oct 28 18:37:27 2015 -0400
+
+    Merge branch 'master' of https://github.com/adamincera/dots into parser
+
+commit d455d5b5effabb5502661e7e88ea36886d989659
+Merge: ac3904c 2431ac5
+Author: rgordon <rcgordon@umass.edu>
+Date:   Wed Oct 28 18:32:41 2015 -0400
+
+    Merge branch 'master' into parser
+    
+    merging change from master into parser branch. (updated lrm files)
+
+commit ac3904cccab6634da34eb291323eb1b926b5c187
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Oct 27 12:19:40 2015 -0400
+
+    added rules for declaring lists and dicts. what goes within [ ] or { } for assignment still needs to be reworked. also added folder of text files of token sequences that should be accepted in menhir
+
+commit 9d5cd99922da2b7f196d98b95c03fb88e443a213
+Merge: 1dbdcbd fe6a0b7
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Tue Oct 27 11:19:18 2015 -0400
+
+    Merge branch 'parser' of https://github.com/adamincera/dots into parser
+
+commit fe6a0b7aad6aa626d13dcb673db2e86498a47dd6
+Author: rgordon <rcgordon@umass.edu>
+Date:   Tue Oct 27 11:18:43 2015 -0400
+
+    fixed problem where program was never accepted
+
+commit 2431ac59cefad1ecf2590abe9b2808685a2b6b07
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Oct 26 07:54:01 2015 -0400
+
+    additional edits
+
+commit e9cea73d337580171ea5ff7f7239d5fe9f2630b8
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Mon Oct 26 00:24:16 2015 -0400
+
+    cleaned up LRM, added logo to cover page
+
+commit bce2ffe2076e070eb3ad9be1c3e210b3f6d0c3a7
+Author: rgordon <rcgordon@umass.edu>
+Date:   Thu Oct 22 14:11:03 2015 -0400
+
+    old versions of all files were based on outdated version of microc compiler. updated each file with new version of microc compiler. added function for concatenating lists and altered the program rule to use that since all variable declarations now return lists.
+
+commit 77d47745262d1f0e1b719ee1f5847894d4616631
+Author: rgordon <rcgordon@umass.edu>
+Date:   Thu Oct 22 10:18:19 2015 -0400
+
+    changed definition of program symbol to be an object with a variable list, function list, and command list (aka stmt list). added the '.' token to the scanner and added rules for called a member variable or member function of an object to the expr rule
+
+commit 327b31c16e686fd804abab45b788ef19f990638e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Thu Oct 22 09:26:19 2015 -0400
+
+    previous fix forgot to change the patterns of the prefix definitions to refer to itself --> corrected. also fixed chaining of graph declarations
+
+commit 1d0ac252d61979690ee196f67fef2e1bad7868bb
+Author: rgordon <rcgordon@umass.edu>
+Date:   Thu Oct 22 09:23:40 2015 -0400
+
+    fixed chaining declarations of primitives and nodes
+
+commit 53c49b72410109ceef3ed6cba051910106764156
+Author: rgordon <rcgordon@umass.edu>
+Date:   Thu Oct 22 00:11:50 2015 -0400
+
+    minor edits
+
+commit 1dbdcbd96053cbe89328ace904feaa1f2b99efa5
+Author: rgordon <rcgordon@umass.edu>
+Date:   Thu Oct 22 00:01:26 2015 -0400
+
+    minor edits
+
+commit 817cc418b1994be088fffc9c3c3403bed4c1d220
+Merge: 121d493 246b3a0
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Wed Oct 21 23:50:33 2015 -0400
+
+    merged, removed pdf from repo
+
+commit 121d493e3496111690be4d8bc2e34326e846aaaf
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Wed Oct 21 23:48:24 2015 -0400
+
+    added section 1 and section 2.2 to LRM
+
+commit 246b3a06f87df1641c25b79bf3cae23f5c00e4e7
+Merge: fd1fbff e965c02
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Wed Oct 21 23:43:02 2015 -0400
+
+    Merge branch 'master' of https://github.com/adamincera/dots
+
+commit fd1fbff6b0b33aa68f41e1e4e25458c39bffb823
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Wed Oct 21 23:42:42 2015 -0400
+
+    hosanna
+    's contriubtion
+
+commit e965c028d19b707bcd5f42b5f980c2e3daafc77e
+Author: rgordon <rcgordon@umass.edu>
+Date:   Wed Oct 21 23:41:38 2015 -0400
+
+    added built-in function subsection
+
+commit 3ffcd8ad51551cf2f850a5eecef59465a7bc66be
+Author: rgordon <rcgordon@umass.edu>
+Date:   Wed Oct 21 22:10:10 2015 -0400
+
+    slight change to name of rule
+
+commit 61a87f635d17ab5ff8768ffeba5d610c2917df7f
+Author: rgordon <rcgordon@umass.edu>
+Date:   Wed Oct 21 21:38:32 2015 -0400
+
+    additional changes; added rules for edge operations
+
+commit 5db14b42a4ece367a051e8954093572d0b4615fb
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Wed Oct 21 21:07:25 2015 -0400
+
+    added right graph
+
+commit d716ac0736f352a4b71944f6a7c4f84a7d851022
+Author: rgordon <rcgordon@umass.edu>
+Date:   Wed Oct 21 21:01:08 2015 -0400
+
+    1st attempts at making scanner and parser for our language. for testing whether the grammar is unambiguous
+
+commit 7f980d206d07c1f0bc6faf1bce6684efc3cdefa4
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Mon Oct 19 21:25:19 2015 -0400
+
+    Finished section on statements.
+
+commit 7f2ee8c9ae79ab53a71202161deb2e4f42031389
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Mon Oct 19 20:18:38 2015 -0400
+
+    added whitespace section, small tweaks to scoping
+
+commit 3556afc508aa4b733ff08cee243b4416113619d3
+Author: rgordon <rcgordon@umass.edu>
+Date:   Mon Oct 19 00:54:40 2015 -0400
+
+    added sections for list and dict data types
+
+commit 4c462efa38de3182801882aca408fd799056d35d
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Oct 18 17:39:43 2015 -0400
+
+    Tweaked "scope" more to my liking with a more comprehensive definition.
+
+commit c51c53eaf772bbd049e18b07d37c5d1f13425751
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Sun Oct 18 17:15:25 2015 -0400
+
+    added scope section in Latex
+
+commit ed5c07efdb001cd3c6d81faec72fcb74d8b10799
+Author: rgordon <rcgordon@umass.edu>
+Date:   Sun Oct 18 14:54:50 2015 -0400
+
+    created initial latex file for the language reference manual, including adding necessary headers and package imports. created Makefile for easily compiling and cleaning up the tex file. added primitive type, functions, and program structure sections to the doc.
+
+commit 0846e4b9748002a74f1bbc7219ec59d98c88cbfe
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Thu Oct 8 20:19:31 2015 -0400
+
+    moved proposal into documentation directory, added latex compilation script
+
+commit a6b182e60d3366ee7cfd9f20ded2dc340a3422be
+Merge: 36f25c8 0e4350a
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Thu Oct 8 20:00:13 2015 -0400
+
+    hosanna was here
+
+commit 36f25c8db74c8497ce0cc4774dd616209d4b4c3f
+Author: Hosanna <miramonte23@gmail.com>
+Date:   Thu Oct 8 19:59:02 2015 -0400
+
+    hosanna was here
+
+commit 8fadefb68aa67f9d9ef976b3074a51794415285e
+Author: rgord <rcg2130@columbia.edu>
+Date:   Fri Oct 9 07:46:04 2015 -0400
+
+    transferred latex project files for lang proposal from sharelatex to repo
+
+commit 0e4350a21eb3b9eafe27dde4b3b3811bdf21cec9
+Author: Yumeng Liao <y.liao.2908@gmail.com>
+Date:   Thu Oct 8 19:57:30 2015 -0400
+
+    testing
+
+commit 2306aed112353a1dd50308f26cdd6c83de7cbbff
+Author: Adam Incera <aji2112@columbia.edu>
+Date:   Sun Sep 20 21:34:23 2015 -0400
+
+    initial commit

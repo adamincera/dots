@@ -1,0 +1,28 @@
+num x;
+string s;
+
+x = 5.3;
+s = "This is a d.o.t.s. program.";
+
+node n1;
+node n2("florida");
+
+graph g;
+g = n1 + n2;
+
+n1 -->[2.3] n2;
+n2 --> n1;
+
+list<node> node_list = [n1, n2];
+dict<string, num> lang_prob;
+lang_prob["e"] = 12.7;
+lang_prob["a"] = 8.17;
+lang_prob["d"] = 4.25;
+
+print(x, "\n", s, "\n", n1, "\n", n2, "\n");
+
+for (elem in g) {
+    print(elem, "\n");
+}
+
+print(node_list, "\n", lang_prob, "\n");
