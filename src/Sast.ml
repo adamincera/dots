@@ -45,7 +45,6 @@ type s_stmt =
  s_fdecl = {
     s_fname : string;
     s_rtype : dataType; 
-    (*formals : (string * string) list; *)
     s_formals : (dataType * string) list;
     s_body : s_stmt list;
   }

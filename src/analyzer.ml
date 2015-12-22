@@ -1,11 +1,10 @@
-(* semantically checks dot sast and converts to c ast *)
+(* converts dots SAST to C AST *)
 open Ast
 open Sast
 open Translate
 
 
 module StringMap = Map.Make(String)
-(* module DataTypeMap = Map.Make(dataType) *)
 type s_program = { s_globals : s_stmt list; s_main: s_stmt list; s_funcs : s_fdecl list; } 
 
 (* 
@@ -32,6 +31,15 @@ type s_program = { s_globals : s_stmt list; s_main: s_stmt list; s_funcs : s_fde
                        Assign(Id(..., result_var), Id(..., e1_result))
                      ])
 *)
+
+(* where symbol tables are stored *)
+type translation_env = {
+            var_inds : int StringMap.t ref list;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
+            var_types : Sast.dataType StringMap.t ref list;   (* maps a var name to its type  ex. x -> num *)
+            func_inds : int StringMap.t ref list;             (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
+            func_obj : Sast.s_fdecl StringMap.t ref list;  (* maps a func name to its return type *)
+            return_type : Sast.dataType;                       (* what should the return type be of the current scope *)
+}
 
 (*
   @param *implicit* := list of Sast.stmts to sort
@@ -111,13 +119,6 @@ let rec stmt_sifter sifted = function
                            s_funcs = f :: sifted.s_funcs} tl
               )
 
-type translation_env = {
-            var_inds : int StringMap.t ref list;              (* var names to indices ex. x -> 1 so that we can just refer to it as v1 *)
-            var_types : Sast.dataType StringMap.t ref list;   (* maps a var name to its type  ex. x -> num *)
-            func_inds : int StringMap.t ref list;             (* func names to indices ex. x -> 1 so that we can just refer to it as f1 *)
-            func_obj : Sast.s_fdecl StringMap.t ref list;  (* maps a func name to its return type *)
-            return_type : Sast.dataType;                       (* what should the return type be of the current scope *)
-    }
 
 let mappings = [("ine", Sast.Node); ("oute", Sast.Node); ("value", Sast.Node); ("nodes", Sast.Graph)] 
 let mem_vars =  List.fold_left (fun m (k, v) -> StringMap.add k v m) StringMap.empty mappings

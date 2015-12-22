@@ -1,0 +1,750 @@
+Using positive testing dir: dtest
+Using negative testing dir: ntests
+
+Running tests in "dtest" folder:
+*************************************************
+
+Running tests in "dtest/access-assign" folder:
+*************************************************
+
+Running tests: aa-dict-print.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: aa-simple-dict.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: aa-simple.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/binops" folder:
+*************************************************
+
+Running tests: binop-add.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: binop-graph-equals.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: binop-num-comp.dots
+================================
+COMPILATION FAILED
+
+Running tests: binop-simple.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: binop-string-opp.dots
+================================
+COMPILATION FAILED
+
+Running tests: binop-string.dots
+================================
+COMPILATION FAILED
+
+Running tests: list-access-binop.dots
+================================
+COMPILATION FAILED
+
+Running tests: log-complex.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/booleans" folder:
+*************************************************
+
+Running tests: bool-simp.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/call-builtin-fn" folder:
+*************************************************
+
+Running tests: call-len.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: call-range-1.dots
+================================
+COMPILATION FAILED
+
+Running tests: call-range-2.dots
+================================
+COMPILATION FAILED
+
+Running tests: call-range-for-1.dots
+================================
+COMPILATION FAILED
+
+Running tests: call-range-for-2.dots
+================================
+COMPILATION FAILED
+
+Running tests: max-complex.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: max.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: min.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/comments" folder:
+*************************************************
+
+Running tests: multi-line-cmnt.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: single-cmnt.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/complex" folder:
+*************************************************
+
+Running tests: bfs-seen-func.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: bfs.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: bst.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: dijkstras-fuck.dots
+================================
+COMPILATION FAILED
+
+Running tests: dijkstras.dots
+================================
+COMPILATION FAILED
+
+Running tests: graph-demo.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: sample01.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: sample02.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests in "dtest/dicts" folder:
+*************************************************
+
+Running tests: dict-access-assign.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: dict-access-simple.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: dict-access.dots
+================================
+COMPILATION FAILED
+
+Running tests: dict-assign.dots
+================================
+COMPILATION FAILED
+
+Running tests: dict-decl-simple.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: dict-decl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: dict-func.dots
+================================
+COMPILATION FAILED
+
+Running tests: dict-literal.dots
+================================
+COMPILATION FAILED
+
+Running tests in "dtest/for-loop" folder:
+*************************************************
+
+Running tests: for-dict-node.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: for-dict-print.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: for-dict-simple.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: for-empty.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: for-graph.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: for-member.dots
+================================
+COMPILATION FAILED
+
+Running tests: for-nested.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: for-node-in-graph.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: for-node.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: for-simple.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/functions" folder:
+*************************************************
+
+Running tests: double-funct.dots
+================================
+COMPILATION FAILED
+
+Running tests: fdecl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: func-basic.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: func-mult-call-simp.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: funct-dict-arg.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: funct-dict.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: funct-len.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: funct-relax.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: funct-return.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: funct-simple.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: print-funct.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: relax-decl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: var-decls.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests in "dtest/graphs" folder:
+*************************************************
+
+Running tests: graph-assign.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: graph-decl-extra-fancy.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: graph-decl-fancy.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: graph-decl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: graph-dir-weighted.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: graph-dir.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: graph-plus-node.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: graph-undir-weighted.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: graph-undir.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests in "dtest/lists" folder:
+*************************************************
+
+Running tests: list-access-assign.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: list-access-complex.dots
+================================
+COMPILATION FAILED
+
+Running tests: list-access.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: list-assign-complex.dots
+================================
+COMPILATION FAILED
+
+Running tests: list-assign-simp.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: list-assign.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: list-decl-pop.dots
+================================
+COMPILATION FAILED
+
+Running tests: list-decl-simple.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: list-decl.dots
+================================
+COMPILATION FAILED
+
+Running tests: list-func.dots
+================================
+COMPILATION FAILED
+
+Running tests: list-literal.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/member-funcs" folder:
+*************************************************
+
+Running tests: member-call-dequeue.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: member-call-enqueue.dots
+================================
+COMPILATION FAILED
+
+Running tests: member-call-value.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: member-comp.dots
+================================
+COMPILATION FAILED
+
+Running tests: node-edges.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: node-in.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: node-out.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: out-access.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: peek.dots
+================================
+COMPILATION FAILED
+
+Running tests: remove.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests in "dtest/member-var" folder:
+*************************************************
+
+Running tests: member-var.dots
+================================
+COMPILATION FAILED
+
+Running tests in "dtest/nodes" folder:
+*************************************************
+
+Running tests: node-decl-simp.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: node-decl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/nums" folder:
+*************************************************
+
+Running tests: decl-assign.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: int-decl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: multi-num-decl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: num-assign-decl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: num-assign.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: num-decl.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: num-if.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests: num-literal.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: vdecl.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests in "dtest/print" folder:
+*************************************************
+
+Running tests: hello-world-fancy.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: hello-world.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: multi-hello-world.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: print-dict.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: print-list.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: print-node.dots
+================================
+COMPILATION SUCCESSFUL
+FAILED TEST....writing diff files
+
+Running tests: print-num.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: print-string.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/strings" folder:
+*************************************************
+
+Running tests: string-literal.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: string-var.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests in "dtest/while-loop" folder:
+*************************************************
+
+Running tests: while-simple.dots
+================================
+COMPILATION SUCCESSFUL
+PASSED TEST
+
+Running tests: while.dots
+================================
+COMPILATION SUCCESSFUL
+FAIL: no .out file exists to check against
+
+Running tests in "ntests" folder:
+*************************************************
+
+Running tests: access-nonexistent.dots
+================================
+COMPILATION FAILED
+
+Running tests: dict-literal-keyblank.dots
+================================
+COMPILATION FAILED
+
+Running tests: dict-literal-keymiss.dots
+================================
+COMPILATION FAILED
+
+Running tests: dict-literal-valblank.dots
+================================
+COMPILATION FAILED
+
+Running tests: dict-literal-valmiss.dots
+================================
+COMPILATION FAILED
+
+Running tests: double-vdecl.dots
+================================
+COMPILATION FAILED
+
+Running tests: list-assign.dots
+================================
+COMPILATION FAILED
+
+Running tests: list-literal.dots
+================================
+COMPILATION FAILED
+
+ Tests completed.
+
+ Summary below (checked boxes = performed as expected): 
+
+Tests that should pass:
+[X] aa-dict-print(dtest/access-assign)
+[X] aa-simple(dtest/access-assign)
+[X] aa-simple-dict(dtest/access-assign)
+[X] binop-add(dtest/binops)
+[ ] binop-num-comp(dtest/binops)
+[X] binop-simple(dtest/binops)
+[ ] binop-string(dtest/binops)
+[ ] binop-string-opp(dtest/binops)
+[X] bool-simp(dtest/booleans)
+[X] call-len(dtest/call-builtin-fn)
+[ ] call-range-1(dtest/call-builtin-fn)
+[ ] call-range-2(dtest/call-builtin-fn)
+[ ] call-range-for-1(dtest/call-builtin-fn)
+[ ] call-range-for-2(dtest/call-builtin-fn)
+[X] decl-assign(dtest/nums)
+[ ] dict-access(dtest/dicts)
+[ ] dict-access-assign(dtest/dicts)
+[X] dict-access-simple(dtest/dicts)
+[ ] dict-assign(dtest/dicts)
+[X] dict-decl(dtest/dicts)
+[X] dict-decl-simple(dtest/dicts)
+[ ] dict-func(dtest/dicts)
+[ ] dict-literal(dtest/dicts)
+[ ] dijkstras(dtest/complex)
+[ ] dijkstras-fuck(dtest/complex)
+[ ] double-funct(dtest/functions)
+[X] fdecl(dtest/functions)
+[ ] for-dict-simple(dtest/for-loop)
+[X] for-empty(dtest/for-loop)
+[ ] for-member(dtest/for-loop)
+[X] for-nested(dtest/for-loop)
+[ ] for-node(dtest/for-loop)
+[X] for-simple(dtest/for-loop)
+[X] func-basic(dtest/functions)
+[ ] func-mult-call-simp(dtest/functions)
+[X] funct-dict(dtest/functions)
+[X] funct-dict-arg(dtest/functions)
+[X] funct-len(dtest/functions)
+[X] funct-relax(dtest/functions)
+[X] graph-assign(dtest/graphs)
+[X] graph-decl(dtest/graphs)
+[ ] graph-decl-extra-fancy(dtest/graphs)
+[ ] graph-decl-fancy(dtest/graphs)
+[ ] graph-dir(dtest/graphs)
+[ ] graph-dir-weighted(dtest/graphs)
+[ ] graph-undir(dtest/graphs)
+[ ] graph-undir-weighted(dtest/graphs)
+[X] hello-world(dtest/print)
+[X] hello-world-fancy(dtest/print)
+[X] int-decl(dtest/nums)
+[X] list-access(dtest/lists)
+[ ] list-access-assign(dtest/lists)
+[ ] list-access-binop(dtest/binops)
+[ ] list-access-complex(dtest/lists)
+[X] list-assign(dtest/lists)
+[ ] list-assign-complex(dtest/lists)
+[ ] list-decl(dtest/lists)
+[ ] list-decl-pop(dtest/lists)
+[X] list-decl-simple(dtest/lists)
+[ ] list-func(dtest/lists)
+[X] list-literal(dtest/lists)
+[X] log-complex(dtest/binops)
+[X] max(dtest/call-builtin-fn)
+[ ] member-call-enqueue(dtest/member-funcs)
+[ ] member-comp(dtest/member-funcs)
+[ ] member-var(dtest/member-var)
+[X] min(dtest/call-builtin-fn)
+[X] multi-hello-world(dtest/print)
+[X] multi-line-cmnt(dtest/comments)
+[X] multi-num-decl(dtest/nums)
+[X] node-decl(dtest/nodes)
+[X] node-decl-simp(dtest/nodes)
+[ ] node-out(dtest/member-funcs)
+[X] num-assign(dtest/nums)
+[X] num-assign-decl(dtest/nums)
+[X] num-decl(dtest/nums)
+[X] num-literal(dtest/nums)
+[X] out-access(dtest/member-funcs)
+[ ] peek(dtest/member-funcs)
+[X] print-dict(dtest/print)
+[X] print-funct(dtest/functions)
+[X] print-list(dtest/print)
+[ ] print-node(dtest/print)
+[X] print-num(dtest/print)
+[X] print-string(dtest/print)
+[X] relax-decl(dtest/functions)
+[X] single-cmnt(dtest/comments)
+[X] string-literal(dtest/strings)
+[X] string-var(dtest/strings)
+[X] while-simple(dtest/while-loop)
+
+Tests that should fail:
+[X] access-nonexistent(ntests)
+[X] dict-literal-keyblank(ntests)
+[X] dict-literal-keymiss(ntests)
+[X] dict-literal-valblank(ntests)
+[X] dict-literal-valmiss(ntests)
+[X] double-vdecl(ntests)
+[X] list-assign(ntests)
+[X] list-literal(ntests)

@@ -1,21 +1,21 @@
 (*****************************)
 (* CONVERTS AN AST TO AN SAST *) 
-(*      STOP hoho time        *) 
 (******************************)
 open Ast
 open Sast
 open Analyzer
 
-
-(* convert an Ast.expr object to Sast.expr object *)
+(* extract dt from list *)
 let get_list_type = function
  | Sast.List(dt) ->  dt
  | _ -> raise (Failure("wrong type: not a list"))
 
+(* extract key type, val type from dict *)
 let get_dict_type = function
  | Sast.Dict(dt1, dt2) ->  (dt1, dt2)
  | _ -> raise (Failure("wrong type: not a dict "))
 
+(* make sure each element in a list is the right type *)
 let rec check_list env v_e = function
  | [] -> ""
  | hd::tl -> 
@@ -23,6 +23,8 @@ let rec check_list env v_e = function
        raise (Failure ("list element not of type: " ^ type_to_str ( v_e )) )
     else 
       check_list env v_e tl
+
+
 let rec check_graph_list env = function
  | [] -> ""
  | hd::tl -> 
@@ -40,7 +42,8 @@ let rec check_graph_list env = function
         | Sast.BidirVal(e1,v1,v2,e2,dt) ->
             check_graph_list env tl 
         | _ -> raise (Failure ("type not expected in Graph Def")))
-(* v_e = (k_dt, v_dt) *)
+
+(* make sure each pair in dict assignment is right type *)
 let rec check_dict env v_e = function
  | [] -> ""
  | hd::tl -> 
@@ -49,15 +52,19 @@ let rec check_dict env v_e = function
     else 
       check_dict env v_e tl
 
+(* match arguments to a function call to that func's definition *)
  let rec formal_check s_formal_list s_el = 
   match s_formal_list, s_el with
     | [], [] -> true
-    | [], _ -> raise (Failure ("formal list fucked up" ) )
-    | _, [] -> raise (Failure ("formal list fucked up" ) )
+    | [], _ -> raise (Failure ("incorrect arguments" ) )
+    | _, [] -> raise (Failure ("incorrect arguments" ) )
     | hd1::tl1, hd2::tl2 -> ((fst hd1) = (get_sexpr_type hd2)) && (formal_check tl1 tl2)  
 
+
+(* converts Ast.program to Sast.program *)
 let convert_ast prog env =
 
+(* convert an Ast.expr object to Sast.expr object *)
 let rec expr env = function
 | Ast.NumLiteral(v) -> Sast.NumLiteral(v, Sast.Num)
 | Ast.StrLiteral(v) -> Sast.StrLiteral(v, Sast.String)
@@ -466,15 +473,12 @@ let rec stmt env = function
           | Failure(f) -> raise (Failure (f) )
     ); 
     Sast.Vdecl(vtype, id)
-(*| _ -> failwith "Unknown") *)
 | Ast.Assign(v, e) ->                     (* checks that the var and expression are of the same type, then converts to Sast.Assign *)
     let s_e = expr env e in             (* func rec until it knows datatype -- sast version of ast expr e *)
     let s_v = expr env v in
     let e_dt = get_sexpr_type s_e in     (* data type of that sast expr with function get_sexpr_type*)
     let v_dt = get_sexpr_type s_v in
-    (*if not( (find_var v env.var_types) = e_dt)*) (* gets type of var trying to assign get type trying to assign to *)
     if not (v_dt = e_dt)
-    (*then raise (Failure ("assignment expression not of type: " ^ type_to_str (find_var v env.var_types) )) *)
     then raise (Failure ("assignment expression not of type: " ^ (type_to_str v_dt) ))
     else Sast.Assign(s_v, s_e, Sast.Void)
 | Ast.AccessAssign(e1, e2, e3) -> 
@@ -530,7 +534,6 @@ let rec stmt env = function
 
 | Ast.Return(e) -> 
     (try  
-      (*let rt = str_to_type fdl.s_rtype in *)
         let s_e = expr env e in
        (match get_sexpr_type s_e with  
          | Sast.Node -> Sast.Return(s_e, Sast.Node)
