@@ -41,7 +41,7 @@
 
 %%
 
-                    /* START PROGRAM */
+/* START PROGRAM */
 
 program:
   decls EOF { $1 }
@@ -57,7 +57,7 @@ decls:
 
 /* (1)def (2)func (3)<funcName> ( (5)arg1,...argN ) { (8) <local variables> (9) <body> } */
 fdecl:
-   DEF f_data_type ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+   DEF f_data_type ID LPAREN formals_opt RPAREN LBRACE non_func_stmt_list RBRACE
      { Fdecl({ 
               rtype = $2;
               fname = $3;
@@ -88,6 +88,7 @@ edge_op:
 |  ID REDGE ID { Dir($1, $3) }                                  /*   x --> y        */
 |  ID REDGE LBRACKET expr RBRACKET ID { DirVal($1, $6, $4) }    /*   x -->[5] y     */
 |  ID UEDGE LBRACKET expr RBRACKET ID { UndirVal($1, $6, $4) }  /*   x --[5] y      */
+/* bug with bidirectional weighted edges: */
 /*|  ID LBRACKET expr RBRACKET UEDGE LBRACKET expr RBRACKET ID */   /*   x [3]--[5] y   */
    /*{ BidirVal($3, $1, $9, $7) }                                 */
 
@@ -166,16 +167,15 @@ dict_decl_prefix:
                                   /* STATEMENTS */
 /////////////////////////////////////////////////////////////////////////////
 
-/* list of statements */
-stmt_list:
-    /* nothing */  { [] }
-  | stmt_list stmt { $2 :: $1 }
-
 /* statements are defined inside functions or executed like a script */
 /* a statement is just an action. ex. x = 5; */
 
 stmt:
-   expr SEMI { Expr($1) } 
+  | non_func_stmt {$1}
+  | func_stmt {$1}
+
+non_func_stmt: 
+  | expr SEMI { Expr($1) } 
   | log_expr SEMI { Expr($1) }
   | edge_op SEMI { Expr($1) }
   | ID ASSIGN expr SEMI { Assign(Id($1), $3) }
@@ -189,11 +189,18 @@ stmt:
      { For($3, $5, $8) }
   | WHILE LPAREN log_expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
   | vdecl { $1 }
-  | fdecl { $1 }
 
-alt_stmt: 
-  | fdecl { $1 }
-  | alt_stmt  { $1 }
+func_stmt:
+    | fdecl {$1}
+
+/* list of statements */
+stmt_list:
+    /* nothing */  { [] }
+  | stmt_list stmt { $2 :: $1 }
+
+non_func_stmt_list:
+  /* nothing */  { [] }
+  | non_func_stmt_list non_func_stmt { $2 :: $1 }
 
 /////////////////////////////////////////////////////////////////////////////
                           /* EXPRESSIONS */
@@ -214,9 +221,7 @@ expr:
   | access_expr { $1 }
   | nacc_expr { $1 }
 
-nacc_expr: /* non access exprs */
-  
-  /*| expr DOT ID %prec NOCALL { MemberVar($1, $3) }*/
+nacc_expr: /* non access exprs */  
   | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
   | term               { $1 }
@@ -251,10 +256,12 @@ tuples_opt:
  /* nothing*/  {[]} 
  | tuples_list {List.rev $1}
 
- tuples_list:
+/* for dictionary assignment */
+tuples_list:
     expr COLON expr { [($1, $3)]  }
   | tuples_list COMMA expr COLON expr { ($3, $5) :: $1 }
 
+/* arguments to a function */
 actuals_list:
     expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 } 
