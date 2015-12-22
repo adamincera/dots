@@ -33,24 +33,6 @@ type s_program = { s_globals : s_stmt list; s_main: s_stmt list; s_funcs : s_fde
                      ])
 *)
 
-(* read in Sast program creat list of glbs by skipping fdecls  
-program = { s_cmds : s_stmt list } 
-
-    Block of s_stmt list
-  | Expr of s_expr
-  | Vdecl of dataType * string
-  | NodeDef of string * s_expr * dataType (* (node id, type, item id) *)
-  | Assign of string * s_expr * dataType                     (* x = 5; *)
-  | Return of s_expr * dataType                         (* return x (dataType) *)
-  | If of s_expr * s_stmt * s_stmt             (* if (boolean) stmt; *)
-  | For of string * string * s_stmt list       (* temp var, iterable var, var decls, stmts *)
-  | While of s_expr * s_stmt list              (* condition, var decls, stmt list *)
-  | Fdecl of s_fdecl and 
-
-  *) 
-
-(* let prgm = List.rev program.s_cmds in *)
-
 (*
   @param *implicit* := list of Sast.stmts to sort
   @param sifted := a struct that contains the globals, 
@@ -68,14 +50,6 @@ let rec stmt_sifter sifted = function
 | [] -> sifted
 | hd :: tl -> (match hd with
                | Sast.Vdecl(dt, id) -> 
-               (*
-                   let assign = 
-                      (match dt with
-                      | Graph -> [Sast.Assign(Id(id, dt), Call("init_graph", [], Graph), Void)]
-                      | _ -> []
-                      ) 
-                   in
-                 *)
                    stmt_sifter {s_globals = hd :: sifted.s_globals; 
                                                s_main = sifted.s_main; 
                                                s_funcs = sifted.s_funcs} tl
@@ -87,7 +61,7 @@ let rec stmt_sifter sifted = function
                   stmt_sifter {s_globals = sifted.s_globals; 
                                s_main = hd :: sifted.s_main; 
                                s_funcs = sifted.s_funcs} tl
-               | Sast.NodeDef(id, e, dt) | Sast.Assign(Id(id, Sast.Node), e, dt) -> 
+               | Sast.NodeDef(id, e, dt) -> 
                    stmt_sifter {s_globals = sifted.s_globals; 
                    s_main = hd :: sifted.s_main; 
                    s_funcs = sifted.s_funcs} tl
@@ -143,7 +117,6 @@ type translation_env = {
 let mappings = [("ine", Sast.Node); ("oute", Sast.Node); ("value", Sast.Node); ("nodes", Sast.Graph)] 
 let mem_vars =  List.fold_left (fun m (k, v) -> StringMap.add k v m) StringMap.empty mappings
 
-(* val enum : int -> 'a list -> (int * 'a) list *)
 (* returns list of tuples mapping each elem of a list to consecutive 
 numbers starting from n and incrementing n by stride for each elem *)
 let rec enum stride n = function
@@ -154,14 +127,6 @@ let rec enum stride n = function
   (* takes list of tuples (value, key) and adds them to the given map *)
 let string_map_pairs map pairs =
     List.fold_left (fun m (i, n) -> StringMap.add n i m) map pairs
-
-(*
-let cvar_cnt = ref 0 
-let find_max_index map = 
-  cvar_cnt := !cvar_cnt + 1;
-   !cvar_cnt  
- *)
- 
 
 let find_max_index map = 
     let bindings = StringMap.bindings map in
@@ -298,13 +263,11 @@ let translate (env, sast_prg) =
    ex. "key" : 3      := means that var "key" represents auto var "a3"
  *)
 let create_auto env key dt = 
-      (* let ind = (find_max_index !auto_cnt) + 1 in *)
       let ind = (find_max_index !(List.hd env.var_inds)+1) in
       let var_name = (match key with
          | "" -> "v" ^ string_of_int(ind)
          | _ -> key
       ) in
-     (*  auto_cnt := StringMap.add var_name ind !auto_cnt; (* add new auto_var ref *) *)
       (List.hd env.var_types) := StringMap.add var_name dt !(List.hd env.var_types); (* add type map *)
       (List.hd env.var_inds) := StringMap.add var_name ind !(List.hd env.var_inds); (* add index map *)      
       ind
@@ -526,7 +489,6 @@ translate_expr env = function
               (List.rev (Expr(Assign(Id(Ptr(c_dt), result_var), Id(Ptr(c_dt), temp_list))) 
                :: (List.rev c_stmts) 
               )))) (* add the assignment to the end of enqueue calls *)
-        (* ListLiteral(dt_to_ct dt, List.map (fun f -> translate_expr env f) el) (* TODO *) *)
 
     | Sast.DictLiteral(kvl, dt) ->  
         DictLiteral(dt_to_ct dt, 
@@ -537,11 +499,6 @@ translate_expr env = function
             let v_type = dt_to_ct dt in
             Block([
                       Vdecl(Ptr(v_type), result_var);
-                      (*
-                      Expr(Assign(Id(Ptr(v_type), result_var), 
-                           Call(Ptr(Void), "malloc", [ Call(Int, "sizeof", [Id(Void, Translate.type_to_str v_type)] ) ])
-                          ));
-                      *)
                       Expr(Assign(Id(Ptr(v_type), result_var), Ref(Ptr(v_type), Id(v_type, index) )))
                   ])
     | Sast.Binop(e1, op, e2, dt) ->
@@ -550,18 +507,15 @@ translate_expr env = function
         let ce1 = translate_expr env e1 in
           let result_e1 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
           let e1_cdt = dt_to_ct (get_sexpr_type e1) in    (*gets is the c data type of the expression*)
-          let e1_deref = Deref( e1_cdt, Id(Ptr( e1_cdt), result_e1)) in
 
         let ce2 = translate_expr env e2 in
           let result_e2 = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in (* get result var of e1's translation *)
           let e2_cdt = dt_to_ct (get_sexpr_type e2) in 
-          let e2_deref = Deref( e2_cdt, Id(Ptr( e2_cdt), result_e2)) in
 
         let cdt1 = Translate.get_cexpr_type ce1 in
         let cdt2 = Translate.get_cexpr_type ce2 in 
         
         let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-        let args = [e1_deref; e2_deref] in
         let result_decl = Vdecl(Ptr(c_dt), result_var) in                (* declare this expr's result var *)
         
         let binop_func = 
@@ -598,44 +552,18 @@ translate_expr env = function
                   |  Graph -> 
                       (match e2_cdt with
                         | Node -> 
-                            (*
-                            let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
-                            let index = "v" ^ string_of_int(find_var auto_var env.var_inds) in
-                            Vdecl(Ptr(Graph), index);
-                            
-                            Block([Vdecl(Ptr(Graph), index);
-                                   Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])));
-                                   Expr(Call(Void, "add_node", [Id(Graph, index); ce2]));
-                                   Expr(Assign(Id(Graph, index), Call(Graph, "plus", [ce1;ce2])));
-
-                            ])
-                            *)
                             Call(Graph, "graph_plus_node", [Deref(Graph, Id(e1_cdt, result_e1));
                                                           Deref(Node, Id(e2_cdt, result_e2))])
                         | Graph -> 
-                            (* g1 = plus(g2, g3); 
-                            let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.Graph)) in
-                            let index = "v" ^ string_of_int(find_var auto_var
-                            env.var_inds) in 
-                            Block([Vdecl(Ptr(Graph), result_var);
-                                   Expr(Assign(Id(Graph, result_var), Call(Graph, "plus", [ce1;ce2])));
-
-                                 ])
-                      *) Nostmt
+                            Nostmt
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
                     )  
                   |  Node -> 
                       (match e2_cdt with
-                        | Node -> (*
-                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-                        let args = [Id(cdt1, result_e1); Id(cdt2, result_e2)] in
-                        let result_decl = Vdecl(Ptr(c_dt), result_var) in  
-                          Translate.Binop(cdt1, ce1, op, ce2)*) (*TODO*)
-                            
+                        | Node -> 
                           Call(Graph, "node_plus_node", [Deref(Node, Id(e1_cdt,
                           result_e1));
                           Deref(Node, Id(e2_cdt, result_e2))])
-                                                           (*Deref(e2_cdt, Id(Ptr(e2_cdt), result_e2))*)
 
                         | Graph -> Translate.Binop(cdt1, ce1, op, ce2) (*TODO*)
                         | _ -> raise(Failure("With the type checking in Sast, this should never be reached...")) 
@@ -768,8 +696,6 @@ translate_expr env = function
                                                 ]) :: elems)
                                         tl
                       | List(dt) -> 
-                          let elem_type = dt_to_ct dt in
-                          let auto_var = "v" ^ string_of_int(create_auto env "" (Sast.List(dt))) in
                           let print_loop = translate_stmt env 
                                               (Sast.For("elem", hd, 
                                                         [Expr(Call("print", [Id("elem", dt)], Sast.Void));
@@ -801,21 +727,8 @@ translate_expr env = function
                             tl
                           
                       | Dict(dtk, dtv) -> 
-                          let key_type = dt_to_ct dtk in
-                          let val_type = dt_to_ct dtv in
-                          let key_var = "v" ^ string_of_int(create_auto env "$key" dtk ) in
                           
                           (* build the print value statement for the specific key type *)
-                          let call_stmt = Sast.Access(hd, Id("$key", dtk), dtv) in
-                          (*
-                            (match dtk with
-                              | Num -> 
-                              | String -> Sast.Call("get_string", [hd; Id("$key", dtk)], dtv)
-                              | Node -> Sast.Call("get_node", [hd; Id("$key", dtk)], dtv)
-                              | Graph -> Sast.Call("get_graph", [hd; Id("$key", dtk)], dtv)
-                              | _ -> raise (Failure ("dict keys can't be of type: " ^ type_to_str dtk))
-                            ) in
-                          *)
                           (*
                             // C code: 
                             int i;
@@ -881,7 +794,6 @@ translate_expr env = function
                 Block( print_builder [] el (* TODO *) )
             | "len" ->
             (*func_name, el, dt*)
-                    let e_dt = dt_to_ct dt in
                     let elem_c = (translate_expr env (List.hd el)) in
                     let arg_e = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
                     let arg_dt = get_sexpr_type (List.hd el) in 
@@ -923,7 +835,6 @@ translate_expr env = function
                     | _ -> raise (Failure "len not implemented for this type")
                     )
             | "min" | "max" -> 
-                  let e_dt = dt_to_ct dt in
                     let elem_c = (translate_expr env (List.hd el)) in
                     let arg_e = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
                     let arg_dt = get_sexpr_type (List.hd el) in 
@@ -1083,7 +994,6 @@ translate_expr env = function
                   | "dequeue" | "pop" -> 
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                       let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
-                      let final_result = Id(dt_to_ct e_dt, result_var) in
 
                            Block([
 
@@ -1095,22 +1005,6 @@ translate_expr env = function
                                 ))
                              (* store the result of Access in our result_var *)
                         ])
-                           (*
-                  | "ine" -> 
-                      let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-                      let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *) 
-                      let final_result = Id(Ptr(dt_to_ct e_dt), result_var) in
-
-                      Block([
-                             c_e;
-                             result_decl;
-                             Expr(Assign(
-                                      Id(Ptr(c_dt), result_var), 
-                                      Member(Ptr(Entry), Deref((dt_to_ct e_dt), c_id), "in") ))
-                             (* store the result of Access in our result_var *)
-                        ])
-                  |
-*)
                   | "peek" ->
                     let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                     let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
@@ -1164,7 +1058,6 @@ translate_expr env = function
                             
                             let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
                             let result_decl = Vdecl(Ptr(Void), result_var) in (* declare this expr's result var *)
-                                 (*let e1_cdt = dt_to_ct (get_sexpr_type e1) in *)
                             Block([
                               c_e;
                               key_c;
@@ -1180,19 +1073,8 @@ translate_expr env = function
                       )
                       
 
-      (* Node * n; returns value  snippet n= n.val() datamember of *t Node->data 
-       Expr(Assign(
-                                     final_result, 
-                                     Call(Ptr(Void), 
-                                          "malloc", 
-                                         [Call(Int, "sizeof", [Id(Void, "Entry")]
-                                       )])
-                          ));
-       *)
                   | "val" ->
                       let result_var = "v" ^ string_of_int(create_auto env "" (dt)) in (* create a new auto_var to store THIS EXPR'S result *)
-                      let result_decl = Vdecl(Ptr(c_dt), result_var) in (* declare this expr's result var *)
-                      let final_result = Id(dt_to_ct e_dt, result_var) in
                       Block([
                          c_e;
                          Vdecl(Ptr(Cstring), result_var);
@@ -1217,7 +1099,6 @@ translate_expr env = function
             let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
             Call(Void, "connect_dir", [Id(Ptr(Node), v1_index); Id(Ptr(Node), v2_index)])
     | Sast.UndirVal(v1, v2, w, dt) -> 
-            let c_dt = dt_to_ct dt in
             let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
             let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
             let w_c = translate_expr env w in
@@ -1232,7 +1113,6 @@ translate_expr env = function
                 v2_index); w_deref])
             ])
     | Sast.DirVal(v1, v2, w, dt) ->
-            let c_dt = dt_to_ct dt in
             let v1_index = "v" ^ string_of_int (find_var v1 env.var_inds) in
             let v2_index = "v" ^ string_of_int (find_var v2 env.var_inds) in
             let w_c = translate_expr env w in
@@ -1263,12 +1143,8 @@ translate_stmt env = function
               | String -> Vdecl(Cstring, index)
               | Bool -> Vdecl(Int, index)
               | Graph -> Block([Vdecl(Graph, index);
-                               (*  Expr(Assign(Id(Graph, index), Call(Void, "init_graph", []))) *)
                                ]) (* C: graph_t *g1 = init_graph(); *)
-              | Node -> (* Block([Vdecl(Ptr(Node), index); 
-                               Expr(Assign(Id(Node, index), Call(Void, "init_node", [Literal(Cstring, "")])))
-                              ]) *) (* C: node_t *x = init_node(""); *)
-                        Block([Vdecl((Node), index);])
+              | Node -> Block([Vdecl((Node), index);])(* C: node_t *x = init_node(""); *)
               | List(dt) -> Vdecl(List(dt_to_ct dt), index) (* C: list_t *x; *)
               | Dict(dtk, dtv) -> Vdecl(Ptr(Ptr(Entry)), index) (* TODO *)
               | Void -> raise (Failure ("should not be using Void as a datatype"))
@@ -1278,7 +1154,6 @@ translate_stmt env = function
             let e_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
             let cv = translate_expr env v in
             let v_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
-            let e_type = get_sexpr_type e in
             let v_type = get_sexpr_type v in
             let var_type = dt_to_ct v_type in
             
@@ -1430,17 +1305,11 @@ translate_stmt env = function
             find_vars ( calls @ stmts) tl
         in
         let node_add_calls = find_vars [] sl in
-        (* let graph_list = [Expr(Assign(Id(Graph, index), Call(Void, "init_graph", [])))] in *)
         Block( (Expr(Assign(Id(Graph, index), Call(Void, "init_graph", []))) :: edge_ops) 
                 @ node_add_calls
         )
 
     | Sast.While (cond, sl) -> 
-        (*
-        let c_cond = translate_expr env cond in
-        let cond_result = "v" ^ string_of_int (find_max_index !(List.hd env.var_inds)) in
-        let deref_cond = Deref(Int, Id(Ptr(Int), cond_result)) in
-        *)
         (match cond with
          | Binop(e1, op, e2, dt) -> 
              let c_e1 = translate_expr env e1 in
@@ -1464,11 +1333,6 @@ translate_stmt env = function
         )
         
         (* convert body *)
-        (*
-        let sl_builder = build_args [] sl in
-        let c_stmts = List.map (fun t -> (fst t)) c_args in
-        let result_params = List.map (fun t -> (snd t)) c_args in
-        *)
                                           
     | Sast.If (cond, s1, s2) ->
 
@@ -1503,18 +1367,8 @@ translate_stmt env = function
             
             let loop_var = "v" ^ string_of_int(create_auto env key (Sast.Void)) in
             let key_var = "v" ^ string_of_int(create_auto env key iter_stype) in (* the temp var in "for x in iterable " *)
-            (*let index = "v" ^ string_of_int (find_var iter env.var_inds) in*)
-            
-            (*let iter_type = (find_var iter env.var_types) in*)
-
             let csl = List.map (translate_stmt env) sl in
             Block(
-              (*
-            [Vdecl(Ptr(dt_to_ct iter_type), auto_index); 
-             Expr(Assign(Id(dt_to_ct iter_type, auto_index), translate_expr env iter))
-            ]
-            @
-          *)
             c_iter :: 
             [
                 (match iter_stype with
@@ -1565,7 +1419,6 @@ translate_stmt env = function
                              Expr(Assign(Id(Ptr(Node), key_var), iter_deref))
                       ] @ csl)
                   | Graph -> 
-                      let iter_deref = Deref(Graph, Id(Ptr(Graph), iter_result)) in
                       Block([Vdecl(Node, key_var);
                                     Vdecl(List(Node), loop_var); 
                                     For(Assign(Id(List(Node), loop_var),

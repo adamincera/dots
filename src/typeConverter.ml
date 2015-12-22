@@ -576,7 +576,6 @@ let rec stmt env = function
       | Not_found -> raise (Failure("Node Def failure")))
 |  Ast.GraphDef(v, el) ->
     (try
-      let v_e = (find_var v env.var_types) in
       let s_el = List.map (expr env) el in
       ignore(check_graph_list env s_el);
       Sast.GraphDef(v, s_el)
