@@ -4,16 +4,6 @@ import os, sys, glob
 import argparse
 from subprocess32 import check_output, Popen, PIPE, call
 
-# if len(sys.argv) == 1:
-#     print('Running with default configurations:\n')
-
-# else:
-#     print('usage: -f,  or no command line args')
-#     print('-f: prints full results of every test')
-#     print('-e: show stderr of menhir')
-#     print ('no command line args: runs all tests and only prints tests that failed, suppresses stderr of menhir.\n')
-#     sys.exit()
-
 #####################
 # ARGUMENT PARSING: #
 #####################
@@ -30,10 +20,14 @@ args = parser.parse_args()
 path = r'dtest'
 npath = r'ntests'
 
+print "Using positive testing dir: " + path
+print "Using negative testing dir: " + npath
+
 summary_results = {}
 summary_results_n = {}
 
 for directory in os.walk(path):
+    # walk through the test directory
     print ('\nRunning tests in "' + directory[0] + '" folder:')
     print ('*************************************************')
     for dir_entry in os.listdir(directory[0]):
