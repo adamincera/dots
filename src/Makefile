@@ -34,6 +34,7 @@ build: analyzer clib
 
 .PHONY: setup
 setup:
+	cd clib ; make clean
 	cd clib ; make library
 
 clib:

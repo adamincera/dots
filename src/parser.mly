@@ -50,11 +50,6 @@ decls:
  | /* nothing */ { { cmds = [] } }
  | decls stmt  { { cmds = $2 :: $1.cmds } }
 
-/* decls:
-|   nothing  { {funcs = []; cmds = []} }
-|  decls vdecl { {vars = $1.vars @ $2; funcs = $1.funcs; cmds = $1.cmds} }
-|  decls fdecl { {funcs = $2 :: $1.funcs; cmds = $1.cmds} }
-|  decls stmt  { {funcs = $1.funcs; cmds = $2 :: $1.cmds} }  */
 
 /////////////////////////////////////////////////////////////////////////////
                     /* FUNCTIONS */
@@ -78,16 +73,6 @@ formals_opt:
 formal_list:
     f_data_type ID                   { [($1, $2)] }
   | formal_list COMMA f_data_type ID { ($3, $4) :: $1 }
-
-/* Dictionary Formal Arguments */
-/* assigning  to a dict */
-/* ex. d = {"foo" : "blah", "bar" : "dd"} 
-dict_formal_list:
-    ID COLON expr { [DictAssign([(Id($1), $3)])] }                                       w : 5        
-|   literal COLON expr {  [DictAssign($1, $3)] }                                      "hello" : 5  
-|   dict_formal_list COMMA ID COLON expr { DictAssign([(Id($3), $5)]) :: $1 }              w : 5        
-|   dict_formal_list COMMA literal COLON expr { DictAssign([($3, $5)]) :: $1 }
-*/
 
 /* comma separated list of operations on nodes
  * for use with graph declarations 
@@ -214,37 +199,6 @@ alt_stmt:
                           /* EXPRESSIONS */
 /////////////////////////////////////////////////////////////////////////////
 
-/*
-assign_expr:
-  | ID ASSIGN expr   { Assign($1, $3) }
-*/
-
-/*
-expr:
-  | literal          { $1 }
-  | INF              { NumLiteral("INF") }
-  | TRUE             { Boolean(True) }
-  | FALSE            { Boolean(False) }
-  | ID               { Id($1) }
-  | LPAREN expr RPAREN { $2 }
-  | expr PLUS   expr { Binop($1, Add,   $3) }
-  | expr MINUS  expr { Binop($1, Sub,   $3) }
-  | expr TIMES  expr { Binop($1, Mult,  $3) }
-  | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr EQ     expr { Binop($1, Equal, $3) }
-  | expr NEQ    expr { Binop($1, Neq,   $3) }
-  | expr LT     expr { Binop($1, Less,  $3) }
-  | expr LEQ    expr { Binop($1, Leq,   $3) }
-  | expr GT     expr { Binop($1, Greater,  $3) }
-  | expr GEQ    expr { Binop($1, Geq,   $3) }
-  | expr LOGAND expr { Binop($1, LogAnd, $3) }
-  | expr LOGOR expr  { Binop($1, LogOr, $3) }
-  COMMENT | expr LBRACKET expr RBRACKET { Access($1, $3) } COMMENT
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | expr DOT ID %prec NOCALL { MemberVar($1, $3) }
-  | expr DOT ID LPAREN actuals_opt RPAREN { MemberCall($1, $3, $5) }
-*/
-
 
 log_expr: 
   | expr EQ  expr { Binop($1, Equal, $3) }
@@ -284,48 +238,6 @@ atom:
   | TRUE             { Boolean(True) }
   | FALSE            { Boolean(False) }
   | ID               { Id($1) }
-
-/*
-expr_opt:
-    * nothing * { Noexpr }
-  | expr          { $1 }
-*/
-
-/* new rules let's go */ 
-/* 
-l_e: 
-  | e EQ     e { Binop($1, Equal, $3) }
-  | e NEQ    e { Binop($1, Neq,   $3) }
-  | e LT     e { Binop($1, Less,  $3) }
-  | e LEQ    e { Binop($1, Leq,   $3) }
-  | e GT     e { Binop($1, Greater,  $3) }
-  | e GEQ    e { Binop($1, Geq,   $3) }
-  | l_e LOGAND l_e { Binop($1, LogAnd, $3) }
-  | l_e LOGOR l_e  { Binop($1, LogOr, $3) }
-
-e: 
-  | LPAREN e RPAREN { $2 }
-  | e PLUS   e { Binop($1, Add,   $3) }
-  | e MINUS  e { Binop($1, Sub,   $3) }
-  | e TIMES  e { Binop($1, Mult,  $3) }
-  | e DIVIDE e { Binop($1, Div,   $3) }
-  | term { $1 }
-  | access_expr { $1 }
-  | literal          { $1 }
-  | INF              { NumLiteral("INF") }
-  | TRUE             { Boolean(True) }
-  | FALSE            { Boolean(False) }
-
-access_expr:
-  | term LBRACKET e RBRACKET { Access($1, $3) } 
-
-term: 
-  | ID               { Id($1) }
-  | term DOT ID %prec NOCALL    { Id($1) } 
-
-*/
-
-
 
 
 /////////////////////////////////////////////////////////////////////////////

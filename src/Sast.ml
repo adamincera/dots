@@ -50,12 +50,6 @@ type s_stmt =
     s_body : s_stmt list;
   }
 
-(* program: ist of vars, function defs, commands not within a function
-s_funcs : s_fdecl list;
-   (* | AssignList of string * s_expr list           when a list of expressions is assigned to a variable 
-  | DictAssign of string * (s_expr * s_expr) list                (variable name, list of tuples of key value pairs) *)
-                s_cmds : s_stmt list
- *)
 type program = { s_cmds : s_stmt list } 
 
 let rec dt_to_str = function

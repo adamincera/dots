@@ -29,18 +29,6 @@ type expr =
   | NoOp of string
   | Noexpr
 
-(* b/c nums can be either float or int just treat them as strings *)
-(*type edge_expr =
-| Undir of string * string (* id, id *)
-| Dir of string * string (* id, id *)
-| UndirVal of string * string * expr (* id, id, weight *)
-| DirVal of string * string * expr (* id, id, weight *)
-| BidirVal of expr * string * string * expr (* weight, id, id, weight *)
-| NoOp of string
-*)
-
-
-
 
 type stmt =
     Block of stmt list
@@ -67,10 +55,6 @@ type stmt =
     body : stmt list;
   }
 
-(* program: ist of vars, function defs, commands not within a function  
-    funcs : func_decl list;
-                cmds :
-*)
 type program =  { cmds: stmt list }
 
 (* type program = string list * func_decl list *)
@@ -153,7 +137,6 @@ let rec string_of_stmt = function
   "def " ^ (f_type_to_string fdecl.rtype) ^ " " ^ fdecl.fname ^ "(" ^ 
     (String.concat ", " (List.map (fun f ->(f_type_to_string (fst f)) ^ " " ^ snd f) fdecl.formals)) ^
      ")\n{\n" ^
-  (*String.concat "" (List.map string_of_vdecl fdecl.locals) ^*)
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 

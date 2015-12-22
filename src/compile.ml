@@ -20,8 +20,6 @@ let _ =
     )
     in
 
-  (*print_endline("finished Parser -> Ast");*)
-
       let print_decl = {
           s_fname = "print";
           s_rtype = Sast.Void;
@@ -51,12 +49,10 @@ let _ =
 
   (* convert Ast to Sast *)
   let sast_prg = convert_ast { cmds = List.rev ast_prg.cmds} sast_env  in
-  (*print_endline ("finished Ast -> Sast");*)
 
   (* massage Sast into a form more suitable for C Ast *)
   (* i.e. split up variable declarations, function definitions, and other *)
   let sifted_prg = stmt_sifter {s_globals = []; s_main = []; s_funcs = []} sast_prg.s_cmds in
-  (*print_endline ("finished Sast -> Sorted Sast");*)
 
   (* construct Sast program object from sifted *)
   let sifted_prg = {s_globals = List.rev sifted_prg.s_globals; 
@@ -87,18 +83,7 @@ let _ =
 
  (* convert Sast to C Ast *)
  let cprg = translate(trans_env, sifted_prg) in
- (*print_endline("finished Sast -> CAst");*)
 
   (* output C code from C Ast *)
   print_endline (translate_c(cprg.globals, cprg.cfuncs))
 
-  (* print_endline (String.concat "\n" (List.map string_of_stmt (List.rev prg.cmds))) *)
-
-
-(* Ast pretty printing version *)
-(*  let _ =
-  let lexbuf = Lexing.from_channel stdin in
-  let prg = Parser.program Scanner.token lexbuf in
-  let result = string_of_program ([], List.rev prg.cmds) in
-  print_endline result;; 
-  *)

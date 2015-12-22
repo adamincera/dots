@@ -46,6 +46,11 @@ let get_list_type = function
   | Sast.Dict(dtk, dtv) -> dtk
   | _ -> raise (Failure("wrong type: not a list"))
 
+(* 
+  extract an SAST into a form more presentable to C AST 
+  3 pieces: global variable declarations, function definitions,
+  other statements
+*)
 let rec stmt_sifter sifted = function
 | [] -> sifted
 | hd :: tl -> (match hd with
@@ -253,8 +258,6 @@ let translate (env, sast_prg) =
     keep track of all auto vars created so far, so that we 
     don't repeat auto vars in C 
 *)
-(* let auto_cnt = ref 0  *)
-(* let auto_cnt = ref StringMap.empty in *)
 
 (* maps the given key to the next available int index
    returns the index/number that the key was mapped to
@@ -273,13 +276,14 @@ let create_auto env key dt =
       ind
 in
 
-    (* 
+(* 
+  C equivalent:
    char str[50];
    int len;
 
    strcpy(str, "This is tutorialspoint.com");
    len = strlen(str);
-    *)
+*)
 let string_len c_v = 
   let cdt1 = Translate.get_cexpr_type c_v in
   if cdt1 = Cstring then
@@ -292,6 +296,7 @@ let string_len c_v =
     raise (Failure("only possible with string "))
   in
 
+(* C requires special handling of string concatenation *)
 let string_concat c_v1 c_v2 = 
   let cdt2 = Translate.get_cexpr_type c_v2 in
 
@@ -377,11 +382,7 @@ let string_of_stmt c_v =
                     ]))
       | _ -> raise (Failure ("cannot convert type to cstring: " ^  s_dt)))
 in
-                  
-(* char *snum = malloc(sizeof(char) * 256); 
-    sprintf (string,"%d.%02u", (int) number, (int) ((number - (int) number ) * precision) );
-*)
-
+                
 
 let rec build_args args = function
 | [] -> args
