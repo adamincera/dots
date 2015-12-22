@@ -1,0 +1,87 @@
+def string node_in_list (list<node> l, node x) {
+	for (n in l) {
+	    if (n == x) {
+	        return "yes";
+	    }
+	}
+	return "no";
+}
+
+def string node_in_graph (graph g, node x) {
+	for (n in g) {
+	    if (n == x) {
+	        return "yes";
+	    }
+	}
+	return "no";
+}
+
+def list<node> find_intersection(graph gg1, graph gg2) {
+	list<node> result;
+	
+	for (n1 in gg1) {
+	    for (n2 in gg2) {
+	        if (n1 == n2) {
+	            result.enqueue(n1);
+	        }
+	    }
+	}
+	return result;
+}
+
+node x("chicago");
+node y("bar");
+node z("foo");
+node w("blah");
+
+/* NodeFunctions: */
+
+list<node> node_list = [x, y, z];
+string result;
+print("list contains: \n", node_list, "\n", "\n");
+
+result = node_in_list (node_list, x);
+print(x, " in node_list?\n", "\t", result, "\n");
+
+result = node_in_list (node_list, w);
+print(w, " in node_list?\n", "\t", result, "\n");
+
+print("\n\n");
+
+/* regular graph declaration */
+graph g1;
+g1 = x + w;
+g1 = g1 + y;
+
+print("G1 contains:\n");
+for (n1 in g1) {
+	print(n1, "\n");
+}
+print("\n");
+
+/* fancy graph declaration */
+graph g2 = {
+	x -- y,
+	y --> z,
+	z -->[22.3] x
+};
+
+print("G2 contains: \n");
+for (n2 in g2) {
+	print(n2, "\n");
+}
+print("\n");
+
+result = node_in_graph(g1, z);
+print("z in g1? ", result, "\n");
+
+result = node_in_graph(g2, z);
+print("z in g2? ", result, "\n");
+
+/* graph function */
+list<node> union;
+union = find_intersection(g1, g2);
+
+print("\nSHARED NODES:\n");
+
+# print(union);

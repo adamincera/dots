@@ -1,0 +1,3 @@
+node x("miami");
+string s = "Hello World!";
+print(s, "\n", x, "\n");
