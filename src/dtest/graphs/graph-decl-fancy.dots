@@ -1,8 +1,11 @@
 node x;
 node y;
+node z;
+
 graph g1 = {
-#	x -->[1] y,
-	y -->[2] x
+	x -->[1] y,
+	y -->[2] x,
+        y -->z
 };
 dict<node, num> temp = y.oute();
 dict<node, num> temp2 = y.ine();

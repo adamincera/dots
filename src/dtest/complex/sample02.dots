@@ -1,0 +1,19 @@
+node x("chicago");
+node y("miami");
+node z("new haven");
+node w("nyc");
+
+graph g1 = {
+    x --> y,
+    y -->[3.2] x,
+    z --> [3.22] x,
+    x -->[90] w
+};
+
+print("GRAPH G1:\n");
+for (n in g1) {
+	print(n, "\n");
+}
+
+print("X edge weights:\n");
+print(x.oute());
