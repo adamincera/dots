@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# make the c library files
-cd clib ; make ; cd ..
+# NOTE: run this script from within the directory it's in or
+# variables won't be set up correctly
 
-# turn the clib files into a library file
-cd clib ; ar -cvq libdots.a *.o ; cd ..
+# make the C library archive
+make setup
+
+# make the dots compiler
+make
+
+# add clib to the DOTS environment variable
+export DOTS=$(pwd)/clib

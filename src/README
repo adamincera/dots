@@ -1,0 +1,35 @@
+#################
+# Install Guide #
+#################
+
+Option 1: Using the setup script
+--------------------------------
+
+> ./setup.sh
+
+
+Option 2: Manual installation
+------------------------------
+
+To install the dots compiler, run:
+
+> make setup
+> make
+
+Then add the path to clib to the DOTS environment variable
+
+> export DOTS=/path/to/src/clib
+
+
+######################
+# Using the Compiler #
+######################
+
+To compile a script to an executable named "exec", run:
+
+> ./gdc /path/to/dots-file
+
+
+To compile to a custom executable name run:
+
+> ./gdc /path/to/dots-file /path/to/custom-name 
